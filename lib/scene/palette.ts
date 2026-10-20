@@ -18,8 +18,16 @@ export interface ScenePalette {
   soil: Color;
   soilDark: Color;
   soilOchre: Color;
+  /** Terra batida: estrada e platô nivelado. */
+  soilPacked: Color;
   rock: Color;
   dust: Color;
+  root: Color;
+  bark: Color;
+  /** Madeira do corte fresco do toco. */
+  wood: Color;
+  /** Fundo do reservatório (o que aparece quando a água não reflete o céu). */
+  waterDeep: Color;
 }
 
 let cached: ScenePalette | null = null;
@@ -46,6 +54,8 @@ export function getScenePalette(): ScenePalette {
 
   // As ilhas flutuam sobre um mar de neblina clara: a luz de baixo é quente, não escura.
   const haze = mix(t.neblina, t.poeira, 0.55);
+  const soilOchre = mix(t["terra-roxa"], t.poeira, 0.26);
+  const rock = mix(mix(t["solo-fundo"], t["terra-roxa"], 0.35), t.neblina, 0.15);
 
   cached = {
     tokens: t,
@@ -61,9 +71,14 @@ export function getScenePalette(): ScenePalette {
     grassDry: mix(t.pasto, t.poeira, 0.45),
     soil: t["terra-roxa"].clone(),
     soilDark: mix(t["terra-roxa"], t["solo-fundo"], 0.6),
-    soilOchre: mix(t["terra-roxa"], t.poeira, 0.26),
-    rock: mix(mix(t["solo-fundo"], t["terra-roxa"], 0.35), t.neblina, 0.15),
+    soilOchre,
+    soilPacked: mix(soilOchre, t.poeira, 0.3),
+    rock,
     dust: mix(t.poeira, white, 0.25),
+    root: mix(t["solo-fundo"], t["terra-roxa"], 0.2),
+    bark: mix(rock, t.neblina, 0.25),
+    wood: mix(t.poeira, t["terra-roxa"], 0.12),
+    waterDeep: mix(t.pasto, t["solo-fundo"], 0.75),
   };
   return cached;
 }

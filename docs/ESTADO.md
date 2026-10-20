@@ -1,6 +1,7 @@
 # Estado do projeto: onde paramos
 
-Última sessão: 19/10/2026. Feito: setup completo e **cena base validada** (céu, neblina, 7 ilhas procedurais, blocos de terra, poeira e voo de câmera guiado pelo scroll). Ainda não há escavadeira nem as seções depois de Serviços.
+Última sessão: 20/10/2026. Feito: **topos por serviço e raízes penduradas**. Cada ilha conta o serviço pela silhueta: lago com reflexo do céu, terra revolvida com torrões, sulcos de aração, estrada de terra com talude de corte, fileiras de tocos de eucalipto com leira e metade limpa, platô nivelado com barranco e estacas de gabarito. A geração das ilhas ficou 2× mais rápida e entra uma ilha por tarefa.
+Antes (19/10): setup completo e cena base validada (céu, neblina, 7 ilhas, blocos, poeira, voo guiado pelo scroll). Ainda não há escavadeira nem as seções depois de Serviços.
 
 A direção criativa completa está em [`BRIEFING.md`](BRIEFING.md). Este arquivo guarda o estado técnico, as decisões e os próximos passos. **Atualize no fim de cada sessão**: a memória do Claude Code e a lista de tarefas do claude-mem ficam na máquina, não vão para o git.
 
@@ -18,6 +19,8 @@ A direção criativa completa está em [`BRIEFING.md`](BRIEFING.md). Este arquiv
    ```
 3. **Google Chrome** instalado, para as capturas (`npm run shots`).
 4. Reinstalar as skills, que também são por máquina (ver seção 8).
+5. Os agentes `explorador-haiku` e `operacional-sonnet` agora estão no repositório (`.claude/agents/`), então não precisam ser recriados.
+6. O `next dev` cria o `AGENTS.md` (regras do Next para agentes). Ele está versionado de propósito: se for apagado, volta.
 
 ## 2. Scripts
 
@@ -29,7 +32,9 @@ A direção criativa completa está em [`BRIEFING.md`](BRIEFING.md). Este arquiv
 | `npm run shots` | Capturas em 1440 px e 390 px + console do navegador → `.shots/`. Opções: `-- --url http://localhost:3000 --stops hero,reservatorio~preparo-solo --only mobile --reduced`. `a~b` = meio do voo entre duas paradas |
 | `npm run check:camera` | Depois de mexer em `lib/scene/world.ts`: confere se a câmera passa longe das ilhas (hoje: folga 7,7 no desktop e 11,9 no celular) |
 
-**O que conferir nas capturas:** nenhum bloco por cima do texto nas paradas; ilha à direita do texto no desktop e acima dele no celular; console sem erros. O único aviso esperado é `THREE.Clock: This module has been deprecated`, que vem de dentro do R3F.
+**O que conferir nas capturas:** nenhum bloco por cima do texto nas paradas; ilha à direita do texto no desktop e acima dele no celular; o serviço legível no topo de cada ilha; console sem erros. O único aviso esperado é `THREE.Clock: This module has been deprecated`, que vem de dentro do R3F. Para julgar uma cor, meça os pixels (`System.Drawing` no PowerShell): ao lado da terra roxa saturada, um cáqui médio parece quase branco.
+
+Todas as paradas: `npm run shots -- --stops hero,reservatorio,preparo-solo,aracao,estradas,destoca,terrenos`.
 
 ## 3. Mapa do código
 
@@ -39,15 +44,21 @@ A direção criativa completa está em [`BRIEFING.md`](BRIEFING.md). Este arquiv
 | `app/globals.css` | Tailwind 4 (`@theme inline` mapeando os tokens), botão, links, céu de reserva em CSS, véu de leitura no celular |
 | `content/site.ts` | Toda a copy, telefones, WhatsApp, SEO |
 | `lib/store.ts` | zustand: `stop` (parada contínua da câmera) e `quality` (`high`/`low`) |
-| `lib/scene/world.ts` | **Mapa do mundo**: ilhas (centro, raio, profundidade, semente, relevo, posição da câmera), enquadramento, lente, direção do sol. Sem imports do three |
-| `lib/scene/palette.ts` | Lê os tokens do CSS e deriva os tons da cena (céu, neblina, pasto, camadas de solo, rocha) |
-| `lib/scene/islandGeometry.ts` | Ilha procedural (perfil de revolução + ruído + cor por vértice) |
+| `lib/scene/world.ts` | **Mapa do mundo**: ilhas (centro, raio, profundidade, semente, relevo, **tipo de topo**, posição da câmera), enquadramento, lente, direção do sol. Sem imports do three |
+| `lib/scene/palette.ts` | Lê os tokens do CSS e deriva os tons da cena (céu, neblina, pasto, camadas de solo, terra batida, rocha, raiz, casca, madeira, água) |
+| `lib/scene/islandGeometry.ts` | Ilha procedural (perfil de revolução + ruído + cor por vértice). Devolve corpo, raízes, objetos do topo e espelho d'água |
+| `lib/scene/islandTops.ts` | **Um topo por serviço**: `sample()` dá altura e cor de cada ponto; também os objetos (tocos, torrões, estacas) e a elipse da água. Orientado pela câmera da parada |
+| `lib/scene/rootGeometry.ts` | Raízes penduradas (tubos que afinam, uma geometria por ilha) |
+| `lib/scene/propGeometry.ts` | Toco, toco arrancado, torrão e estaca (instanciados por ilha) |
+| `lib/scene/noise.ts` | Perlin (port do `ImprovedNoise` com valores idênticos, 2× mais rápido), fbm, smoothstep |
+| `lib/scene/normals.ts` | Normais por vértice direto nos arrays |
 | `lib/scene/blockGeometry.ts` | Blocos: torrão, leiva (com pasto) e pedra facetada |
 | `lib/scene/blockField.ts` | Onde cada bloco fica: órbita do hero, pedras sob as ilhas, detritos do voo; ordenados por prioridade |
 | `components/scene/SceneRoot.tsx` | O único Canvas (dynamic import, `ssr:false`, `aria-hidden`, fade-in) |
 | `components/scene/Scene.tsx` | Canvas, luzes, neblina, níveis de qualidade, `PerformanceMonitor` |
 | `components/scene/CameraRig.tsx` | Voo: duas CatmullRom (posição e alvo), amortecimento, parallax do mouse (2,5°/1,5°), enquadramento |
-| `components/scene/{Sky,Archipelago,EarthBlocks,Dust,Effects}.tsx` | Céu em shader, ilhas, InstancedMesh, poeira, pós (vinheta + grão) |
+| `components/scene/{Sky,Archipelago,EarthBlocks,Dust,Effects}.tsx` | Céu em shader, ilhas (montadas uma por tarefa), InstancedMesh, poeira, pós (vinheta + grão) |
+| `components/scene/Water.tsx` | Água do reservatório: shader sem luz que reflete o gradiente do céu, com neblina |
 | `components/motion/SmoothScroll.tsx` | Lenis no ticker do GSAP (desligado com movimento reduzido) |
 | `components/motion/ScrollDirector.tsx` | Scroll → `stop`: a câmera chega na ilha quando a seção `[data-stop]` está centralizada |
 | `components/sections/{Hero,Services}.tsx` | Seções atuais |
@@ -69,34 +80,36 @@ A direção criativa completa está em [`BRIEFING.md`](BRIEFING.md). Este arquiv
 - **Qualidade:** celular ou toque começa em `low` (40 blocos, 220 partículas, sem pós, DPR 1, MSAA nativo). Desktop começa em `high` (150 blocos, 700 partículas, DPR até 1,5, vinheta + grão) e o `PerformanceMonitor` baixa para `low` se o FPS cair. **No notebook com Intel HD 630 o desktop cai para `low` em segundos**, então a cena precisa ficar bonita sem pós-processamento.
 - **Movimento reduzido:** sem Lenis (scroll nativo), Canvas com `frameloop="demand"` e câmera parada no hero. É provisório (ver pendências).
 - **Header** só com nome e telefone, sem logo (o logo em vetor está pendente). Ícone da aba provisório: linhas de terreno se nivelando.
+- **Topos orientados pela câmera da parada.** Sulcos, estrada, fileiras de tocos, eixo do lago e barranco do platô são definidos a partir da direção ilha → câmera. Os sulcos e as fileiras apontam para quem olha (linhas que convergem). A estrada vem em diagonal: de lado, ela virava uma risca. **Mudar `camera` de uma ilha gira o topo junto.**
+- **Malha 160 segmentos × 40 anéis no topo** por causa dos sulcos: abaixo de ~4 vértices por período, a aração serrilha. Por isso as cores com borda dura (estrada, talude) têm transição de ~0,03 raio: mais estreita vira zigue-zague.
+- **A borda gramada do paredão pega a cor do topo** (escurecida), então o platô tem borda de terra e as outras, de pasto.
+- **Água:** o céu é muito mais claro que a água, e a câmera passa rente (~12°). Reflexo por igual virava um disco cinza. A solução foi fresnel contido mais uma faixa de céu refletido do lado de lá: escura perto, clara longe. O barramento (aterro) fica no lado oposto à câmera para não esconder a água.
+- **Destoca conta a história da esquerda para a direita:** tocos em fileiras → leira de tocos arrancados → terra limpa.
+- **Custo de gerar ilha:** de 18 a 60 ms cada uma (desktop com NVIDIA T600, produção), uns 270 ms no total. Elas entram **uma por tarefa** (`setTimeout`), na ordem do voo, e o hero vem primeiro. O R3F redesenha ao montar, então funciona com `frameloop="demand"`. Para chegar nisso: Perlin próprio com valores idênticos ao do three (conferido em 1 milhão de pontos), normais em arrays tipados e arrays pré-alocados. Se o Lighthouse acusar TBT alto no celular, o próximo passo é gerar as ilhas num Web Worker.
 
 ## 5. Pendências conhecidas
 
 - [ ] **WhatsApp provisório**: usando (35) 99974-6093 (`content/site.ts`, `confirmado: false`).
 - [ ] **Ícone** provisório (`app/icon.svg`) até chegar o logo.
 - [ ] **Movimento reduzido**: trocar o Canvas parado por uma imagem AVIF pré-renderizada da cena (pedido do CLAUDE.md).
-- [ ] **Topos das ilhas genéricos**: todas têm pasto. De longe, as silhuetas se repetem como cones invertidos. É o próximo passo.
-- [ ] A ilha `terrenos` deveria ser um **platô de terra nivelada**, não pasto.
-- [ ] Os agentes citados no `CLAUDE.md` (`.claude/agents/operacional-sonnet.md` e `explorador-haiku.md`) **não existem**. Criar ou tirar a seção.
 - [ ] Pendências com a cliente: lista em `BRIEFING.md`.
+- [ ] **Ajustes finos dos topos** (revisar com olhar fresco, no navegador e não só em captura):
+  - preparo de solo e aração ficaram próximos em cor; o que separa os dois é a textura (torrões × sulcos);
+  - a margem de terra do reservatório ainda lembra um anel;
+  - as estacas do platô são quase invisíveis no celular (pode ficar assim, é detalhe).
+- [ ] O hero continua só com pasto: o lugar da escavadeira e da área escavada vem com ela.
 
 ## 6. Próximos passos (ordem sugerida)
 
-1. **Topos por serviço + raízes penduradas.** O serviço precisa ser legível *pela silhueta*, de longe. Ideia de implementação: `kind` em `IslandSpec`, uma função de altura + cor do topo por tipo em `islandGeometry.ts`, e objetos extras (água, tocos) como componentes.
-   - `reservatorio`: depressão escavada no topo + plano de água refletindo a cor do céu (fresnel barato com as cores da paleta).
-   - `preparo-solo`: terra revolvida e escura, sem pasto.
-   - `aracao`: sulcos paralelos (deslocamento senoidal numa direção + cor alternada).
-   - `estradas`: faixa de terra batida rebaixada, em curva, cortando a ilha de ponta a ponta.
-   - `destoca`: metade com tocos de eucalipto (instâncias com raízes), metade limpa.
-   - `terrenos`: platô perfeitamente plano de terra nivelada.
-   - Raízes: tubos finos que afinam, saindo da base de cada ilha.
-2. **Escavadeira** na ilha do hero (ver seção 7).
-3. **Transição do hero:** no scroll, o braço desce, cava e lança um bloco que vira a próxima ilha.
-4. **Preloader "nivelamento":** linha de terreno que se aplaina com o carregamento; em 100%, a câmera mergulha.
-5. **Seções restantes:** Como trabalhamos (sequência real, numeração permitida) → Frota (scroll horizontal + blueprint) → Antes e depois (caçamba como controle) → Onde atuamos (curvas de nível + anéis de raio) → Depoimentos (só reais) → Contato final (a câmera pousa na última ilha; "H e H" entalhado em terra).
-6. **Detalhes:** tipografia que nivela (eixo `wdth` da Archivo) em 1 ou 2 títulos; curvas de nível em SVG como textura e divisores; poeira no hover do WhatsApp.
-7. **SEO:** JSON-LD `LocalBusiness` e imagem OG renderizada da cena.
-8. **Performance:** medir LCP no 4G (Lighthouse) e o tamanho do bundle do three.
+1. **Escavadeira** na ilha do hero (ver seção 7). Depende de comprar o modelo.
+2. **Transição do hero:** no scroll, o braço desce, cava e lança um bloco que vira a próxima ilha.
+3. **Preloader "nivelamento":** linha de terreno que se aplaina com o carregamento; em 100%, a câmera mergulha.
+4. **Seções restantes:** Como trabalhamos (sequência real, numeração permitida) → Frota (scroll horizontal + blueprint) → Antes e depois (caçamba como controle) → Onde atuamos (curvas de nível + anéis de raio) → Depoimentos (só reais) → Contato final (a câmera pousa na última ilha; "H e H" entalhado em terra).
+5. **Detalhes:** tipografia que nivela (eixo `wdth` da Archivo) em 1 ou 2 títulos; curvas de nível em SVG como textura e divisores; poeira no hover do WhatsApp.
+6. **SEO:** JSON-LD `LocalBusiness` e imagem OG renderizada da cena.
+7. **Performance:** medir LCP e TBT no 4G (Lighthouse, perfil celular) e o tamanho do bundle do three. Se o TBT vier alto, levar a geração das ilhas para um Web Worker (ver seção 4).
+
+Se a escavadeira ainda não tiver sido comprada, dá para adiantar o 3 (preloader) ou o 4 (seções em HTML), que não dependem dela.
 
 ## 7. Escavadeira: comprar, não modelar
 
