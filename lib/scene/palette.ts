@@ -1,7 +1,5 @@
 import { Color } from "three";
-
-const TOKENS = ["solo-fundo", "terra-roxa", "amarelo-maquina", "poeira", "pasto", "neblina"] as const;
-type TokenName = (typeof TOKENS)[number];
+import { TOKEN_NAMES, type TokenName, type TokenValues, readTokens } from "./tokens";
 
 export interface ScenePalette {
   tokens: Readonly<Record<TokenName, Color>>;
@@ -32,23 +30,18 @@ export interface ScenePalette {
 
 let cached: ScenePalette | null = null;
 
+/** Os tons da cena, a partir dos tokens de styles/tokens.css (lidos uma vez). */
+export function getScenePalette(): ScenePalette {
+  cached ??= derivePalette(readTokens());
+  return cached;
+}
+
 /**
- * Lê os tokens de styles/tokens.css e deriva os tons da cena a partir deles.
+ * Deriva os tons da cena dos tokens. Sem DOM: o worker das ilhas usa a mesma função.
  * As misturas acontecem em espaço linear (o Color do three converte o hex sRGB).
  */
-export function getScenePalette(): ScenePalette {
-  if (cached) return cached;
-
-  const styles = getComputedStyle(document.documentElement);
-  const read = (name: TokenName) => {
-    const value = styles.getPropertyValue(`--${name}`).trim();
-    if (!value && process.env.NODE_ENV !== "production") {
-      console.warn(`[cena] token --${name} não encontrado em styles/tokens.css`);
-    }
-    return new Color(value || "#ff00ff");
-  };
-
-  const t = Object.fromEntries(TOKENS.map((name) => [name, read(name)])) as Record<TokenName, Color>;
+export function derivePalette(values: TokenValues): ScenePalette {
+  const t = Object.fromEntries(TOKEN_NAMES.map((name) => [name, new Color(values[name])])) as Record<TokenName, Color>;
   const mix = (a: Color, b: Color, k: number) => a.clone().lerp(b, k);
   const white = new Color(1, 1, 1);
 
@@ -57,7 +50,7 @@ export function getScenePalette(): ScenePalette {
   const soilOchre = mix(t["terra-roxa"], t.poeira, 0.26);
   const rock = mix(mix(t["solo-fundo"], t["terra-roxa"], 0.35), t.neblina, 0.15);
 
-  cached = {
+  return {
     tokens: t,
     skyZenith: mix(t.neblina, t["terra-roxa"], 0.3),
     skyHorizon: mix(t.poeira, white, 0.1),
@@ -80,5 +73,4 @@ export function getScenePalette(): ScenePalette {
     wood: mix(t.poeira, t["terra-roxa"], 0.12),
     waterDeep: mix(t.pasto, t["solo-fundo"], 0.75),
   };
-  return cached;
 }

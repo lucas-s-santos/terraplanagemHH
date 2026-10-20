@@ -1,6 +1,7 @@
-import { BufferAttribute, BufferGeometry, Color, Float32BufferAttribute } from "three";
+import { Color } from "three";
 import { mulberry32, range } from "@/lib/random";
 import { createTop, type WaterSpec } from "./islandTops";
+import { type MeshData, meshBuffers } from "./meshData";
 import { clamp01, fbm, smoothstep } from "./noise";
 import { vertexNormals } from "./normals";
 import type { ScenePalette } from "./palette";
@@ -27,11 +28,16 @@ export interface IslandProp {
   scale: Vec3;
 }
 
-export interface IslandParts {
-  body: BufferGeometry;
-  roots: BufferGeometry;
+/** Tudo o que uma ilha precisa, em arrays crus (gerado no worker, ver islandSource.ts). */
+export interface IslandData {
+  body: MeshData;
+  roots: MeshData;
   props: IslandProp[];
-  water: BufferGeometry | null;
+  water: MeshData | null;
+}
+
+export function islandBuffers(island: IslandData): Transferable[] {
+  return meshBuffers([island.body, island.roots, island.water]);
 }
 
 // Resolução pensada para os sulcos da aração (ver FURROW em islandTops.ts).
@@ -73,7 +79,7 @@ function buildProfile(depthRatio: number): ProfileRing[] {
  * Ilha flutuante procedural: o topo conta o serviço (islandTops.ts), o paredão tem camadas
  * de terra roxa e a base rochosa afina até uma ponta torta, com raízes penduradas.
  */
-export function createIsland(shape: IslandShape, palette: ScenePalette): IslandParts {
+export function createIsland(shape: IslandShape, palette: ScenePalette): IslandData {
   const { radius: R, depth, seed, relief } = shape;
   const rand = mulberry32(seed);
   const ox = range(rand, 0, 100);
@@ -226,12 +232,14 @@ export function createIsland(shape: IslandShape, palette: ScenePalette): IslandP
     }
   }
 
-  const body = new BufferGeometry();
-  body.setAttribute("position", new BufferAttribute(positions, 3));
-  body.setAttribute("color", new BufferAttribute(colors, 3));
-  body.setAttribute("normal", new BufferAttribute(vertexNormals(positions, indices), 3));
-  body.setIndex(new BufferAttribute(indices, 1));
-  body.computeBoundingSphere();
+  const body: MeshData = {
+    attributes: {
+      position: { array: positions, itemSize: 3 },
+      color: { array: colors, itemSize: 3 },
+      normal: { array: vertexNormals(positions, indices), itemSize: 3 },
+    },
+    index: indices,
+  };
 
   // Raízes: nascem na faixa de solo logo abaixo da borda, mais perto do topo do que da ponta.
   const rootRings = profile.flatMap((ring, k) => (!ring.top && ring.under >= 0.02 && ring.under <= 0.42 ? [k] : []));
@@ -265,7 +273,7 @@ export function createIsland(shape: IslandShape, palette: ScenePalette): IslandP
 }
 
 /** Disco elíptico do espelho d'água. `aEdge` vai de 0 no centro a 1 na borda (margem mais turva). */
-function createWaterGeometry(water: WaterSpec, R: number): BufferGeometry {
+function createWaterGeometry(water: WaterSpec, R: number): MeshData {
   const STEPS = 64;
   const [cx, cy, cz] = water.center;
   const [ux, uz] = water.axis;
@@ -282,10 +290,11 @@ function createWaterGeometry(water: WaterSpec, R: number): BufferGeometry {
     // Ordem que deixa a face virada para cima.
     indices.push(0, 1 + ((k + 1) % STEPS), 1 + k);
   }
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
-  geometry.setAttribute("aEdge", new Float32BufferAttribute(edge, 1));
-  geometry.setIndex(indices);
-  geometry.computeBoundingSphere();
-  return geometry;
+  return {
+    attributes: {
+      position: { array: new Float32Array(positions), itemSize: 3 },
+      aEdge: { array: new Float32Array(edge), itemSize: 1 },
+    },
+    index: new Uint32Array(indices),
+  };
 }

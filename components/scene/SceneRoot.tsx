@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
+import { startIslandWorker } from "@/lib/scene/islandSource";
 import { useSceneStore } from "@/lib/store";
 import { Preloader } from "./Preloader";
 import { SceneBoundary } from "./SceneBoundary";
@@ -13,8 +14,12 @@ const Scene = dynamic(() => import("./Scene"), { ssr: false });
 export function SceneRoot() {
   const revealed = useSceneStore((s) => s.revealed);
 
-  // Página hidratada: o primeiro passo do nivelamento.
-  useEffect(() => useSceneStore.getState().setLoad(0.1), []);
+  // Página hidratada: primeiro passo do nivelamento, e as ilhas começam a ser geradas
+  // no worker enquanto o three ainda baixa.
+  useEffect(() => {
+    useSceneStore.getState().setLoad(0.1);
+    startIslandWorker();
+  }, []);
 
   return (
     <div aria-hidden="true" className="ceu-reserva pointer-events-none fixed inset-0 z-0">

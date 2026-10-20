@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { type BufferGeometry, type Group, type InstancedMesh, type Material, MeshStandardMaterial, Object3D } from "three";
 import { useSceneStore } from "@/lib/store";
-import { createIsland, type IslandProp } from "@/lib/scene/islandGeometry";
+import { createIsland, type IslandData, type IslandProp } from "@/lib/scene/islandGeometry";
+import { provideIsland, startIslandWorker, useIslandSource } from "@/lib/scene/islandSource";
+import { toGeometry } from "@/lib/scene/meshData";
 import { getScenePalette } from "@/lib/scene/palette";
 import { PROP_KINDS, type PropKind, createPropGeometry } from "@/lib/scene/propGeometry";
 import { ISLANDS, type IslandSpec } from "@/lib/scene/world";
@@ -42,17 +44,22 @@ function PropInstances({ props, geometry, material }: PropInstancesProps) {
 
 interface IslandProps {
   spec: IslandSpec;
+  data: IslandData;
   material: Material;
   propGeometries: PropGeometries;
   animate: boolean;
 }
 
-function Island({ spec, material, propGeometries, animate }: IslandProps) {
+function Island({ spec, data, material, propGeometries, animate }: IslandProps) {
   const group = useRef<Group>(null);
-  const parts = useMemo(() => createIsland(spec, getScenePalette()), [spec]);
+  // Os arrays chegam prontos (do worker); aqui só viram BufferGeometry, o que é barato.
+  const parts = useMemo(
+    () => ({ body: toGeometry(data.body), roots: toGeometry(data.roots), water: data.water && toGeometry(data.water) }),
+    [data],
+  );
   const propsByKind = useMemo(
-    () => PROP_KINDS.map((kind) => ({ kind, props: parts.props.filter((prop) => prop.kind === kind) })),
-    [parts],
+    () => PROP_KINDS.map((kind) => ({ kind, props: data.props.filter((prop) => prop.kind === kind) })),
+    [data],
   );
   const phase = spec.seed * 0.37;
 
@@ -86,20 +93,30 @@ function Island({ spec, material, propGeometries, animate }: IslandProps) {
 }
 
 /**
- * As ilhas: uma para o hero e uma para cada serviço.
- * Cada ilha custa dezenas de ms para gerar; elas entram uma por tarefa, na ordem do voo,
- * para a abertura não virar uma tarefa longa só. É esse avanço que o preloader mostra
- * (de 30% a 100%), e a cena só aparece com todas prontas.
+ * As ilhas: uma para o hero e uma para cada serviço. São geradas no worker
+ * (islandSource.ts) e entram aqui conforme ficam prontas; a cena só aparece com todas
+ * montadas (o preloader fecha em 100%).
  */
 export function Archipelago({ animate }: { animate: boolean }) {
-  const [mounted, setMounted] = useState(1);
+  const islands = useIslandSource((s) => s.islands);
+  const failed = useIslandSource((s) => s.failed);
+  const ready = islands.filter(Boolean).length;
+
+  // O SceneRoot já iniciou o worker ao hidratar; aqui é só garantia.
+  useEffect(() => startIslandWorker(), []);
+
+  // Reserva sem worker: gera o que faltar aqui mesmo, uma ilha por tarefa.
+  useEffect(() => {
+    if (!failed) return;
+    const missing = ISLANDS.findIndex((_, i) => !islands[i]);
+    if (missing < 0) return;
+    const id = window.setTimeout(() => provideIsland(missing, createIsland(ISLANDS[missing], getScenePalette())), 0);
+    return () => window.clearTimeout(id);
+  }, [failed, islands]);
 
   useEffect(() => {
-    useSceneStore.getState().setLoad(0.3 + (0.7 * mounted) / ISLANDS.length);
-    if (mounted >= ISLANDS.length) return;
-    const id = window.setTimeout(() => setMounted((n) => n + 1), 0);
-    return () => window.clearTimeout(id);
-  }, [mounted]);
+    if (ready === ISLANDS.length) useSceneStore.getState().setLoad(1);
+  }, [ready]);
 
   const material = useMemo(
     () => new MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 }),
@@ -120,9 +137,21 @@ export function Archipelago({ animate }: { animate: boolean }) {
 
   return (
     <>
-      {ISLANDS.slice(0, mounted).map((spec) => (
-        <Island key={spec.id} spec={spec} material={material} propGeometries={propGeometries} animate={animate} />
-      ))}
+      {ISLANDS.map((spec, i) => {
+        const data = islands[i];
+        return (
+          data && (
+            <Island
+              key={spec.id}
+              spec={spec}
+              data={data}
+              material={material}
+              propGeometries={propGeometries}
+              animate={animate}
+            />
+          )
+        );
+      })}
     </>
   );
 }

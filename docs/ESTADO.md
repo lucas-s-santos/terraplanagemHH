@@ -1,6 +1,9 @@
 # Estado do projeto: onde paramos
 
-Última sessão: 20/10/2026. Feito: **topos por serviço e raízes penduradas**. Cada ilha conta o serviço pela silhueta: lago com reflexo do céu, terra revolvida com torrões, sulcos de aração, estrada de terra com talude de corte, fileiras de tocos de eucalipto com leira e metade limpa, platô nivelado com barranco e estacas de gabarito. A geração das ilhas ficou 2× mais rápida e entra uma ilha por tarefa.
+Última sessão: 20/10/2026. Feito:
+- **Topos por serviço e raízes penduradas.** Cada ilha conta o serviço pela silhueta: lago com reflexo do céu, terra revolvida com torrões, sulcos de aração, estrada de terra com talude de corte, fileiras de tocos de eucalipto com leira e metade limpa, platô nivelado com barranco e estacas de gabarito.
+- **Preloader "nivelamento"** com o carregamento real e **mergulho da câmera** na entrada.
+- **Ilhas geradas num Web Worker**, em paralelo ao download do three.
 Antes (19/10): setup completo e cena base validada (céu, neblina, 7 ilhas, blocos, poeira, voo guiado pelo scroll). Ainda não há escavadeira nem as seções depois de Serviços.
 
 A direção criativa completa está em [`BRIEFING.md`](BRIEFING.md). Este arquivo guarda o estado técnico, as decisões e os próximos passos. **Atualize no fim de cada sessão**: a memória do Claude Code e a lista de tarefas do claude-mem ficam na máquina, não vão para o git.
@@ -43,10 +46,14 @@ Todas as paradas: `npm run shots -- --stops hero,reservatorio,preparo-solo,araca
 | `styles/tokens.css` | Tokens (fonte da verdade). A cena 3D lê as mesmas variáveis em tempo de execução |
 | `app/globals.css` | Tailwind 4 (`@theme inline` mapeando os tokens), botão, links, céu de reserva em CSS, véu de leitura no celular |
 | `content/site.ts` | Toda a copy, telefones, WhatsApp, SEO |
-| `lib/store.ts` | zustand: `stop` (parada contínua da câmera) e `quality` (`high`/`low`) |
+| `lib/store.ts` | zustand: `stop` (parada contínua da câmera), `quality` (`high`/`low`), `load` (0 a 1, só sobe) e `revealed` (a cena entrou) |
 | `lib/scene/world.ts` | **Mapa do mundo**: ilhas (centro, raio, profundidade, semente, relevo, **tipo de topo**, posição da câmera), enquadramento, lente, direção do sol. Sem imports do three |
-| `lib/scene/palette.ts` | Lê os tokens do CSS e deriva os tons da cena (céu, neblina, pasto, camadas de solo, terra batida, rocha, raiz, casca, madeira, água) |
-| `lib/scene/islandGeometry.ts` | Ilha procedural (perfil de revolução + ruído + cor por vértice). Devolve corpo, raízes, objetos do topo e espelho d'água |
+| `lib/scene/tokens.ts` | Lê os tokens de cor do CSS (sem three: fica no bundle inicial) |
+| `lib/scene/palette.ts` | `derivePalette()` deriva os tons da cena dos tokens, sem DOM (o worker usa); `getScenePalette()` é a versão da página, com cache |
+| `lib/scene/islandGeometry.ts` | Ilha procedural (perfil de revolução + ruído + cor por vértice). Devolve **arrays crus** (`IslandData`): corpo, raízes, objetos do topo e espelho d'água |
+| `lib/scene/island.worker.ts` | Web Worker: gera as 7 ilhas na ordem do voo e devolve uma por mensagem (buffers transferidos) |
+| `lib/scene/islandSource.ts` | Inicia o worker ao hidratar e guarda as ilhas prontas (store próprio). Se o Worker falhar, liga `failed` e o Archipelago gera na thread principal |
+| `lib/scene/meshData.ts` | Formato `MeshData` (arrays) e `toGeometry()` para virar BufferGeometry na página |
 | `lib/scene/islandTops.ts` | **Um topo por serviço**: `sample()` dá altura e cor de cada ponto; também os objetos (tocos, torrões, estacas) e a elipse da água. Orientado pela câmera da parada |
 | `lib/scene/rootGeometry.ts` | Raízes penduradas (tubos que afinam, uma geometria por ilha) |
 | `lib/scene/propGeometry.ts` | Toco, toco arrancado, torrão e estaca (instanciados por ilha) |
@@ -54,10 +61,11 @@ Todas as paradas: `npm run shots -- --stops hero,reservatorio,preparo-solo,araca
 | `lib/scene/normals.ts` | Normais por vértice direto nos arrays |
 | `lib/scene/blockGeometry.ts` | Blocos: torrão, leiva (com pasto) e pedra facetada |
 | `lib/scene/blockField.ts` | Onde cada bloco fica: órbita do hero, pedras sob as ilhas, detritos do voo; ordenados por prioridade |
-| `components/scene/SceneRoot.tsx` | O único Canvas (dynamic import, `ssr:false`, `aria-hidden`, fade-in) |
+| `components/scene/SceneRoot.tsx` | O único Canvas (dynamic import, `ssr:false`, `aria-hidden`), o preloader e o fade-in quando `revealed` |
+| `components/scene/Preloader.tsx` | Preloader "nivelamento": linha de terreno + 2 curvas de nível, aplainadas por uma lâmina amarela conforme `load` |
 | `components/scene/Scene.tsx` | Canvas, luzes, neblina, níveis de qualidade, `PerformanceMonitor` |
-| `components/scene/CameraRig.tsx` | Voo: duas CatmullRom (posição e alvo), amortecimento, parallax do mouse (2,5°/1,5°), enquadramento |
-| `components/scene/{Sky,Archipelago,EarthBlocks,Dust,Effects}.tsx` | Céu em shader, ilhas (montadas uma por tarefa), InstancedMesh, poeira, pós (vinheta + grão) |
+| `components/scene/CameraRig.tsx` | Voo: duas CatmullRom (posição e alvo), amortecimento, parallax do mouse (2,5°/1,5°), enquadramento, mergulho de entrada (`DIVE`) |
+| `components/scene/{Sky,Archipelago,EarthBlocks,Dust,Effects}.tsx` | Céu em shader, ilhas (montadas conforme chegam do worker), InstancedMesh, poeira, pós (vinheta + grão) |
 | `components/scene/Water.tsx` | Água do reservatório: shader sem luz que reflete o gradiente do céu, com neblina |
 | `components/motion/SmoothScroll.tsx` | Lenis no ticker do GSAP (desligado com movimento reduzido) |
 | `components/motion/ScrollDirector.tsx` | Scroll → `stop`: a câmera chega na ilha quando a seção `[data-stop]` está centralizada |
@@ -85,7 +93,12 @@ Todas as paradas: `npm run shots -- --stops hero,reservatorio,preparo-solo,araca
 - **A borda gramada do paredão pega a cor do topo** (escurecida), então o platô tem borda de terra e as outras, de pasto.
 - **Água:** o céu é muito mais claro que a água, e a câmera passa rente (~12°). Reflexo por igual virava um disco cinza. A solução foi fresnel contido mais uma faixa de céu refletido do lado de lá: escura perto, clara longe. O barramento (aterro) fica no lado oposto à câmera para não esconder a água.
 - **Destoca conta a história da esquerda para a direita:** tocos em fileiras → leira de tocos arrancados → terra limpa.
-- **Custo de gerar ilha:** de 18 a 60 ms cada uma (desktop com NVIDIA T600, produção), uns 270 ms no total. Elas entram **uma por tarefa** (`setTimeout`), na ordem do voo, e o hero vem primeiro. O R3F redesenha ao montar, então funciona com `frameloop="demand"`. Para chegar nisso: Perlin próprio com valores idênticos ao do three (conferido em 1 milhão de pontos), normais em arrays tipados e arrays pré-alocados. Se o Lighthouse acusar TBT alto no celular, o próximo passo é gerar as ilhas num Web Worker.
+- **Ilhas num Web Worker.** Gerar uma ilha custa de 18 a 60 ms no desktop e de 100 a 450 ms num celular fraco. Na thread principal, isso travava a lâmina do preloader e atrasava um toque no WhatsApp. O worker começa assim que a página hidrata, em paralelo ao download do three, e devolve arrays (buffers transferidos, sem cópia); a página só monta as `BufferGeometry`. **Reserva:** sem Worker, as ilhas são geradas na thread principal, uma por tarefa. Testado removendo `window.Worker`. Antes disso, a geração já tinha ficado 2× mais rápida: Perlin próprio com valores idênticos ao do three (conferido em 1 milhão de pontos), normais em arrays tipados e arrays pré-alocados.
+- **Preloader na camada da cena, não por cima da página.** O texto do hero pinta antes de tudo e continua sendo o LCP. A linha fica onde a ilha do hero vai aparecer (`.nivelamento` em `globals.css`, com `min-aspect-ratio: 1/1` como o `FRAMING`). Quando a cena entra, a ilha surge debaixo da linha.
+- **Progresso real** em `store.load`: 10% ao hidratar, até 66% conforme o worker entrega as ilhas, e 100% quando a cena monta todas. A lâmina anima até o valor (GSAP `quickTo`, 0,9 s). Se travar por 15 s, o preloader sai mesmo assim. Se a cena falhar (sem WebGL), o `SceneBoundary` manda 100% e fica o céu de reserva.
+- **Linha desenhada com `clipPath`, não com tracejado.** Com `vector-effect: non-scaling-stroke`, o Chrome mede o tracejado em pixels de tela e a normalização do `pathLength` em unidades do SVG, e a linha saía cortada em ~70%.
+- **Mergulho:** a câmera começa 1,9× mais longe e 20 unidades mais alta e desce em 2,4 s (ease-out cúbico), com o passo limitado a 1/30 s para não pular. Com movimento reduzido, não há mergulho.
+- **Números (produção, celular emulado em 4G lento + CPU 4×):** LCP 1,15 s (o título do hero); o preloader sai em 6 a 7 s; bloqueio acima de 50 ms em torno de 1,0 s (era 1,4 s antes do worker). O que sobra é o próprio motor 3D: avaliar o three, criar o Canvas e **compilar os shaders** (tarefas de 170 a 460 ms). **Ao medir no Windows, aqueça o navegador:** a primeira requisição de um Chrome recém-aberto leva ~1,8 s, e isso não é do site (o servidor responde em 6 ms).
 
 ## 5. Pendências conhecidas
 
@@ -103,13 +116,12 @@ Todas as paradas: `npm run shots -- --stops hero,reservatorio,preparo-solo,araca
 
 1. **Escavadeira** na ilha do hero (ver seção 7). Depende de comprar o modelo.
 2. **Transição do hero:** no scroll, o braço desce, cava e lança um bloco que vira a próxima ilha.
-3. **Preloader "nivelamento":** linha de terreno que se aplaina com o carregamento; em 100%, a câmera mergulha.
-4. **Seções restantes:** Como trabalhamos (sequência real, numeração permitida) → Frota (scroll horizontal + blueprint) → Antes e depois (caçamba como controle) → Onde atuamos (curvas de nível + anéis de raio) → Depoimentos (só reais) → Contato final (a câmera pousa na última ilha; "H e H" entalhado em terra).
-5. **Detalhes:** tipografia que nivela (eixo `wdth` da Archivo) em 1 ou 2 títulos; curvas de nível em SVG como textura e divisores; poeira no hover do WhatsApp.
-6. **SEO:** JSON-LD `LocalBusiness` e imagem OG renderizada da cena.
-7. **Performance:** medir LCP e TBT no 4G (Lighthouse, perfil celular) e o tamanho do bundle do three. Se o TBT vier alto, levar a geração das ilhas para um Web Worker (ver seção 4).
+3. **Seções restantes:** Como trabalhamos (sequência real, numeração permitida) → Frota (scroll horizontal + blueprint) → Antes e depois (caçamba como controle) → Onde atuamos (curvas de nível + anéis de raio) → Depoimentos (só reais) → Contato final (a câmera pousa na última ilha; "H e H" entalhado em terra). Sem material da cliente, dá para fazer agora **Como trabalhamos** e **Contato final**. Frota, Antes e depois e Onde atuamos dependem de fotos e da lista de cidades. Antes, decidir o que a cena faz depois da última ilha de serviço: as seções seguintes ficam sobre a cena parada no platô?
+4. **Detalhes:** tipografia que nivela (eixo `wdth` da Archivo) em 1 ou 2 títulos; curvas de nível em SVG como textura e divisores; poeira no hover do WhatsApp.
+5. **SEO:** JSON-LD `LocalBusiness` e imagem OG renderizada da cena.
+6. **Performance:** compilar os shaders sem travar (`renderer.compileAsync` antes de revelar a cena), rodar o Lighthouse de verdade (perfil celular) e medir o bundle do three.
 
-Se a escavadeira ainda não tiver sido comprada, dá para adiantar o 3 (preloader) ou o 4 (seções em HTML), que não dependem dela.
+Se a escavadeira ainda não tiver sido comprada, o 3 (seções em HTML) não depende dela.
 
 ## 7. Escavadeira: comprar, não modelar
 

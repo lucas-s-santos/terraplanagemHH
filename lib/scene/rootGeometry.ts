@@ -1,5 +1,6 @@
-import { BufferAttribute, BufferGeometry, CatmullRomCurve3, Color, Vector3 } from "three";
+import { CatmullRomCurve3, Color, Vector3 } from "three";
 import { range } from "@/lib/random";
+import type { MeshData } from "./meshData";
 import { vertexNormals } from "./normals";
 import type { ScenePalette } from "./palette";
 import type { Vec3 } from "./world";
@@ -24,7 +25,7 @@ export function createRootGeometry(
   islandRadius: number,
   rand: () => number,
   palette: ScenePalette,
-): BufferGeometry {
+): MeshData {
   const perRoot = (STEPS + 1) * SIDES;
   const positions = new Float32Array(anchors.length * perRoot * 3);
   const colors = new Float32Array(positions.length);
@@ -91,11 +92,12 @@ export function createRootGeometry(
     }
   });
 
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new BufferAttribute(positions, 3));
-  geometry.setAttribute("color", new BufferAttribute(colors, 3));
-  geometry.setAttribute("normal", new BufferAttribute(vertexNormals(positions, indices), 3));
-  geometry.setIndex(new BufferAttribute(indices, 1));
-  geometry.computeBoundingSphere();
-  return geometry;
+  return {
+    attributes: {
+      position: { array: positions, itemSize: 3 },
+      color: { array: colors, itemSize: 3 },
+      normal: { array: vertexNormals(positions, indices), itemSize: 3 },
+    },
+    index: indices,
+  };
 }
