@@ -4,6 +4,7 @@
 - **Topos por serviço e raízes penduradas.** Cada ilha conta o serviço pela silhueta: lago com reflexo do céu, terra revolvida com torrões, sulcos de aração, estrada de terra com talude de corte, fileiras de tocos de eucalipto com leira e metade limpa, platô nivelado com barranco e estacas de gabarito.
 - **Preloader "nivelamento"** com o carregamento real e **mergulho da câmera** na entrada.
 - **Ilhas geradas num Web Worker**, em paralelo ao download do three.
+- **Seções depois dos serviços:** painel de terra com **Como trabalhamos**, **Contato final** (a câmera pousa no platô) e **rodapé** com os contatos e o "H e H" entalhado.
 Antes (19/10): setup completo e cena base validada (céu, neblina, 7 ilhas, blocos, poeira, voo guiado pelo scroll). Ainda não há escavadeira nem as seções depois de Serviços.
 
 A direção criativa completa está em [`BRIEFING.md`](BRIEFING.md). Este arquivo guarda o estado técnico, as decisões e os próximos passos. **Atualize no fim de cada sessão**: a memória do Claude Code e a lista de tarefas do claude-mem ficam na máquina, não vão para o git.
@@ -32,12 +33,14 @@ A direção criativa completa está em [`BRIEFING.md`](BRIEFING.md). Este arquiv
 | `npm run dev` | Desenvolvimento |
 | `npm run build` / `npm start` | Build de produção (rodar antes de fechar qualquer tarefa visual) |
 | `npm run typecheck` | Só o TypeScript |
-| `npm run shots` | Capturas em 1440 px e 390 px + console do navegador → `.shots/`. Opções: `-- --url http://localhost:3000 --stops hero,reservatorio~preparo-solo --only mobile --reduced`. `a~b` = meio do voo entre duas paradas |
-| `npm run check:camera` | Depois de mexer em `lib/scene/world.ts`: confere se a câmera passa longe das ilhas (hoje: folga 7,7 no desktop e 11,9 no celular) |
+| `npm run shots` | Capturas em 1440 px e 390 px + console do navegador → `.shots/`. Opções: `-- --url http://localhost:3000 --stops hero,reservatorio~preparo-solo,fim --only mobile --reduced`. `a~b` = meio do caminho entre duas paradas (`terrenos~contato` cai no painel de terra); `fim` = rodapé |
+| `npm run check:camera` | Depois de mexer em `lib/scene/world.ts`: confere se a câmera passa longe das ilhas (hoje: folga 6,2 no desktop e 11,9 no celular) |
 
 **O que conferir nas capturas:** nenhum bloco por cima do texto nas paradas; ilha à direita do texto no desktop e acima dele no celular; o serviço legível no topo de cada ilha; console sem erros. O único aviso esperado é `THREE.Clock: This module has been deprecated`, que vem de dentro do R3F. Para julgar uma cor, meça os pixels (`System.Drawing` no PowerShell): ao lado da terra roxa saturada, um cáqui médio parece quase branco.
 
-Todas as paradas: `npm run shots -- --stops hero,reservatorio,preparo-solo,aracao,estradas,destoca,terrenos`.
+Página inteira: `npm run shots -- --stops hero,reservatorio,preparo-solo,aracao,estradas,destoca,terrenos,terrenos~contato,contato,fim`.
+
+Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (duas posições sobrepostas). Se aparecer, aumente o `--wait` antes de concluir que é um bug.
 
 ## 3. Mapa do código
 
@@ -47,7 +50,7 @@ Todas as paradas: `npm run shots -- --stops hero,reservatorio,preparo-solo,araca
 | `app/globals.css` | Tailwind 4 (`@theme inline` mapeando os tokens), botão, links, céu de reserva em CSS, véu de leitura no celular |
 | `content/site.ts` | Toda a copy, telefones, WhatsApp, SEO |
 | `lib/store.ts` | zustand: `stop` (parada contínua da câmera), `quality` (`high`/`low`), `load` (0 a 1, só sobe) e `revealed` (a cena entrou) |
-| `lib/scene/world.ts` | **Mapa do mundo**: ilhas (centro, raio, profundidade, semente, relevo, **tipo de topo**, posição da câmera), enquadramento, lente, direção do sol. Sem imports do three |
+| `lib/scene/world.ts` | **Mapa do mundo**: `ISLANDS` (centro, raio, profundidade, semente, relevo, **tipo de topo**, câmera), `STOPS` (paradas da câmera: uma por ilha + o pouso `contato` no platô), enquadramento, lente, direção do sol. Sem imports do three |
 | `lib/scene/tokens.ts` | Lê os tokens de cor do CSS (sem three: fica no bundle inicial) |
 | `lib/scene/palette.ts` | `derivePalette()` deriva os tons da cena dos tokens, sem DOM (o worker usa); `getScenePalette()` é a versão da página, com cache |
 | `lib/scene/islandGeometry.ts` | Ilha procedural (perfil de revolução + ruído + cor por vértice). Devolve **arrays crus** (`IslandData`): corpo, raízes, objetos do topo e espelho d'água |
@@ -68,10 +71,17 @@ Todas as paradas: `npm run shots -- --stops hero,reservatorio,preparo-solo,araca
 | `components/scene/{Sky,Archipelago,EarthBlocks,Dust,Effects}.tsx` | Céu em shader, ilhas (montadas conforme chegam do worker), InstancedMesh, poeira, pós (vinheta + grão) |
 | `components/scene/Water.tsx` | Água do reservatório: shader sem luz que reflete o gradiente do céu, com neblina |
 | `components/motion/SmoothScroll.tsx` | Lenis no ticker do GSAP (desligado com movimento reduzido) |
-| `components/motion/ScrollDirector.tsx` | Scroll → `stop`: a câmera chega na ilha quando a seção `[data-stop]` está centralizada |
-| `components/sections/{Hero,Services}.tsx` | Seções atuais |
+| `components/motion/ScrollDirector.tsx` | Scroll → `stop`: a câmera chega na parada quando um marcador `[data-stop]` está centralizado. **Vários marcadores da mesma parada = a câmera espera** entre eles |
+| `components/motion/MagneticLink.tsx` | Link magnético (o WhatsApp do contato). Só com mouse e sem movimento reduzido |
+| `components/sections/{Hero,Services}.tsx` | Hero e as 6 paradas de serviço |
+| `components/sections/EarthPanel.tsx` | Painel de terra opaco depois dos serviços. Tem no fim o marcador que segura a câmera no platô |
+| `components/sections/TerrainEdge.tsx` | Borda irregular de bloco de solo (faixa de terra roxa + solo escuro); `flip` para a borda de baixo |
+| `components/sections/Process.tsx` | Como trabalhamos: linha de nível (ondulada → reta) desenhada no scroll, etapas que acendem na estaca |
+| `components/sections/Contact.tsx` | Contato final (parada `contato`): título, apoio e o WhatsApp grande |
+| `components/sections/SiteFooter.tsx` | Chão do rodapé: telefones, e-mail, endereço e o "H e H" entalhado |
 
-**Para adicionar uma parada:** criar a ilha em `world.ts` e uma seção com `data-stop="<mesmo id>"`, **na mesma ordem**. Depois rodar `npm run check:camera`.
+**Para adicionar uma parada:** criar a ilha em `ISLANDS` (ou só uma parada em `STOPS`, se for olhar de novo para uma ilha existente) e um marcador `data-stop="<mesmo id>"` na página, **na mesma ordem**. Depois rodar `npm run check:camera`.
+**Para adicionar uma seção no painel de terra** (Frota, Antes e depois, Onde atuamos): é só colocá-la dentro do `<EarthPanel>` em `app/page.tsx`. A câmera continua esperando no platô.
 
 ## 4. Decisões tomadas (e por quê)
 
@@ -98,6 +108,11 @@ Todas as paradas: `npm run shots -- --stops hero,reservatorio,preparo-solo,araca
 - **Progresso real** em `store.load`: 10% ao hidratar, até 66% conforme o worker entrega as ilhas, e 100% quando a cena monta todas. A lâmina anima até o valor (GSAP `quickTo`, 0,9 s). Se travar por 15 s, o preloader sai mesmo assim. Se a cena falhar (sem WebGL), o `SceneBoundary` manda 100% e fica o céu de reserva.
 - **Linha desenhada com `clipPath`, não com tracejado.** Com `vector-effect: non-scaling-stroke`, o Chrome mede o tracejado em pixels de tela e a normalização do `pathLength` em unidades do SVG, e a linha saía cortada em ~70%.
 - **Mergulho:** a câmera começa 1,9× mais longe e 20 unidades mais alta e desce em 2,4 s (ease-out cúbico), com o passo limitado a 1/30 s para não pular. Com movimento reduzido, não há mergulho.
+- **Depois dos serviços, painel de terra por cima** (decisão do Lucas, 20/10). A câmera estaciona no platô e as seções sobem num bloco de solo opaco (texto `poeira` sobre `solo-fundo`), com borda irregular e faixa de terra roxa em cima e borda irregular embaixo. Quando o painel passa, a câmera **pousa** no platô (parada `contato`, mais longe e pelo outro lado, com o barranco atrás). A ousadia continua só no voo, e o texto é sempre legível.
+- **O contato é só o convite e o WhatsApp grande**, como o hero. Telefones, e-mail e endereço ficam no chão do rodapé. Com tudo junto, no celular o título caía em cima da ilha.
+- **"H e H" entalhado:** fonte em `cqi` (31% da largura do contêiner), para ocupar ~95% da largura em qualquer tela. As camadas de solo vêm de `background-clip: text` com um gradiente irregular, e a aresta vem de `filter: drop-shadow` (o `text-shadow` pinta por cima do recorte e apaga as camadas).
+- **Botão primário usa `translate` no `:active`, não `transform`**: o ímã do WhatsApp anima o `transform` pelo GSAP, e os dois brigariam.
+- **Foco claro no chão escuro:** a classe `.chao` (painel e rodapé) troca a cor do contorno de foco para `poeira`.
 - **Números (produção, celular emulado em 4G lento + CPU 4×):** LCP 1,15 s (o título do hero); o preloader sai em 6 a 7 s; bloqueio acima de 50 ms em torno de 1,0 s (era 1,4 s antes do worker). O que sobra é o próprio motor 3D: avaliar o three, criar o Canvas e **compilar os shaders** (tarefas de 170 a 460 ms). **Ao medir no Windows, aqueça o navegador:** a primeira requisição de um Chrome recém-aberto leva ~1,8 s, e isso não é do site (o servidor responde em 6 ms).
 
 ## 5. Pendências conhecidas
@@ -111,17 +126,20 @@ Todas as paradas: `npm run shots -- --stops hero,reservatorio,preparo-solo,araca
   - a margem de terra do reservatório ainda lembra um anel;
   - as estacas do platô são quase invisíveis no celular (pode ficar assim, é detalhe).
 - [ ] O hero continua só com pasto: o lugar da escavadeira e da área escavada vem com ela.
+- [ ] **Textos das etapas de "Como trabalhamos"** escritos por nós (a sequência é do briefing). Confirmar com a cliente, principalmente "valor e prazo antes de qualquer máquina entrar".
+- [ ] **Telefones sem rótulo de quem é quem** (o briefing pede "telefones com rótulo"). Perguntar à cliente junto com qual é o WhatsApp.
+- [ ] **A cena continua renderizando atrás do painel opaco.** Pausar o Canvas (`frameloop`) enquanto o painel cobre a tela toda poupa bateria no celular.
 
 ## 6. Próximos passos (ordem sugerida)
 
 1. **Escavadeira** na ilha do hero (ver seção 7). Depende de comprar o modelo.
 2. **Transição do hero:** no scroll, o braço desce, cava e lança um bloco que vira a próxima ilha.
-3. **Seções restantes:** Como trabalhamos (sequência real, numeração permitida) → Frota (scroll horizontal + blueprint) → Antes e depois (caçamba como controle) → Onde atuamos (curvas de nível + anéis de raio) → Depoimentos (só reais) → Contato final (a câmera pousa na última ilha; "H e H" entalhado em terra). Sem material da cliente, dá para fazer agora **Como trabalhamos** e **Contato final**. Frota, Antes e depois e Onde atuamos dependem de fotos e da lista de cidades. Antes, decidir o que a cena faz depois da última ilha de serviço: as seções seguintes ficam sobre a cena parada no platô?
+3. **Seções que faltam, dentro do painel de terra** (Como trabalhamos, Contato final e rodapé já estão prontos): Frota (scroll horizontal + blueprint) → Antes e depois (caçamba como controle) → Onde atuamos (curvas de nível + anéis de raio) → Depoimentos (só reais). **Todas dependem de material da cliente:** fotos da frota e de obras, lista de cidades e depoimentos.
 4. **Detalhes:** tipografia que nivela (eixo `wdth` da Archivo) em 1 ou 2 títulos; curvas de nível em SVG como textura e divisores; poeira no hover do WhatsApp.
 5. **SEO:** JSON-LD `LocalBusiness` e imagem OG renderizada da cena.
 6. **Performance:** compilar os shaders sem travar (`renderer.compileAsync` antes de revelar a cena), rodar o Lighthouse de verdade (perfil celular) e medir o bundle do three.
 
-Se a escavadeira ainda não tiver sido comprada, o 3 (seções em HTML) não depende dela.
+Sem escavadeira e sem material da cliente, o que dá para adiantar é o 4 (detalhes), o 5 (SEO) e o 6 (performance).
 
 ## 7. Escavadeira: comprar, não modelar
 

@@ -4,7 +4,9 @@ import type { ServiceId } from "@/content/site";
  * Mapa do mundo: onde cada ilha flutua e de onde a câmera olha para ela.
  * Sem imports do three — este arquivo também é usado pelas seções (ordem das paradas).
  */
-export type StopId = "hero" | ServiceId;
+export type IslandId = "hero" | ServiceId;
+/** Cada ilha é uma parada; o contato é uma parada a mais, que volta para o platô. */
+export type StopId = IslandId | "contato";
 export type Vec3 = readonly [number, number, number];
 
 /**
@@ -15,7 +17,7 @@ export type Vec3 = readonly [number, number, number];
 export type IslandTop = "pasto" | "lago" | "revolvido" | "sulcos" | "estrada" | "destoca" | "plato";
 
 export interface IslandSpec {
-  id: StopId;
+  id: IslandId;
   center: Vec3;
   radius: number;
   /** Altura da parte de baixo (rochas e raízes), em unidades do mundo. */
@@ -43,7 +45,32 @@ export const ISLANDS: readonly IslandSpec[] = [
   { id: "terrenos", center: [-12, -4, -285], radius: 8.5, depth: 12.5, seed: 233, relief: 0.15, top: "plato", camera: [-2, 8, 30] },
 ];
 
-export const STOP_IDS: readonly StopId[] = ISLANDS.map((island) => island.id);
+/** Parada da câmera: para qual ilha olha e de onde (relativo ao centro da ilha). */
+export interface CameraStop {
+  id: StopId;
+  island: IslandSpec;
+  camera: Vec3;
+  narrowY?: number;
+}
+
+const PLATEAU = ISLANDS[ISLANDS.length - 1];
+
+/**
+ * O voo: uma parada por ilha e, no fim, o pouso no platô (contato final): mais perto,
+ * mais baixo e pelo outro lado, com o barranco atrás.
+ */
+export const STOPS: readonly CameraStop[] = [
+  ...ISLANDS.map((island) => ({ id: island.id, island, camera: island.camera, narrowY: island.narrowY })),
+  { id: "contato", island: PLATEAU, camera: [13, 5, 34], narrowY: 0.46 },
+];
+
+export const STOP_IDS: readonly StopId[] = STOPS.map((stop) => stop.id);
+
+/** Posição da câmera numa parada, em coordenadas do mundo. */
+export function stopPosition(stop: CameraStop): Vec3 {
+  const [cx, cy, cz] = stop.island.center;
+  return [cx + stop.camera[0], cy + stop.camera[1], cz + stop.camera[2]];
+}
 
 /** Onde a ilha da parada aparece na tela (NDC: -1 a 1). No desktop, à direita do texto; no celular, acima dele. */
 export const FRAMING = {

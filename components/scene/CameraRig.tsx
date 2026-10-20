@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { easing } from "maath";
 import { CatmullRomCurve3, MathUtils, type PerspectiveCamera, Vector2, Vector3 } from "three";
 import { useSceneStore } from "@/lib/store";
-import { FRAMING, ISLANDS, LENS, islandFocus } from "@/lib/scene/world";
+import { FRAMING, LENS, STOPS, islandFocus, stopPosition } from "@/lib/scene/world";
 
 const Y_AXIS = new Vector3(0, 1, 0);
 const YAW = MathUtils.degToRad(2.5);
@@ -19,14 +19,14 @@ const DIVE = { seconds: 2.4, distance: 0.9, rise: 20 };
  */
 export function CameraRig({ animate }: { animate: boolean }) {
   const curves = useMemo(() => {
-    const positions = ISLANDS.map((island) => new Vector3(...island.center).add(new Vector3(...island.camera)));
-    const targets = ISLANDS.map((island) => new Vector3(...islandFocus(island)));
+    const positions = STOPS.map((stop) => new Vector3(...stopPosition(stop)));
+    const targets = STOPS.map((stop) => new Vector3(...islandFocus(stop.island)));
     return {
       position: new CatmullRomCurve3(positions, false, "centripetal"),
       target: new CatmullRomCurve3(targets, false, "centripetal"),
     };
   }, []);
-  const narrowY = useMemo(() => ISLANDS.map((island) => island.narrowY ?? FRAMING.narrow.y), []);
+  const narrowY = useMemo(() => STOPS.map((stop) => stop.narrowY ?? FRAMING.narrow.y), []);
 
   const rig = useMemo(
     () => ({
@@ -72,7 +72,7 @@ export function CameraRig({ animate }: { animate: boolean }) {
     // Passo limitado: a geração das ilhas pode travar alguns quadros e o mergulho não deve pular.
     if (animate && scene.revealed && rig.intro < 1) rig.intro = Math.min(rig.intro + Math.min(delta, 1 / 30) / DIVE.seconds, 1);
     const dive = animate ? (1 - rig.intro) ** 3 : 0;
-    const t = MathUtils.clamp(stop / (ISLANDS.length - 1), 0, 1);
+    const t = MathUtils.clamp(stop / (STOPS.length - 1), 0, 1);
     const from = Math.floor(stop);
     const stopNarrowY = MathUtils.lerp(narrowY[from] ?? 0, narrowY[from + 1] ?? narrowY[from] ?? 0, stop - from);
 

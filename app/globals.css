@@ -32,6 +32,11 @@
     outline-offset: 4px;
     border-radius: 2px;
   }
+
+  /* Sobre o chão escuro (painel de terra e rodapé), o foco é claro. */
+  .chao :focus-visible {
+    outline-color: var(--poeira);
+  }
 }
 
 @layer components {
@@ -78,13 +83,51 @@
     box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--solo-fundo) 22%, transparent);
     transition:
       background-color 160ms ease-out,
-      transform 160ms ease-out;
+      translate 160ms ease-out;
   }
   .botao-primario:hover {
     background: color-mix(in oklab, var(--amarelo-maquina) 90%, white);
   }
   .botao-primario:active {
-    transform: translateY(1px);
+    translate: 0 1px;
+  }
+
+  /* O WhatsApp do contato final: grande (e magnético, ver MagneticLink). */
+  .botao-grande {
+    min-height: 4rem;
+    padding: 0 2.2rem;
+    font-size: 1.25rem;
+  }
+
+  /* "H e H" entalhado no chão do rodapé: a letra mostra as camadas de solo do corte,
+     sombra na aresta de cima e luz na de baixo. (drop-shadow, porque o text-shadow
+     é pintado por cima do background-clip: text e apaga as camadas.) */
+  .marca-entalhada {
+    /* "H e H" mede ~3em: com 31cqi ocupa ~95% da largura do rodapé em qualquer tela. */
+    font-size: 26vw;
+    font-size: 31cqi;
+    font-weight: 900;
+    font-stretch: 125%;
+    line-height: 0.8;
+    letter-spacing: -0.045em;
+    word-spacing: -0.12em;
+    white-space: nowrap;
+    color: transparent;
+    /* Camadas irregulares: terra roxa em cima, escurecendo para baixo, com veios finos. */
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--terra-roxa) 80%, var(--poeira)) 0%,
+      var(--terra-roxa) 18%,
+      color-mix(in oklab, var(--solo-fundo) 70%, black) 19.5% 21%,
+      color-mix(in oklab, var(--terra-roxa) 70%, var(--solo-fundo)) 22.5% 44%,
+      color-mix(in oklab, var(--terra-roxa) 65%, var(--poeira)) 45.5% 46.5%,
+      color-mix(in oklab, var(--terra-roxa) 55%, var(--solo-fundo)) 48.5% 69%,
+      color-mix(in oklab, var(--solo-fundo) 70%, black) 70% 71.5%,
+      color-mix(in oklab, var(--terra-roxa) 35%, var(--solo-fundo)) 73% 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    filter: drop-shadow(0 -0.012em 0 rgb(0 0 0 / 0.55)) drop-shadow(0 0.012em 0 color-mix(in oklab, var(--poeira) 25%, transparent));
   }
 
   .link-secundario {

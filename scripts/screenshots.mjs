@@ -7,7 +7,7 @@
  *   npm run shots -- --url http://localhost:3000 --stops hero,reservatorio~preparo-solo,terrenos --only mobile
  *   npm run shots -- --reduced          (simula prefers-reduced-motion)
  *
- * Paradas: ids de data-stop. "a~b" fotografa o meio do voo entre duas paradas.
+ * Paradas: ids de data-stop. "a~b" fotografa o meio do caminho entre duas paradas; "fim" é o rodapé.
  * Saída: .shots/ (ignorada pelo git).
  */
 import { mkdirSync } from "node:fs";
@@ -72,7 +72,8 @@ for (const vp of viewports) {
         return Math.max(0, r.top + window.scrollY + r.height / 2 - window.innerHeight / 2);
       };
       const [a, b] = spec.split("~");
-      window.scrollTo({ top: b ? (center(a) + center(b)) / 2 : center(a), behavior: "instant" });
+      const top = spec === "fim" ? document.documentElement.scrollHeight : b ? (center(a) + center(b)) / 2 : center(a);
+      window.scrollTo({ top, behavior: "instant" });
     }, stop);
     await page.waitForTimeout(Number(values.wait));
     const file = path.join(outDir, `${vp.name}-${stop.replace("~", "--")}${values.reduced ? "-reduzido" : ""}.png`);

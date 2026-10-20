@@ -1,7 +1,7 @@
 import { CatmullRomCurve3, Vector3 } from "three";
 import { mulberry32, range } from "@/lib/random";
 import { BLOCK_VARIANTS } from "./blockGeometry";
-import { ISLANDS, type Vec3 } from "./world";
+import { ISLANDS, STOPS, type Vec3, stopPosition } from "./world";
 
 /**
  * Cada bloco gira em volta de um pivô (velocidade ~0 para os que só flutuam).
@@ -83,8 +83,8 @@ export function createBlockField(seed = 1984): BlockField {
 
   // 3. Detritos ao longo do voo, longe do caminho da câmera e fora do quadro das paradas
   //    (onde o texto está sendo lido): eles só cruzam a tela durante o voo.
-  const stopCameras = ISLANDS.map((island) => new Vector3(...island.center).add(new Vector3(...island.camera)));
-  const stopViews = ISLANDS.map((island, k) => new Vector3(...island.center).sub(stopCameras[k]).normalize());
+  const stopCameras = STOPS.map((stop) => new Vector3(...stopPosition(stop)));
+  const stopViews = STOPS.map((stop, k) => new Vector3(...stop.island.center).sub(stopCameras[k]).normalize());
   const inStopFrame = (point: Vector3) =>
     stopCameras.some((camera, k) => {
       const toPoint = point.clone().sub(camera);

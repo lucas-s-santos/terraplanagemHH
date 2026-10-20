@@ -7,7 +7,7 @@
  * Precisa de Node 23.6+ (roda TypeScript direto, sem build).
  */
 import { CatmullRomCurve3, Vector3 } from "three";
-import { ISLANDS, LENS, islandFocus } from "../lib/scene/world.ts";
+import { ISLANDS, LENS, STOPS, islandFocus, stopPosition } from "../lib/scene/world.ts";
 
 const MIN_CLEARANCE = 5;
 const SAMPLES = 4000;
@@ -17,9 +17,9 @@ for (const [label, scale] of [
   ["desktop", LENS.wide.distance],
   ["celular", LENS.narrow.distance],
 ] as const) {
-  const points = ISLANDS.map((island) => {
-    const focus = new Vector3(...islandFocus(island));
-    const camera = new Vector3(...island.center).add(new Vector3(...island.camera));
+  const points = STOPS.map((stop) => {
+    const focus = new Vector3(...islandFocus(stop.island));
+    const camera = new Vector3(...stopPosition(stop));
     return focus.clone().add(camera.sub(focus).multiplyScalar(scale));
   });
   const curve = new CatmullRomCurve3(points, false, "centripetal");
@@ -38,7 +38,7 @@ for (const [label, scale] of [
       const clearance = Math.hypot(side, vertical);
       if (clearance < worst) {
         worst = clearance;
-        where = `${island.id}, parada ${(t * (ISLANDS.length - 1)).toFixed(2)}`;
+        where = `${island.id}, parada ${(t * (STOPS.length - 1)).toFixed(2)}`;
       }
     }
   }

@@ -4,6 +4,7 @@
  */
 export const site = {
   nome: "H e H Terraplanagem",
+  marca: "H e H",
   regiao: "Alterosa – MG",
   endereco: "Rodovia MG 184, s/n, trevo de Alterosa, Alterosa/MG",
   email: "contato@hehterraplanagem.com.br",
@@ -67,6 +68,29 @@ export const site = {
         texto: "Corte, aterro e nivelamento para a obra começar no plano certo.",
       },
     ],
+  },
+
+  // A sequência é do briefing; os textos de cada etapa ainda precisam do aval da cliente.
+  processo: {
+    titulo: "Como trabalhamos",
+    etapas: [
+      { nome: "Contato", texto: "Você chama no WhatsApp e conta o serviço e o tamanho da área." },
+      { nome: "Visita técnica", texto: "Vamos até o terreno ver o solo, o acesso das máquinas e as medidas." },
+      { nome: "Orçamento", texto: "Você recebe o valor e o prazo antes de qualquer máquina entrar." },
+      { nome: "Execução", texto: "Cada etapa com a máquina certa, do jeito que foi combinado." },
+      { nome: "Entrega", texto: "O terreno pronto, conferido junto com você." },
+    ],
+  },
+
+  contato: {
+    titulo: "Conte o que o seu terreno precisa.",
+    apoio: "Atendemos Alterosa e região. O orçamento começa com uma conversa no WhatsApp.",
+    cta: "Chamar no WhatsApp",
+    rotulos: { telefones: "Telefones", email: "E-mail", endereco: "Endereço" },
+  },
+
+  rodape: {
+    linha: "Terraplanagem e destoca em Alterosa – MG",
   },
 } as const;
 

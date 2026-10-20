@@ -2,41 +2,53 @@
 
 import { ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { useSceneStore } from "@/lib/store";
-import { STOP_IDS } from "@/lib/scene/world";
+import { STOP_IDS, type StopId } from "@/lib/scene/world";
+
+interface Anchor {
+  /** Scroll em que o marcador passa pelo centro da tela. */
+  y: number;
+  /** Índice da parada em STOP_IDS. */
+  stop: number;
+}
 
 /**
- * Converte o scroll em "parada" da câmera. A parada i acontece quando o centro
- * da seção [data-stop=id] passa pelo centro da tela; entre duas seções, interpola.
+ * Converte o scroll em "parada" da câmera. A parada acontece quando o centro de um
+ * marcador [data-stop=id] passa pelo centro da tela; entre dois marcadores, interpola.
+ * Uma parada pode ter mais de um marcador (na ordem do documento): entre eles a câmera
+ * fica parada. É assim que ela espera no platô enquanto o painel de terra passa.
  */
 export function ScrollDirector() {
   useGSAP(() => {
     const setStop = useSceneStore.getState().setStop;
-    let anchors: number[] = [];
+    let anchors: Anchor[] = [];
 
     const measure = () => {
       const max = ScrollTrigger.maxScroll(window);
       let previous = 0;
-      anchors = STOP_IDS.map((id) => {
-        const el = document.querySelector<HTMLElement>(`[data-stop="${id}"]`);
-        if (!el) {
-          if (process.env.NODE_ENV !== "production") console.warn(`[scroll] seção data-stop="${id}" não encontrada`);
-          return previous;
-        }
+      anchors = [];
+      for (const el of document.querySelectorAll<HTMLElement>("[data-stop]")) {
+        const stop = STOP_IDS.indexOf(el.dataset.stop as StopId);
+        if (stop < 0) continue;
         const rect = el.getBoundingClientRect();
         const center = rect.top + window.scrollY + rect.height / 2 - window.innerHeight / 2;
         previous = Math.min(Math.max(center, previous), max);
-        return previous;
-      });
+        anchors.push({ y: previous, stop });
+      }
+      if (process.env.NODE_ENV !== "production") {
+        const missing = STOP_IDS.filter((_, i) => !anchors.some((anchor) => anchor.stop === i));
+        if (missing.length > 0) console.warn(`[scroll] sem marcador data-stop para: ${missing.join(", ")}`);
+      }
     };
 
     const toStop = (y: number) => {
-      if (anchors.length === 0 || y <= anchors[0]) return 0;
+      if (anchors.length === 0) return 0;
+      if (y <= anchors[0].y) return anchors[0].stop;
       for (let i = 1; i < anchors.length; i++) {
         const a = anchors[i - 1];
         const b = anchors[i];
-        if (y < b) return i - 1 + (b > a ? (y - a) / (b - a) : 1);
+        if (y < b.y) return a.stop + (b.y > a.y ? (y - a.y) / (b.y - a.y) : 1) * (b.stop - a.stop);
       }
-      return anchors.length - 1;
+      return anchors[anchors.length - 1].stop;
     };
 
     ScrollTrigger.create({
