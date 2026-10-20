@@ -10,6 +10,8 @@ import { FRAMING, ISLANDS, LENS, islandFocus } from "@/lib/scene/world";
 const Y_AXIS = new Vector3(0, 1, 0);
 const YAW = MathUtils.degToRad(2.5);
 const PITCH = MathUtils.degToRad(1.5);
+/** Mergulho de entrada (quando o preloader termina): começa mais longe e mais alto e desce até a parada. */
+const DIVE = { seconds: 2.4, distance: 0.9, rise: 20 };
 
 /**
  * Voo da câmera: a parada atual (store) vira um ponto em duas curvas,
@@ -39,6 +41,8 @@ export function CameraRig({ animate }: { animate: boolean }) {
       pointer: new Vector2(),
       smoothPointer: new Vector2(),
       ready: false,
+      /** Progresso do mergulho de entrada, 0 a 1. */
+      intro: 0,
     }),
     [],
   );
@@ -63,7 +67,11 @@ export function CameraRig({ animate }: { animate: boolean }) {
       camera.fov = fov;
       camera.updateProjectionMatrix();
     }
-    const stop = animate ? useSceneStore.getState().stop : 0;
+    const scene = useSceneStore.getState();
+    const stop = animate ? scene.stop : 0;
+    // Passo limitado: a geração das ilhas pode travar alguns quadros e o mergulho não deve pular.
+    if (animate && scene.revealed && rig.intro < 1) rig.intro = Math.min(rig.intro + Math.min(delta, 1 / 30) / DIVE.seconds, 1);
+    const dive = animate ? (1 - rig.intro) ** 3 : 0;
     const t = MathUtils.clamp(stop / (ISLANDS.length - 1), 0, 1);
     const from = Math.floor(stop);
     const stopNarrowY = MathUtils.lerp(narrowY[from] ?? 0, narrowY[from + 1] ?? narrowY[from] ?? 0, stop - from);
@@ -84,7 +92,8 @@ export function CameraRig({ animate }: { animate: boolean }) {
       easing.damp2(rig.smoothPointer, rig.pointer, 0.6, delta);
     }
 
-    rig.offset.subVectors(rig.position, rig.target).multiplyScalar(distanceScale);
+    rig.offset.subVectors(rig.position, rig.target).multiplyScalar(distanceScale * (1 + DIVE.distance * dive));
+    rig.offset.y += DIVE.rise * dive;
     if (animate) {
       rig.offset.applyAxisAngle(Y_AXIS, rig.smoothPointer.x * YAW);
       rig.right.crossVectors(Y_AXIS, rig.offset).normalize();

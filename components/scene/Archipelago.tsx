@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { type BufferGeometry, type Group, type InstancedMesh, type Material, MeshStandardMaterial, Object3D } from "three";
+import { useSceneStore } from "@/lib/store";
 import { createIsland, type IslandProp } from "@/lib/scene/islandGeometry";
 import { getScenePalette } from "@/lib/scene/palette";
 import { PROP_KINDS, type PropKind, createPropGeometry } from "@/lib/scene/propGeometry";
@@ -87,12 +88,14 @@ function Island({ spec, material, propGeometries, animate }: IslandProps) {
 /**
  * As ilhas: uma para o hero e uma para cada serviço.
  * Cada ilha custa dezenas de ms para gerar; elas entram uma por tarefa, na ordem do voo,
- * para a abertura não virar uma tarefa longa só. As de longe somem na neblina enquanto isso.
+ * para a abertura não virar uma tarefa longa só. É esse avanço que o preloader mostra
+ * (de 30% a 100%), e a cena só aparece com todas prontas.
  */
 export function Archipelago({ animate }: { animate: boolean }) {
   const [mounted, setMounted] = useState(1);
 
   useEffect(() => {
+    useSceneStore.getState().setLoad(0.3 + (0.7 * mounted) / ISLANDS.length);
     if (mounted >= ISLANDS.length) return;
     const id = window.setTimeout(() => setMounted((n) => n + 1), 0);
     return () => window.clearTimeout(id);

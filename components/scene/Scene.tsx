@@ -22,7 +22,7 @@ const BUDGET = {
 
 const CONSTRAINED_QUERY = "(max-width: 768px), (pointer: coarse)";
 
-export default function Scene({ onReady }: { onReady: () => void }) {
+export default function Scene() {
   const reduced = usePrefersReducedMotion();
   const quality = useSceneStore((s) => s.quality);
   const setQuality = useSceneStore((s) => s.setQuality);
@@ -52,7 +52,6 @@ export default function Scene({ onReady }: { onReady: () => void }) {
         position: [first.center[0] + first.camera[0], first.center[1] + first.camera[1], first.center[2] + first.camera[2]],
       }}
       style={{ pointerEvents: "none" }}
-      onCreated={() => requestAnimationFrame(onReady)}
     >
       <fogExp2 attach="fog" args={[palette.fog, 0.0105]} />
       <hemisphereLight args={[palette.hemiSky, palette.hemiGround, 1.5]} />

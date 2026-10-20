@@ -107,6 +107,25 @@
     text-decoration-color: currentColor;
   }
 
+  /* Preloader "nivelamento": no lugar onde a ilha do hero vai aparecer
+     (acima do texto em tela estreita; à direita dele em tela larga, como o FRAMING da câmera). */
+  .nivelamento {
+    position: absolute;
+    left: 50%;
+    top: 19%;
+    width: min(76vw, 26rem);
+    height: auto;
+    translate: -50% 0;
+    overflow: visible;
+  }
+  @media (min-aspect-ratio: 1/1) {
+    .nivelamento {
+      left: 71%;
+      top: 38%;
+      width: min(40vw, 38rem);
+    }
+  }
+
   /* Véu de leitura no mobile, quando o texto fica sobre a cena. */
   .veu-leitura {
     position: relative;

@@ -1,6 +1,7 @@
 "use client";
 
 import { Component, type ReactNode } from "react";
+import { useSceneStore } from "@/lib/store";
 
 interface State {
   failed: boolean;
@@ -16,6 +17,8 @@ export class SceneBoundary extends Component<{ children: ReactNode }, State> {
 
   override componentDidCatch(error: unknown) {
     if (process.env.NODE_ENV !== "production") console.error("[cena] desativada:", error);
+    // O preloader termina de nivelar e sai; fica o céu de reserva.
+    useSceneStore.getState().setLoad(1);
   }
 
   override render() {
