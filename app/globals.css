@@ -1,0 +1,128 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+@theme inline {
+  --color-solo-fundo: var(--solo-fundo);
+  --color-terra-roxa: var(--terra-roxa);
+  --color-amarelo-maquina: var(--amarelo-maquina);
+  --color-poeira: var(--poeira);
+  --color-pasto: var(--pasto);
+  --color-neblina: var(--neblina);
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    background: var(--solo-fundo);
+    color: var(--solo-fundo);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100svh;
+    background: var(--neblina);
+    font-family: var(--font-sans);
+    font-stretch: var(--largura-corpo);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--solo-fundo);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  /* Céu de reserva: aparece antes do Canvas e quando não há WebGL. Calibrado pelo céu renderizado. */
+  .ceu-reserva {
+    background:
+      radial-gradient(90% 60% at 100% 0%, color-mix(in oklab, var(--poeira) 60%, white) 0%, transparent 70%),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklab, var(--poeira) 85%, white) 0%,
+        color-mix(in oklab, var(--poeira) 45%, var(--neblina)) 50%,
+        color-mix(in oklab, var(--neblina) 80%, var(--poeira)) 100%
+      );
+  }
+
+  .titulo-display {
+    font-stretch: var(--largura-titulo);
+    font-weight: 780;
+    line-height: 0.94;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  .titulo-secao {
+    font-stretch: 112%;
+    font-weight: 720;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .botao-primario {
+    display: inline-flex;
+    align-items: center;
+    min-height: 3.25rem;
+    padding: 0 1.6rem;
+    border-radius: 4px;
+    background: var(--amarelo-maquina);
+    color: var(--solo-fundo);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    font-stretch: 108%;
+    letter-spacing: -0.005em;
+    box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--solo-fundo) 22%, transparent);
+    transition:
+      background-color 160ms ease-out,
+      transform 160ms ease-out;
+  }
+  .botao-primario:hover {
+    background: color-mix(in oklab, var(--amarelo-maquina) 90%, white);
+  }
+  .botao-primario:active {
+    transform: translateY(1px);
+  }
+
+  .link-secundario {
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.3em;
+    transition: text-underline-offset 160ms ease-out;
+  }
+  .link-secundario:hover {
+    text-underline-offset: 0.45em;
+  }
+
+  .link-discreto {
+    text-decoration: underline transparent;
+    text-underline-offset: 0.3em;
+    transition: text-decoration-color 160ms ease-out;
+  }
+  .link-discreto:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* Véu de leitura no mobile, quando o texto fica sobre a cena. */
+  .veu-leitura {
+    position: relative;
+    isolation: isolate;
+  }
+  .veu-leitura::before {
+    content: "";
+    position: absolute;
+    inset: -3rem -1.5rem;
+    z-index: -1;
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--neblina) 78%, transparent), transparent);
+    pointer-events: none;
+  }
+  @media (min-width: 48rem) {
+    .veu-leitura::before {
+      content: none;
+    }
+  }
+}

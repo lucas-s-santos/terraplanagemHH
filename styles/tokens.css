@@ -1,0 +1,22 @@
+/*
+ * Design tokens — fonte da verdade.
+ * A UI usa via Tailwind (mapeados em app/globals.css) e a cena 3D lê
+ * estas mesmas variáveis em tempo de execução (lib/scene/palette.ts).
+ */
+:root {
+  /* Cores da marca */
+  --solo-fundo: #2b1d15;
+  --terra-roxa: #6b2e1d;
+  --amarelo-maquina: #f2b705;
+  --poeira: #e7c78f;
+  --pasto: #5e6b3a;
+  --neblina: #cbb89a;
+
+  /* Tipografia: eixo de largura da Archivo (62%–125%) */
+  --largura-titulo: 118%;
+  --largura-corpo: 100%;
+
+  /* Ritmo */
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --max-conteudo: 90rem;
+}

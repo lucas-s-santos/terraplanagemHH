@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Ícone provisório até chegar o logo em vetor: terreno sendo nivelado. -->
+  <rect width="64" height="64" rx="12" fill="#2b1d15"/>
+  <path d="M12 22c8-5 13 4 20-1s12-3 20 1" fill="none" stroke="#e7c78f" stroke-width="4" stroke-linecap="round"/>
+  <path d="M12 33c8-2 13 2 20 0s12-2 20 0" fill="none" stroke="#e7c78f" stroke-width="4" stroke-linecap="round"/>
+  <path d="M12 44h40" fill="none" stroke="#f2b705" stroke-width="4" stroke-linecap="round"/>
+</svg>

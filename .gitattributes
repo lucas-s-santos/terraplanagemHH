@@ -1,0 +1,8 @@
+# Mesmas quebras de linha (LF) em qualquer computador
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.avif binary
+*.webp binary
+*.glb binary
+*.ktx2 binary
