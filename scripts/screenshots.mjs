@@ -30,9 +30,8 @@ const { values } = parseArgs({
 const outDir = path.resolve(values.out);
 mkdirSync(outDir, { recursive: true });
 
-// No Windows, força a GPU real via Direct3D (sem isso o WebGL pode cair no renderizador de software).
-const gpuArgs = process.platform === "win32" ? ["--use-angle=d3d11", "--ignore-gpu-blocklist"] : ["--ignore-gpu-blocklist"];
-const browser = await chromium.launch({ channel: values.channel, headless: true, args: gpuArgs });
+// Os clipes são H.264: o Chrome instalado (channel "chrome") decodifica; o Chromium puro do Playwright, não.
+const browser = await chromium.launch({ channel: values.channel, headless: true });
 
 const viewports = [
   { name: "desktop", width: 1440, height: 900, isMobile: false, hasTouch: false, deviceScaleFactor: 1 },
@@ -53,15 +52,11 @@ for (const vp of viewports) {
   page.on("pageerror", (e) => logs.push(`[pageerror] ${e.message}`));
 
   await page.goto(values.url, { waitUntil: "networkidle" });
-  await page.waitForSelector("canvas", { timeout: 15000 }).catch(() => logs.push("[shots] o canvas não apareceu"));
-  await page.waitForTimeout(3500);
-  logs.push(
-    `[shots] GPU: ${await page.evaluate(() => {
-      const gl = document.createElement("canvas").getContext("webgl2");
-      const info = gl?.getExtension("WEBGL_debug_renderer_info");
-      return info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : "sem WebGL2";
-    })}`,
-  );
+  // O preloader sai (visibility: hidden) quando o primeiro clipe carregou.
+  await page
+    .waitForSelector(".nivelamento", { state: "hidden", timeout: 20000 })
+    .catch(() => logs.push("[shots] o preloader não saiu em 20 s"));
+  await page.waitForTimeout(1500);
 
   for (const stop of values.stops.split(",")) {
     await page.evaluate((spec) => {

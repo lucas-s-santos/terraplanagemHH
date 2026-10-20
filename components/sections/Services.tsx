@@ -1,6 +1,6 @@
 import { site } from "@/content/site";
 
-/** Uma parada da câmera por serviço: texto à esquerda, ilha ao lado. */
+/** Uma parada por serviço: texto à esquerda, o clipe da máquina trabalhando ao fundo. */
 export function Services() {
   const { servicos } = site;
 
@@ -18,7 +18,7 @@ export function Services() {
           <div className="mx-auto w-full max-w-(--max-conteudo) px-(--gutter)">
             <div className="veu-leitura max-w-[30rem]">
               <h3 className="titulo-secao text-[clamp(2rem,3.4vw,3.1rem)]">{servico.nome}</h3>
-              <p className="mt-4 max-w-[34ch] text-lg leading-relaxed text-solo-fundo/85">{servico.texto}</p>
+              <p className="mt-4 max-w-[34ch] text-lg leading-relaxed text-poeira/85">{servico.texto}</p>
             </div>
           </div>
         </article>

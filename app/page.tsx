@@ -1,6 +1,6 @@
+import { MediaStage } from "@/components/media/MediaStage";
 import { ScrollDirector } from "@/components/motion/ScrollDirector";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
-import { SceneRoot } from "@/components/scene/SceneRoot";
 import { Contact } from "@/components/sections/Contact";
 import { EarthPanel } from "@/components/sections/EarthPanel";
 import { Hero } from "@/components/sections/Hero";
@@ -11,7 +11,7 @@ import { SiteFooter } from "@/components/sections/SiteFooter";
 export default function Home() {
   return (
     <>
-      <SceneRoot />
+      <MediaStage />
       <SmoothScroll />
       <ScrollDirector />
       <main className="relative z-10">

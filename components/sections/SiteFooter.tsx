@@ -7,7 +7,7 @@ export function SiteFooter() {
   const rotulo = "text-sm font-semibold text-poeira/60";
 
   return (
-    <footer className="chao relative z-10 bg-solo-fundo text-poeira">
+    <footer className="relative z-10 bg-solo-fundo text-poeira">
       <TerrainEdge />
       <div className="mx-auto w-full max-w-(--max-conteudo) overflow-hidden px-(--gutter) pt-[10svh] pb-8">
         <dl className="grid gap-x-16 gap-y-8 sm:grid-cols-[auto_auto_1fr]">

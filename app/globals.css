@@ -12,15 +12,16 @@
 }
 
 @layer base {
+  /* A página inteira é escura (vídeo com véu, painel de terra, rodapé): texto claro. */
   html {
     background: var(--solo-fundo);
-    color: var(--solo-fundo);
+    color: var(--poeira);
     -webkit-text-size-adjust: 100%;
   }
 
   body {
     min-height: 100svh;
-    background: var(--neblina);
+    background: var(--solo-fundo);
     font-family: var(--font-sans);
     font-stretch: var(--largura-corpo);
     -webkit-font-smoothing: antialiased;
@@ -28,28 +29,64 @@
   }
 
   :focus-visible {
-    outline: 3px solid var(--solo-fundo);
+    outline: 3px solid var(--poeira);
     outline-offset: 4px;
     border-radius: 2px;
-  }
-
-  /* Sobre o chão escuro (painel de terra e rodapé), o foco é claro. */
-  .chao :focus-visible {
-    outline-color: var(--poeira);
   }
 }
 
 @layer components {
-  /* Céu de reserva: aparece antes do Canvas e quando não há WebGL. Calibrado pelo céu renderizado. */
-  .ceu-reserva {
+  /* Fundo de terra: aparece antes do vídeo, nas paradas ainda sem clipe e se o vídeo falhar. */
+  .fundo-terra {
     background:
-      radial-gradient(90% 60% at 100% 0%, color-mix(in oklab, var(--poeira) 60%, white) 0%, transparent 70%),
+      radial-gradient(80% 60% at 72% 28%, color-mix(in oklab, var(--terra-roxa) 55%, var(--solo-fundo)) 0%, transparent 70%),
+      linear-gradient(to bottom, color-mix(in oklab, var(--solo-fundo) 85%, var(--terra-roxa)), var(--solo-fundo));
+  }
+
+  /* Entrada do vídeo depois do preloader: aparece e se aproxima devagar. */
+  .palco {
+    opacity: 0;
+    scale: 1.08;
+    transition:
+      opacity 1400ms ease-out,
+      scale 2600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .palco[data-revelado="true"] {
+    opacity: 1;
+    scale: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .palco {
+      scale: 1;
+      transition: none;
+    }
+  }
+
+  /* Véu sobre o vídeo para o texto claro ler bem em qualquer filmagem: embaixo no celular,
+     à esquerda nas telas largas, e uma faixa leve em cima para o cabeçalho. */
+  .veu-video {
+    background:
+      linear-gradient(to bottom, color-mix(in oklab, var(--solo-fundo) 55%, transparent), transparent 22%),
       linear-gradient(
-        to bottom,
-        color-mix(in oklab, var(--poeira) 85%, white) 0%,
-        color-mix(in oklab, var(--poeira) 45%, var(--neblina)) 50%,
-        color-mix(in oklab, var(--neblina) 80%, var(--poeira)) 100%
-      );
+        to top,
+        color-mix(in oklab, var(--solo-fundo) 88%, transparent) 0%,
+        color-mix(in oklab, var(--solo-fundo) 55%, transparent) 45%,
+        transparent 75%
+      ),
+      color-mix(in oklab, var(--solo-fundo) 15%, transparent);
+  }
+  @media (min-aspect-ratio: 1/1) {
+    .veu-video {
+      background:
+        linear-gradient(to bottom, color-mix(in oklab, var(--solo-fundo) 55%, transparent), transparent 22%),
+        linear-gradient(
+          to right,
+          color-mix(in oklab, var(--solo-fundo) 85%, transparent) 0%,
+          color-mix(in oklab, var(--solo-fundo) 50%, transparent) 38%,
+          transparent 66%
+        ),
+        color-mix(in oklab, var(--solo-fundo) 12%, transparent);
+    }
   }
 
   .titulo-display {
@@ -150,8 +187,8 @@
     text-decoration-color: currentColor;
   }
 
-  /* Preloader "nivelamento": no lugar onde a ilha do hero vai aparecer
-     (acima do texto em tela estreita; à direita dele em tela larga, como o FRAMING da câmera). */
+  /* Preloader "nivelamento": onde o vídeo do hero tem o assunto, fora do texto
+     (acima dele em tela estreita; à direita em tela larga, onde o véu é transparente). */
   .nivelamento {
     position: absolute;
     left: 50%;
@@ -169,7 +206,7 @@
     }
   }
 
-  /* Véu de leitura no mobile, quando o texto fica sobre a cena. */
+  /* Reforço do véu atrás do bloco de texto no celular, para filmagens claras. */
   .veu-leitura {
     position: relative;
     isolation: isolate;
@@ -179,7 +216,7 @@
     position: absolute;
     inset: -3rem -1.5rem;
     z-index: -1;
-    background: radial-gradient(closest-side, color-mix(in oklab, var(--neblina) 78%, transparent), transparent);
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--solo-fundo) 55%, transparent), transparent);
     pointer-events: none;
   }
   @media (min-width: 48rem) {

@@ -1,30 +1,33 @@
 # Estado do projeto: onde paramos
 
-Última sessão: 20/10/2026. Feito:
-- **Topos por serviço e raízes penduradas.** Cada ilha conta o serviço pela silhueta: lago com reflexo do céu, terra revolvida com torrões, sulcos de aração, estrada de terra com talude de corte, fileiras de tocos de eucalipto com leira e metade limpa, platô nivelado com barranco e estacas de gabarito.
-- **Preloader "nivelamento"** com o carregamento real e **mergulho da câmera** na entrada.
-- **Ilhas geradas num Web Worker**, em paralelo ao download do three.
-- **Seções depois dos serviços:** painel de terra com **Como trabalhamos**, **Contato final** (a câmera pousa no platô) e **rodapé** com os contatos e o "H e H" entalhado.
-Antes (19/10): setup completo e cena base validada (céu, neblina, 7 ilhas, blocos, poeira, voo guiado pelo scroll). Ainda não há escavadeira nem as seções depois de Serviços.
+Última sessão: 20/10/2026, na branch **`feat/video`**.
 
-A direção criativa completa está em [`BRIEFING.md`](BRIEFING.md). Este arquivo guarda o estado técnico, as decisões e os próximos passos. **Atualize no fim de cada sessão**: a memória do Claude Code e a lista de tarefas do claude-mem ficam na máquina, não vão para o git.
+**Virada de direção (20/10):** as ilhas 3D deram lugar a **vídeos de máquinas trabalhando**, ilustrativos e gerados no Google Flow, como a cliente já fazia no site dela. O "surreal" (terra suspensa) vai para dentro dos próprios vídeos.
+- **`main`**: a versão 3D completa (`d6ad5ab`): ilhas por serviço, worker, preloader e painel. O `docs/ESTADO.md` de lá documenta as decisões do 3D.
+- **`feat/video`** (esta): o three.js saiu e entrou uma camada de vídeo guiada pelo scroll. Ficam o preloader "nivelamento", o painel de terra com "Como trabalhamos", o contato e o rodapé entalhado.
+
+**Falta para ver a versão em vídeo de verdade:** os clipes do Flow (seção 7). Até eles chegarem, cada parada mostra o fundo de terra.
+
+A direção criativa está em [`BRIEFING.md`](BRIEFING.md) (com a atualização de 20/10 no topo). Este arquivo guarda o estado técnico, as decisões e os próximos passos. **Atualize no fim de cada sessão**: a memória do Claude Code fica na máquina, não vai para o git.
 
 ---
 
 ## 1. Para continuar em outro computador
 
-1. **Node 24 LTS** (testado com 24.15; mínimo 22.18 por causa do `check:camera`).
+1. **Node 24 LTS** (testado com 24.14 e 24.15).
 2. Clonar **fora do OneDrive** (ele sincroniza `node_modules` e `.next` e deixa tudo lento):
    ```bash
    git clone https://github.com/lucas-s-santos/terraplanagemHH.git
    cd terraplanagemHH
+   git switch feat/video   # versão em vídeo; a main é a 3D
    npm ci
    npm run dev        # http://localhost:3000
    ```
-3. **Google Chrome** instalado, para as capturas (`npm run shots`).
-4. Reinstalar as skills, que também são por máquina (ver seção 8).
-5. Os agentes `explorador-haiku` e `operacional-sonnet` agora estão no repositório (`.claude/agents/`), então não precisam ser recriados.
-6. O `next dev` cria o `AGENTS.md` (regras do Next para agentes). Ele está versionado de propósito: se for apagado, volta.
+3. **Google Chrome** instalado, para as capturas (`npm run shots`). Ele também decodifica H.264, que o Chromium do Playwright não decodifica.
+4. **ffmpeg**, para comprimir os clipes (seção 7). Ainda não está instalado no computador do G:.
+5. Reinstalar as skills, que também são por máquina (seção 8).
+6. Os agentes `explorador-haiku` e `operacional-sonnet` estão no repositório (`.claude/agents/`).
+7. O `next dev` cria o `AGENTS.md` (regras do Next para agentes). Ele está versionado de propósito: se for apagado, volta.
 
 ## 2. Scripts
 
@@ -33,124 +36,99 @@ A direção criativa completa está em [`BRIEFING.md`](BRIEFING.md). Este arquiv
 | `npm run dev` | Desenvolvimento |
 | `npm run build` / `npm start` | Build de produção (rodar antes de fechar qualquer tarefa visual) |
 | `npm run typecheck` | Só o TypeScript |
-| `npm run shots` | Capturas em 1440 px e 390 px + console do navegador → `.shots/`. Opções: `-- --url http://localhost:3000 --stops hero,reservatorio~preparo-solo,fim --only mobile --reduced`. `a~b` = meio do caminho entre duas paradas (`terrenos~contato` cai no painel de terra); `fim` = rodapé |
-| `npm run check:camera` | Depois de mexer em `lib/scene/world.ts`: confere se a câmera passa longe das ilhas (hoje: folga 6,2 no desktop e 11,9 no celular) |
+| `npm run shots` | Capturas em 1440 px e 390 px + console do navegador → `.shots/`. Espera o preloader sair. Opções: `-- --url http://localhost:3000 --stops hero,reservatorio~preparo-solo,fim --only mobile --reduced`. `a~b` = meio do caminho entre duas paradas (`terrenos~contato` cai no painel de terra); `fim` = rodapé |
 
-**O que conferir nas capturas:** nenhum bloco por cima do texto nas paradas; ilha à direita do texto no desktop e acima dele no celular; o serviço legível no topo de cada ilha; console sem erros. O único aviso esperado é `THREE.Clock: This module has been deprecated`, que vem de dentro do R3F. Para julgar uma cor, meça os pixels (`System.Drawing` no PowerShell): ao lado da terra roxa saturada, um cáqui médio parece quase branco.
+**O que conferir nas capturas:** texto legível sobre o vídeo (véu escuro à esquerda no desktop e embaixo no celular); o clipe certo em cada parada; no meio do caminho, os dois clipes se fundindo; console sem erros.
 
 Página inteira: `npm run shots -- --stops hero,reservatorio,preparo-solo,aracao,estradas,destoca,terrenos,terrenos~contato,contato,fim`.
 
 Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (duas posições sobrepostas). Se aparecer, aumente o `--wait` antes de concluir que é um bug.
 
+**Clipes de teste:** `public/media/teste/` (no `.gitignore`) tem clipes falsos (listras com o nome da parada), gerados no próprio Chrome com `MediaRecorder`. Para testar a camada sem os clipes reais, aponte o `content/media.ts` para eles e **volte para `null` antes do commit**.
+
 ## 3. Mapa do código
 
 | Arquivo | Responsabilidade |
 |---|---|
-| `styles/tokens.css` | Tokens (fonte da verdade). A cena 3D lê as mesmas variáveis em tempo de execução |
-| `app/globals.css` | Tailwind 4 (`@theme inline` mapeando os tokens), botão, links, céu de reserva em CSS, véu de leitura no celular |
+| `styles/tokens.css` | Tokens (fonte da verdade) |
+| `app/globals.css` | Tailwind 4 (`@theme inline` mapeando os tokens), fundo de terra, entrada da mídia (`.palco`), véu sobre o vídeo (`.veu-video`), botões, links, preloader, marca entalhada |
 | `content/site.ts` | Toda a copy, telefones, WhatsApp, SEO |
-| `lib/store.ts` | zustand: `stop` (parada contínua da câmera), `quality` (`high`/`low`), `load` (0 a 1, só sobe) e `revealed` (a cena entrou) |
-| `lib/scene/world.ts` | **Mapa do mundo**: `ISLANDS` (centro, raio, profundidade, semente, relevo, **tipo de topo**, câmera), `STOPS` (paradas da câmera: uma por ilha + o pouso `contato` no platô), enquadramento, lente, direção do sol. Sem imports do three |
-| `lib/scene/tokens.ts` | Lê os tokens de cor do CSS (sem three: fica no bundle inicial) |
-| `lib/scene/palette.ts` | `derivePalette()` deriva os tons da cena dos tokens, sem DOM (o worker usa); `getScenePalette()` é a versão da página, com cache |
-| `lib/scene/islandGeometry.ts` | Ilha procedural (perfil de revolução + ruído + cor por vértice). Devolve **arrays crus** (`IslandData`): corpo, raízes, objetos do topo e espelho d'água |
-| `lib/scene/island.worker.ts` | Web Worker: gera as 7 ilhas na ordem do voo e devolve uma por mensagem (buffers transferidos) |
-| `lib/scene/islandSource.ts` | Inicia o worker ao hidratar e guarda as ilhas prontas (store próprio). Se o Worker falhar, liga `failed` e o Archipelago gera na thread principal |
-| `lib/scene/meshData.ts` | Formato `MeshData` (arrays) e `toGeometry()` para virar BufferGeometry na página |
-| `lib/scene/islandTops.ts` | **Um topo por serviço**: `sample()` dá altura e cor de cada ponto; também os objetos (tocos, torrões, estacas) e a elipse da água. Orientado pela câmera da parada |
-| `lib/scene/rootGeometry.ts` | Raízes penduradas (tubos que afinam, uma geometria por ilha) |
-| `lib/scene/propGeometry.ts` | Toco, toco arrancado, torrão e estaca (instanciados por ilha) |
-| `lib/scene/noise.ts` | Perlin (port do `ImprovedNoise` com valores idênticos, 2× mais rápido), fbm, smoothstep |
-| `lib/scene/normals.ts` | Normais por vértice direto nos arrays |
-| `lib/scene/blockGeometry.ts` | Blocos: torrão, leiva (com pasto) e pedra facetada |
-| `lib/scene/blockField.ts` | Onde cada bloco fica: órbita do hero, pedras sob as ilhas, detritos do voo; ordenados por prioridade |
-| `components/scene/SceneRoot.tsx` | O único Canvas (dynamic import, `ssr:false`, `aria-hidden`), o preloader e o fade-in quando `revealed` |
-| `components/scene/Preloader.tsx` | Preloader "nivelamento": linha de terreno + 2 curvas de nível, aplainadas por uma lâmina amarela conforme `load` |
-| `components/scene/Scene.tsx` | Canvas, luzes, neblina, níveis de qualidade, `PerformanceMonitor` |
-| `components/scene/CameraRig.tsx` | Voo: duas CatmullRom (posição e alvo), amortecimento, parallax do mouse (2,5°/1,5°), enquadramento, mergulho de entrada (`DIVE`) |
-| `components/scene/{Sky,Archipelago,EarthBlocks,Dust,Effects}.tsx` | Céu em shader, ilhas (montadas conforme chegam do worker), InstancedMesh, poeira, pós (vinheta + grão) |
-| `components/scene/Water.tsx` | Água do reservatório: shader sem luz que reflete o gradiente do céu, com neblina |
+| `content/media.ts` | **Um clipe por parada** (16:9, 9:16 opcional, capas, ponto de recorte). `null` = fundo de terra |
+| `lib/stops.ts` | As paradas na ordem da página: `hero`, os 6 serviços, `contato` |
+| `lib/store.ts` | zustand: `stop` (parada contínua), `load` (0 a 1, só sobe) e `revealed` (o vídeo entrou) |
+| `lib/useMediaQuery.ts` | Media query reativa (`usePrefersReducedMotion` usa) |
+| `components/media/MediaStage.tsx` | **A camada de mídia fixa**: clipes empilhados, crossfade entre 35% e 65% do caminho, só tocam os visíveis, só baixam o atual e os próximos, recorte do 16:9 no celular |
+| `components/media/Preloader.tsx` | Preloader "nivelamento": linha de terreno aplainada por uma lâmina amarela conforme o primeiro clipe carrega |
 | `components/motion/SmoothScroll.tsx` | Lenis no ticker do GSAP (desligado com movimento reduzido) |
-| `components/motion/ScrollDirector.tsx` | Scroll → `stop`: a câmera chega na parada quando um marcador `[data-stop]` está centralizado. **Vários marcadores da mesma parada = a câmera espera** entre eles |
+| `components/motion/ScrollDirector.tsx` | Scroll → `stop`: a parada acontece quando um marcador `[data-stop]` está centralizado. **Vários marcadores da mesma parada = o clipe espera** entre eles |
 | `components/motion/MagneticLink.tsx` | Link magnético (o WhatsApp do contato). Só com mouse e sem movimento reduzido |
 | `components/sections/{Hero,Services}.tsx` | Hero e as 6 paradas de serviço |
-| `components/sections/EarthPanel.tsx` | Painel de terra opaco depois dos serviços. Tem no fim o marcador que segura a câmera no platô |
+| `components/sections/EarthPanel.tsx` | Painel de terra opaco depois dos serviços. Tem no fim o marcador que segura o clipe de "terrenos" |
 | `components/sections/TerrainEdge.tsx` | Borda irregular de bloco de solo (faixa de terra roxa + solo escuro); `flip` para a borda de baixo |
 | `components/sections/Process.tsx` | Como trabalhamos: linha de nível (ondulada → reta) desenhada no scroll, etapas que acendem na estaca |
 | `components/sections/Contact.tsx` | Contato final (parada `contato`): título, apoio e o WhatsApp grande |
 | `components/sections/SiteFooter.tsx` | Chão do rodapé: telefones, e-mail, endereço e o "H e H" entalhado |
 
-**Para adicionar uma parada:** criar a ilha em `ISLANDS` (ou só uma parada em `STOPS`, se for olhar de novo para uma ilha existente) e um marcador `data-stop="<mesmo id>"` na página, **na mesma ordem**. Depois rodar `npm run check:camera`.
-**Para adicionar uma seção no painel de terra** (Frota, Antes e depois, Onde atuamos): é só colocá-la dentro do `<EarthPanel>` em `app/page.tsx`. A câmera continua esperando no platô.
+**Para adicionar uma parada:** o id em `lib/stops.ts`, o clipe em `content/media.ts` e um marcador `data-stop="<mesmo id>"` na página, **na mesma ordem**.
+**Para adicionar uma seção no painel de terra** (Frota, Antes e depois, Onde atuamos): é só colocá-la dentro do `<EarthPanel>` em `app/page.tsx`.
 
 ## 4. Decisões tomadas (e por quê)
 
 - **TypeScript 5.9, não 7.** O 7 é a reescrita nativa e o suporte do Next ainda não foi confirmado.
-- **Tone mapping Neutral** no renderer e no efeito. O ACES deixava o céu cinza e lavava as cores da marca; o Neutral mantém os tokens fiéis. Os dois níveis de qualidade usam o mesmo, para ficarem iguais.
-- **As cores da cena derivam dos tokens.** Mudar um token em `tokens.css` muda o 3D também.
-- **Sol baixo e à direita** `(0.72, 0.2, -0.66)`, sem disco duro (velado pela poeira). Ilumina a lateral das ilhas e aquece esse lado do céu.
-- **As ilhas flutuam sobre neblina clara**, então a luz de baixo (hemisfério) é quente. Com luz de baixo escura, a base virava uma mancha.
-- **Neblina** `FogExp2(0.0105)` na cor do horizonte: o arquipélago distante aparece no hero e no voo, dando profundidade.
-- **Silhueta das ilhas:** paredão curto com camadas de solo, base que afina com "lóbulos" (alguns lados pendem mais) e ponta torta. Sem os lóbulos, virava casquinha de sorvete.
-- **Enquadramento** (`FRAMING`, em NDC): desloca o ponto de mira para a ilha cair a 42% à direita do centro (desktop) ou acima do texto (celular). `narrowY` por ilha: no hero é 0.46, porque o título ocupa a metade de baixo no celular.
-- **Lente:** em tela estreita, fov 52 e câmera 1,55× mais longe, para a ilha caber na largura.
-- **Texto limpo:** os detritos nunca ficam num cone de 48° em volta da direção de cada parada, nem a menos de 26 unidades das câmeras de parada. Só cruzam a tela durante o voo. A órbita do hero vai de 1,1× a 1,45× o raio.
-- **Qualidade:** celular ou toque começa em `low` (40 blocos, 220 partículas, sem pós, DPR 1, MSAA nativo). Desktop começa em `high` (150 blocos, 700 partículas, DPR até 1,5, vinheta + grão) e o `PerformanceMonitor` baixa para `low` se o FPS cair. **No notebook com Intel HD 630 o desktop cai para `low` em segundos**, então a cena precisa ficar bonita sem pós-processamento.
-- **Movimento reduzido:** sem Lenis (scroll nativo), Canvas com `frameloop="demand"` e câmera parada no hero. É provisório (ver pendências).
-- **Header** só com nome e telefone, sem logo (o logo em vetor está pendente). Ícone da aba provisório: linhas de terreno se nivelando.
-- **Topos orientados pela câmera da parada.** Sulcos, estrada, fileiras de tocos, eixo do lago e barranco do platô são definidos a partir da direção ilha → câmera. Os sulcos e as fileiras apontam para quem olha (linhas que convergem). A estrada vem em diagonal: de lado, ela virava uma risca. **Mudar `camera` de uma ilha gira o topo junto.**
-- **Malha 160 segmentos × 40 anéis no topo** por causa dos sulcos: abaixo de ~4 vértices por período, a aração serrilha. Por isso as cores com borda dura (estrada, talude) têm transição de ~0,03 raio: mais estreita vira zigue-zague.
-- **A borda gramada do paredão pega a cor do topo** (escurecida), então o platô tem borda de terra e as outras, de pasto.
-- **Água:** o céu é muito mais claro que a água, e a câmera passa rente (~12°). Reflexo por igual virava um disco cinza. A solução foi fresnel contido mais uma faixa de céu refletido do lado de lá: escura perto, clara longe. O barramento (aterro) fica no lado oposto à câmera para não esconder a água.
-- **Destoca conta a história da esquerda para a direita:** tocos em fileiras → leira de tocos arrancados → terra limpa.
-- **Ilhas num Web Worker.** Gerar uma ilha custa de 18 a 60 ms no desktop e de 100 a 450 ms num celular fraco. Na thread principal, isso travava a lâmina do preloader e atrasava um toque no WhatsApp. O worker começa assim que a página hidrata, em paralelo ao download do three, e devolve arrays (buffers transferidos, sem cópia); a página só monta as `BufferGeometry`. **Reserva:** sem Worker, as ilhas são geradas na thread principal, uma por tarefa. Testado removendo `window.Worker`. Antes disso, a geração já tinha ficado 2× mais rápida: Perlin próprio com valores idênticos ao do three (conferido em 1 milhão de pontos), normais em arrays tipados e arrays pré-alocados.
-- **Preloader na camada da cena, não por cima da página.** O texto do hero pinta antes de tudo e continua sendo o LCP. A linha fica onde a ilha do hero vai aparecer (`.nivelamento` em `globals.css`, com `min-aspect-ratio: 1/1` como o `FRAMING`). Quando a cena entra, a ilha surge debaixo da linha.
-- **Progresso real** em `store.load`: 10% ao hidratar, até 66% conforme o worker entrega as ilhas, e 100% quando a cena monta todas. A lâmina anima até o valor (GSAP `quickTo`, 0,9 s). Se travar por 15 s, o preloader sai mesmo assim. Se a cena falhar (sem WebGL), o `SceneBoundary` manda 100% e fica o céu de reserva.
-- **Linha desenhada com `clipPath`, não com tracejado.** Com `vector-effect: non-scaling-stroke`, o Chrome mede o tracejado em pixels de tela e a normalização do `pathLength` em unidades do SVG, e a linha saía cortada em ~70%.
-- **Mergulho:** a câmera começa 1,9× mais longe e 20 unidades mais alta e desce em 2,4 s (ease-out cúbico), com o passo limitado a 1/30 s para não pular. Com movimento reduzido, não há mergulho.
-- **Depois dos serviços, painel de terra por cima** (decisão do Lucas, 20/10). A câmera estaciona no platô e as seções sobem num bloco de solo opaco (texto `poeira` sobre `solo-fundo`), com borda irregular e faixa de terra roxa em cima e borda irregular embaixo. Quando o painel passa, a câmera **pousa** no platô (parada `contato`, mais longe e pelo outro lado, com o barranco atrás). A ousadia continua só no voo, e o texto é sempre legível.
-- **O contato é só o convite e o WhatsApp grande**, como o hero. Telefones, e-mail e endereço ficam no chão do rodapé. Com tudo junto, no celular o título caía em cima da ilha.
-- **"H e H" entalhado:** fonte em `cqi` (31% da largura do contêiner), para ocupar ~95% da largura em qualquer tela. As camadas de solo vêm de `background-clip: text` com um gradiente irregular, e a aresta vem de `filter: drop-shadow` (o `text-shadow` pinta por cima do recorte e apaga as camadas).
-- **Botão primário usa `translate` no `:active`, não `transform`**: o ímã do WhatsApp anima o `transform` pelo GSAP, e os dois brigariam.
-- **Foco claro no chão escuro:** a classe `.chao` (painel e rodapé) troca a cor do contorno de foco para `poeira`.
-- **Números (produção, celular emulado em 4G lento + CPU 4×):** LCP 1,15 s (o título do hero); o preloader sai em 6 a 7 s; bloqueio acima de 50 ms em torno de 1,0 s (era 1,4 s antes do worker). O que sobra é o próprio motor 3D: avaliar o three, criar o Canvas e **compilar os shaders** (tarefas de 170 a 460 ms). **Ao medir no Windows, aqueça o navegador:** a primeira requisição de um Chrome recém-aberto leva ~1,8 s, e isso não é do site (o servidor responde em 6 ms).
+- **Vídeo no lugar do 3D** (decisão do Lucas, 20/10). A cliente já ilustrava o trabalho do avô com imagens de IA e quer ver máquinas trabalhando. Misturar ilha estilizada com vídeo realista ficaria incoerente. Sem o three.js, a página ficou bem mais leve: a parte que travava no celular era o motor 3D.
+- **Clipes em loop por seção, não vídeo "raspado" pelo scroll.** Controlar o `currentTime` pelo scroll trava no iPhone, e uma sequência de imagens pesaria dezenas de MB. O crossfade acontece entre 35% e 65% do caminho, para não passar a maior parte do tempo com dois clipes misturados.
+- **Cada camada tem fundo próprio** (`.fundo-terra`). Quando a de cima cobre tudo, a de baixo some e pausa. Sem isso, uma parada sem clipe mostrava o clipe da anterior.
+- **A página inteira ficou escura, com texto claro (`poeira`).** Texto escuro sobre vídeo não lê. O véu é escuro à esquerda no desktop e embaixo no celular, com uma faixa leve em cima para o cabeçalho. Antes do vídeo, o fundo é de terra escura, para o texto claro já ser legível no primeiro desenho (LCP).
+- **Movimento reduzido:** só as capas. O vídeo nem baixa.
+- **Celular:** usa o 9:16 quando existe. Sem ele, recorta o 16:9 no ponto `focus` do clipe (padrão 60%).
+- **Preloader na camada de mídia, não por cima da página.** O texto do hero pinta antes de tudo e continua sendo o LCP. Progresso real em `store.load`: 10% ao hidratar e o resto conforme o primeiro clipe baixa (`progress`, `canplaythrough`). Sem clipe ou com movimento reduzido, vai direto a 100%. Se travar por 15 s, sai mesmo assim.
+- **Linha do preloader com `clipPath`, não com tracejado.** Com `vector-effect: non-scaling-stroke`, o Chrome mede o tracejado em pixels de tela, e a linha saía cortada em ~70%.
+- **Entrada do vídeo:** aparece em 1,4 s e se aproxima devagar (escala de 1,08 para 1 em 2,6 s). Substitui o mergulho da câmera do 3D.
+- **Depois dos serviços, painel de terra por cima** (decisão do Lucas, 20/10). As seções sobem num bloco de solo opaco, com borda irregular e faixa de terra roxa. O clipe de "terrenos" fica enquanto o painel passa; quando ele termina, entra o do contato.
+- **O contato é só o convite e o WhatsApp grande**, como o hero. Telefones, e-mail e endereço ficam no chão do rodapé.
+- **"H e H" entalhado:** fonte em `cqi` (31% da largura do contêiner), para ocupar ~95% da largura em qualquer tela. As camadas de solo vêm de `background-clip: text`, e a aresta vem de `filter: drop-shadow` (o `text-shadow` pinta por cima do recorte e apaga as camadas).
+- **Botão primário usa `translate` no `:active`, não `transform`:** o ímã do WhatsApp anima o `transform` pelo GSAP, e os dois brigariam.
+- **Ao medir desempenho no Windows, aqueça o navegador:** a primeira requisição de um Chrome recém-aberto leva ~1,8 s, e isso não é do site.
+- **Editar texto pelo PowerShell 5.1 corrompe acentos:** `Get-Content`/`Set-Content` leem UTF-8 sem BOM como ANSI. Use a ferramenta de edição ou o Node.
 
 ## 5. Pendências conhecidas
 
+- [ ] **Clipes do Flow** (seção 7). Começar validando 3 variações do hero.
+- [ ] **ffmpeg** neste computador, para comprimir os clipes e gerar as capas.
 - [ ] **WhatsApp provisório**: usando (35) 99974-6093 (`content/site.ts`, `confirmado: false`).
 - [ ] **Ícone** provisório (`app/icon.svg`) até chegar o logo.
-- [ ] **Movimento reduzido**: trocar o Canvas parado por uma imagem AVIF pré-renderizada da cena (pedido do CLAUDE.md).
-- [ ] Pendências com a cliente: lista em `BRIEFING.md`.
-- [ ] **Ajustes finos dos topos** (revisar com olhar fresco, no navegador e não só em captura):
-  - preparo de solo e aração ficaram próximos em cor; o que separa os dois é a textura (torrões × sulcos);
-  - a margem de terra do reservatório ainda lembra um anel;
-  - as estacas do platô são quase invisíveis no celular (pode ficar assim, é detalhe).
-- [ ] O hero continua só com pasto: o lugar da escavadeira e da área escavada vem com ela.
 - [ ] **Textos das etapas de "Como trabalhamos"** escritos por nós (a sequência é do briefing). Confirmar com a cliente, principalmente "valor e prazo antes de qualquer máquina entrar".
 - [ ] **Telefones sem rótulo de quem é quem** (o briefing pede "telefones com rótulo"). Perguntar à cliente junto com qual é o WhatsApp.
-- [ ] **A cena continua renderizando atrás do painel opaco.** Pausar o Canvas (`frameloop`) enquanto o painel cobre a tela toda poupa bateria no celular.
+- [ ] Linha "imagens ilustrativas" discreta no rodapé, se a cliente concordar.
+- [ ] Pendências com a cliente: lista em `BRIEFING.md`.
 
 ## 6. Próximos passos (ordem sugerida)
 
-1. **Escavadeira** na ilha do hero (ver seção 7). Depende de comprar o modelo.
-2. **Transição do hero:** no scroll, o braço desce, cava e lança um bloco que vira a próxima ilha.
-3. **Seções que faltam, dentro do painel de terra** (Como trabalhamos, Contato final e rodapé já estão prontos): Frota (scroll horizontal + blueprint) → Antes e depois (caçamba como controle) → Onde atuamos (curvas de nível + anéis de raio) → Depoimentos (só reais). **Todas dependem de material da cliente:** fotos da frota e de obras, lista de cidades e depoimentos.
-4. **Detalhes:** tipografia que nivela (eixo `wdth` da Archivo) em 1 ou 2 títulos; curvas de nível em SVG como textura e divisores; poeira no hover do WhatsApp.
-5. **SEO:** JSON-LD `LocalBusiness` e imagem OG renderizada da cena.
-6. **Performance:** compilar os shaders sem travar (`renderer.compileAsync` antes de revelar a cena), rodar o Lighthouse de verdade (perfil celular) e medir o bundle do three.
+1. **Clipes:** testar 3 variações do hero com o texto por cima, aprovar o estilo e só depois gerar os outros 7.
+2. **Comprimir e ligar os clipes** (seção 7) e revisar a página inteira em 1440 e 390 px.
+3. **Camada leve de poeira** por cima dos vídeos (canvas 2D, sem three): grãos e poeira reagindo ao scroll e ao mouse, para manter a "terra suspensa" viva entre os clipes.
+4. **Seções que faltam, dentro do painel de terra:** Frota (scroll horizontal + blueprint, fotos reais) → Antes e depois (caçamba como controle, fotos reais) → Onde atuamos (curvas de nível + anéis de raio) → Depoimentos (só reais). Todas dependem de material da cliente.
+5. **Detalhes:** tipografia que nivela (eixo `wdth` da Archivo) em 1 ou 2 títulos; curvas de nível em SVG como textura e divisores; poeira no hover do WhatsApp.
+6. **SEO:** JSON-LD `LocalBusiness` e imagem OG (um quadro do clipe do hero).
+7. **Performance:** Lighthouse de verdade (perfil celular) com os clipes reais.
+8. **Decidir entre `main` (3D) e `feat/video`** e fazer o merge da escolhida.
 
-Sem escavadeira e sem material da cliente, o que dá para adiantar é o 4 (detalhes), o 5 (SEO) e o 6 (performance).
+## 7. Vídeos
 
-## 7. Escavadeira: comprar, não modelar
+**Onde e com que nome:** `public/media/<parada>-16x9.mp4` e, se houver, `<parada>-9x16.mp4`, mais as capas `<parada>-16x9.jpg` / `<parada>-9x16.jpg`. Paradas: `hero`, `reservatorio`, `preparo-solo`, `aracao`, `estradas`, `destoca`, `terrenos`, `contato`. Depois, ligar em `content/media.ts`.
 
-Modelar do zero leva semanas. Ao comprar, exigir:
-- **Peças separadas com pivô na junta:** base, cabine (gira), lança, braço e caçamba. Sem isso não dá para animar a escavação.
-- **Licença** que permita uso na web e modificação.
-- Por volta de **40 mil triângulos**, materiais PBR.
-- **Nenhum logo** (remover Caterpillar ou qualquer marca no Blender).
+**Orçamento, já comprimido:** 16:9 ≤ 2,5 MB (1280–1920 px), 9:16 ≤ 1,5 MB (720×1280), de 6 a 8 s, **sem áudio**. Capa ≤ 120 KB. Só o clipe atual e os próximos baixam.
 
-Pipeline: Blender (tirar logos, aplicar escala, nomear os nós `cabine`, `lanca`, `braco`, `cacamba`) → `gltf-transform` (Draco ou Meshopt + texturas KTX2) → `public/models/escavadeira.glb` com **≤ 1,5 MB**.
-Escala: a ilha do hero tem raio 9 unidades; a escavadeira deve ter uns 5–6 de comprimento.
+**Prompts prontos, um por parada (em inglês, com estilo e composição em comum):** [`PROMPTS-FLOW.md`](PROMPTS-FLOW.md).
+
+**Na geração (Flow):**
+- O mesmo mundo em todos os clipes: fim de tarde, terra roxa do sul de Minas, máquina amarela genérica **sem logo, marca ou texto**, câmera lenta e estável, sem cortes, horizonte no terço de cima (ajuda o crossfade).
+- Um toque surreal discreto: torrões que sobem e ficam suspensos.
+- Espaço calmo para o texto: terço esquerdo no 16:9, metade de baixo no 9:16.
+- 16:9 em todos; 9:16 pelo menos no hero e no contato.
+- Conferir cada quadro: logo ou texto escondido, máquina deformada, braço atravessando a cabine.
+
+**Compressão (quando o ffmpeg estiver instalado):** H.264 em MP4, `-an` (sem áudio), `-movflags +faststart`, CRF entre 26 e 30 até caber no orçamento, e a capa do primeiro quadro em JPG. Se o loop "pular" no fim, cortar alguns quadros para o fim casar com o começo.
 
 ## 8. Skills (instalar em cada computador)
 
@@ -167,6 +145,6 @@ Comando padrão: `npx skills add <repo> --agent claude-code`. Conferir o comando
 
 ## 9. Lembretes de direção
 
-- A ousadia fica num lugar só: **o voo 3D**. Tipografia, layout e UI são quietos e disciplinados. Se tudo brilhar, nada brilha.
+- A ousadia fica num lugar só: **os vídeos**. Tipografia, layout e UI são quietos e disciplinados. Se tudo brilhar, nada brilha.
 - Proibidos (do `CLAUDE.md`): eyebrow em caixa alta, destacar uma palavra só no título, "→" em botões, cards idênticos com sombra cinza, numeração 01/02/03 fora de sequência real.
 - Copy direta e regional: "gradagem" (não "gradiação"), nomes da frota em português, nada de "soluções de excelência".

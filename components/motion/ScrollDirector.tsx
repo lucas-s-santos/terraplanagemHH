@@ -1,8 +1,8 @@
 "use client";
 
 import { ScrollTrigger, useGSAP } from "@/lib/gsap";
-import { useSceneStore } from "@/lib/store";
-import { STOP_IDS, type StopId } from "@/lib/scene/world";
+import { STOP_IDS, type StopId } from "@/lib/stops";
+import { useStageStore } from "@/lib/store";
 
 interface Anchor {
   /** Scroll em que o marcador passa pelo centro da tela. */
@@ -19,7 +19,7 @@ interface Anchor {
  */
 export function ScrollDirector() {
   useGSAP(() => {
-    const setStop = useSceneStore.getState().setStop;
+    const setStop = useStageStore.getState().setStop;
     let anchors: Anchor[] = [];
 
     const measure = () => {

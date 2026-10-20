@@ -2,8 +2,8 @@
 
 import { useId, useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
-import { smoothstep } from "@/lib/scene/noise";
-import { useSceneStore } from "@/lib/store";
+import { smoothstep } from "@/lib/math";
+import { useStageStore } from "@/lib/store";
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 
 const WIDTH = 400;
@@ -18,7 +18,7 @@ const CONTOURS = [
 ] as const;
 /** Largura da transição atrás da lâmina, em fração da linha. */
 const BLADE = 0.12;
-/** Se a cena travar, o preloader sai mesmo assim e fica o céu de reserva. */
+/** Se o vídeo travar, o preloader sai mesmo assim e fica o fundo de terra. */
 const GIVE_UP_MS = 15000;
 
 /** Perfil fixo (igual no servidor e no cliente): morros, um corte e cascalho, preso nas pontas. */
@@ -45,9 +45,9 @@ function terrainPath(level: number, contour: (typeof CONTOURS)[number]) {
 }
 
 /**
- * Preloader "nivelamento": uma linha de terreno no lugar onde a ilha do hero vai aparecer,
- * aplainada por uma lâmina conforme a cena carrega de verdade (store.load). Em 100% a cena
- * entra e a câmera mergulha. Fica na camada da cena: o texto do hero pinta antes e por cima.
+ * Preloader "nivelamento": uma linha de terreno aplainada por uma lâmina conforme o
+ * primeiro clipe carrega de verdade (store.load). Em 100% o vídeo entra.
+ * Fica na camada de mídia: o texto do hero pinta antes e por cima.
  */
 export function Preloader() {
   const root = useRef<SVGSVGElement>(null);
@@ -59,7 +59,7 @@ export function Preloader() {
     () => {
       const svg = root.current;
       if (!svg) return;
-      if (useSceneStore.getState().revealed) {
+      if (useStageStore.getState().revealed) {
         gsap.set(svg, { autoAlpha: 0 });
         return;
       }
@@ -79,11 +79,11 @@ export function Preloader() {
       const finish = () => {
         if (finished) return;
         finished = true;
-        useSceneStore.getState().reveal();
+        useStageStore.getState().reveal();
         gsap.to(svg, { autoAlpha: 0, duration: reduced ? 0 : 0.8, ease: "power1.out" });
       };
       const settle = () => {
-        if (useSceneStore.getState().load >= 1) finish();
+        if (useStageStore.getState().load >= 1) finish();
       };
 
       // A linha se desenha da esquerda para a direita ao aparecer. (Recorte, não tracejado:
@@ -99,8 +99,8 @@ export function Preloader() {
           }
         : gsap.quickTo(shown, "level", { duration: 0.9, ease: "power2.out", onUpdate: draw, onComplete: settle });
 
-      toLevel(useSceneStore.getState().load);
-      const unsubscribe = useSceneStore.subscribe((state, previous) => {
+      toLevel(useStageStore.getState().load);
+      const unsubscribe = useStageStore.subscribe((state, previous) => {
         if (state.load !== previous.load) toLevel(state.load);
       });
       const giveUp = window.setTimeout(finish, GIVE_UP_MS);
@@ -124,7 +124,7 @@ export function Preloader() {
             key={contour.drop}
             data-curva
             d={terrainPath(0, contour)}
-            stroke="var(--solo-fundo)"
+            stroke="var(--poeira)"
             strokeOpacity={contour.opacity}
             strokeWidth={i === 0 ? 1.5 : 1}
             vectorEffect="non-scaling-stroke"

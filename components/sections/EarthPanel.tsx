@@ -2,13 +2,13 @@ import type { ReactNode } from "react";
 import { TerrainEdge } from "./TerrainEdge";
 
 /**
- * Painel de terra: depois da última ilha de serviço, as seções sobem num bloco de solo que
- * cobre a cena. A câmera espera no platô enquanto ele passa (o marcador no fim repete a
- * parada "terrenos") e pousa quando ele termina, na seção de contato.
+ * Painel de terra: depois do último serviço, as seções sobem num bloco de solo que cobre
+ * o vídeo. O clipe de "terrenos" fica enquanto ele passa (o marcador no fim repete a
+ * parada) e, quando ele termina, entra o clipe do contato.
  */
 export function EarthPanel({ children }: { children: ReactNode }) {
   return (
-    <div className="chao relative bg-solo-fundo text-poeira">
+    <div className="relative bg-solo-fundo text-poeira">
       <TerrainEdge />
       {children}
       <TerrainEdge flip />

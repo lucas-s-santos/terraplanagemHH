@@ -19,7 +19,7 @@ export function Hero() {
           <h1 id="hero-titulo" className="titulo-display text-[clamp(2.4rem,4.9vw,4.75rem)]">
             {hero.titulo}
           </h1>
-          <p className="mt-6 max-w-[38ch] text-[1.0625rem] leading-relaxed text-solo-fundo/85 md:text-lg">
+          <p className="mt-6 max-w-[38ch] text-[1.0625rem] leading-relaxed text-poeira/85 md:text-lg">
             {hero.apoio}
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">

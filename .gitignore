@@ -10,3 +10,6 @@ npm-debug.log*
 
 # capturas de revisão (npm run shots)
 .shots/
+
+# clipes de teste locais (não vão para o site)
+public/media/teste/

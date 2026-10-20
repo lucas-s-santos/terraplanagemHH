@@ -7,6 +7,8 @@
 - Frota Caterpillar (pode ser citada no texto; o 3D continua genérico, sem logo)
 - **Público duplo:** produtor rural (destoca, aração, estradas, reservatório) e obra/construção (preparação de terreno, nivelamento). O visual mistura campo e máquina, não só canteiro urbano.
 
+> **Atualização 20/10/2026 (branch `feat/video`):** as ilhas 3D deram lugar a **vídeos de máquinas trabalhando**, ilustrativos e gerados no Google Flow, como a cliente já fazia no site dela. O "surreal" vai para dentro dos próprios vídeos: torrões de terra que sobem e ficam suspensos no ar. Ficam o preloader "nivelamento", o painel de terra, as curvas de nível e o rodapé entalhado. O texto passa a ser claro sobre um véu escuro. A Frota e o Antes e depois continuam com material real da cliente.
+
 ## Conceito: "Terra suspensa"
 O visitante voa por um céu de fim de tarde onde **ilhas de terra flutuam** — topo de pasto, camadas de terra roxa, raízes e pedras penduradas por baixo. Cada ilha é um serviço. Uma escavadeira amarela, elegante e bem iluminada, é a protagonista.
 

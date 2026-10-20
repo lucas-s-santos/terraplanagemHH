@@ -3,7 +3,7 @@ import { site } from "@/content/site";
 import { whatsappHref } from "@/lib/whatsapp";
 
 /**
- * Contato final: a câmera pousa no platô, já nivelado. Só o essencial, como no hero:
+ * Contato final, sobre o clipe do terreno pronto. Só o essencial, como no hero:
  * o convite e o WhatsApp grande. Telefones, e-mail e endereço ficam no chão do rodapé.
  */
 export function Contact() {
@@ -16,7 +16,7 @@ export function Contact() {
           <h2 id="contato-titulo" className="titulo-display text-[clamp(2.2rem,4vw,3.8rem)]">
             {contato.titulo}
           </h2>
-          <p className="mt-6 max-w-[38ch] text-[1.0625rem] leading-relaxed text-solo-fundo/85 md:text-lg">
+          <p className="mt-6 max-w-[38ch] text-[1.0625rem] leading-relaxed text-poeira/85 md:text-lg">
             {contato.apoio}
           </p>
           <div className="mt-10">
