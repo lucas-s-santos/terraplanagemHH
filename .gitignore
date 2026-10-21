@@ -13,3 +13,6 @@ npm-debug.log*
 
 # clipes de teste locais (não vão para o site)
 public/media/teste/
+
+# vídeos originais do Flow, antes de comprimir (pesados; não vão para o site nem para o git)
+media-originais/

@@ -11,6 +11,12 @@ import { Preloader } from "./Preloader";
 
 /** Além do clipe atual e do próximo, quantos começam a baixar antes de aparecer. */
 const PRELOAD_AHEAD = 1;
+const TALL = "(max-aspect-ratio: 1/1)";
+const REDUCED = "(prefers-reduced-motion: reduce)";
+
+// Os hooks começam com o valor do servidor (false) na hidratação. Os efeitos leem o valor real
+// na hora, senão a primeira passada liga o vídeo com movimento reduzido e baixa o 16:9 no celular.
+const matches = (query: string) => window.matchMedia(query).matches;
 
 function sources(clip: Clip, tall: boolean) {
   return {
@@ -28,7 +34,7 @@ function sources(clip: Clip, tall: boolean) {
  */
 export function MediaStage() {
   const reduced = usePrefersReducedMotion();
-  const tall = useMediaQuery("(max-aspect-ratio: 1/1)");
+  const tall = useMediaQuery(TALL);
   const revealed = useStageStore((s) => s.revealed);
   const layers = useRef<(HTMLDivElement | null)[]>([]);
   const videos = useRef<(HTMLVideoElement | null)[]>([]);
@@ -38,7 +44,7 @@ export function MediaStage() {
     const { setLoad } = useStageStore.getState();
     setLoad(0.1);
     const first = videos.current[0];
-    if (!first || reduced) {
+    if (!first || matches(REDUCED)) {
       setLoad(1);
       return;
     }
@@ -60,6 +66,8 @@ export function MediaStage() {
 
   // Qual clipe aparece, qual toca e qual baixa, conforme a parada.
   useEffect(() => {
+    const still = matches(REDUCED);
+    const portrait = matches(TALL);
     const apply = (stop: number) => {
       const current = Math.min(Math.floor(stop), STOP_IDS.length - 1);
       const blend = smoothstep(0.35, 0.65, stop - current);
@@ -73,9 +81,17 @@ export function MediaStage() {
         }
         const video = videos.current[k];
         const clip = clips[id];
+        if (!video || !clip) return;
         // Com movimento reduzido fica a imagem parada (poster): o vídeo nem baixa.
-        if (!video || !clip || reduced) return;
-        const { src } = sources(clip, tall);
+        if (still) {
+          if (video.hasAttribute("src")) {
+            video.pause();
+            video.removeAttribute("src");
+            video.load();
+          }
+          return;
+        }
+        const { src } = sources(clip, portrait);
         if (k >= current && k <= current + 1 + PRELOAD_AHEAD && video.getAttribute("src") !== src) video.src = src;
         if (visible && video.paused) video.play().catch(() => {});
         if (!visible && !video.paused) video.pause();

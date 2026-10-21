@@ -28,7 +28,7 @@ COMPOSITION (16:9 website background): the main action happens in the right 60% 
 
 **COMPOSITION, 9:16 (vertical)**
 ```
-COMPOSITION (9:16 vertical website background): the main action fills the top 55% of the frame; the bottom 45% is calm, uncluttered ground with soft light, because text will be placed there.
+COMPOSITION (9:16 vertical website background): the main action fills the top 55% of the frame; the bottom 45% is calm, uncluttered ground that naturally continues the same scene in the same focus and light (plain soil and short grass), because text will be placed there. One continuous image: no blurred band, no split, no hard horizontal edge, no frame inside the frame.
 ```
 
 ---

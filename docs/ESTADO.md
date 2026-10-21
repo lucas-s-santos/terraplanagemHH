@@ -1,12 +1,12 @@
 # Estado do projeto: onde paramos
 
-Última sessão: 20/10/2026, na branch **`feat/video`**.
+Última sessão: 21/10/2026, na branch **`feat/video`**. **O hero já tem vídeo** (16:9 e 9:16 do Flow, comprimidos, em loop contínuo). Faltam os clipes dos 6 serviços e do contato.
 
 **Virada de direção (20/10):** as ilhas 3D deram lugar a **vídeos de máquinas trabalhando**, ilustrativos e gerados no Google Flow, como a cliente já fazia no site dela. O "surreal" (terra suspensa) vai para dentro dos próprios vídeos.
 - **`main`**: a versão 3D completa (`d6ad5ab`): ilhas por serviço, worker, preloader e painel. O `docs/ESTADO.md` de lá documenta as decisões do 3D.
 - **`feat/video`** (esta): o three.js saiu e entrou uma camada de vídeo guiada pelo scroll. Ficam o preloader "nivelamento", o painel de terra com "Como trabalhamos", o contato e o rodapé entalhado.
 
-**Falta para ver a versão em vídeo de verdade:** os clipes do Flow (seção 7). Até eles chegarem, cada parada mostra o fundo de terra.
+**Falta para completar a versão em vídeo:** os outros 7 clipes do Flow (seção 7). Até eles chegarem, essas paradas mostram o fundo de terra.
 
 A direção criativa está em [`BRIEFING.md`](BRIEFING.md) (com a atualização de 20/10 no topo). Este arquivo guarda o estado técnico, as decisões e os próximos passos. **Atualize no fim de cada sessão**: a memória do Claude Code fica na máquina, não vai para o git.
 
@@ -24,7 +24,7 @@ A direção criativa está em [`BRIEFING.md`](BRIEFING.md) (com a atualização 
    npm run dev        # http://localhost:3000
    ```
 3. **Google Chrome** instalado, para as capturas (`npm run shots`). Ele também decodifica H.264, que o Chromium do Playwright não decodifica.
-4. **ffmpeg**, para comprimir os clipes (seção 7). Ainda não está instalado no computador do G:.
+4. **ffmpeg**, para preparar os clipes (`npm run clip`, seção 7): `winget install --id Gyan.FFmpeg -e`. Já instalado no computador do G: (21/10).
 5. Reinstalar as skills, que também são por máquina (seção 8).
 6. Os agentes `explorador-haiku` e `operacional-sonnet` estão no repositório (`.claude/agents/`).
 7. O `next dev` cria o `AGENTS.md` (regras do Next para agentes). Ele está versionado de propósito: se for apagado, volta.
@@ -36,6 +36,7 @@ A direção criativa está em [`BRIEFING.md`](BRIEFING.md) (com a atualização 
 | `npm run dev` | Desenvolvimento |
 | `npm run build` / `npm start` | Build de produção (rodar antes de fechar qualquer tarefa visual) |
 | `npm run typecheck` | Só o TypeScript |
+| `npm run clip -- <original.mp4> <parada> <16x9\|9x16>` | Prepara um clipe do Flow: loop sem pulo (o último segundo se funde com o primeiro, então o clipe fica com 7 s), H.264 sem áudio até caber no orçamento (tenta a maior largura com a melhor qualidade) e capa JPEG ≤ 120 KB. Saída em `public/media/` |
 | `npm run shots` | Capturas em 1440 px e 390 px + console do navegador → `.shots/`. Espera o preloader sair. Opções: `-- --url http://localhost:3000 --stops hero,reservatorio~preparo-solo,fim --only mobile --reduced`. `a~b` = meio do caminho entre duas paradas (`terrenos~contato` cai no painel de terra); `fim` = rodapé |
 
 **O que conferir nas capturas:** texto legível sobre o vídeo (véu escuro à esquerda no desktop e embaixo no celular); o clipe certo em cada parada; no meio do caminho, os dois clipes se fundindo; console sem erros.
@@ -79,7 +80,8 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 - **Clipes em loop por seção, não vídeo "raspado" pelo scroll.** Controlar o `currentTime` pelo scroll trava no iPhone, e uma sequência de imagens pesaria dezenas de MB. O crossfade acontece entre 35% e 65% do caminho, para não passar a maior parte do tempo com dois clipes misturados.
 - **Cada camada tem fundo próprio** (`.fundo-terra`). Quando a de cima cobre tudo, a de baixo some e pausa. Sem isso, uma parada sem clipe mostrava o clipe da anterior.
 - **A página inteira ficou escura, com texto claro (`poeira`).** Texto escuro sobre vídeo não lê. O véu é escuro à esquerda no desktop e embaixo no celular, com uma faixa leve em cima para o cabeçalho. Antes do vídeo, o fundo é de terra escura, para o texto claro já ser legível no primeiro desenho (LCP).
-- **Movimento reduzido:** só as capas. O vídeo nem baixa.
+- **Movimento reduzido:** só as capas. O vídeo nem baixa. Os efeitos da `MediaStage` leem o `matchMedia` na hora: os hooks começam com o valor do servidor (`false`) na hidratação, e a primeira passada ligava o vídeo mesmo com movimento reduzido (e baixava o 16:9 no celular antes do 9:16).
+- **Loop com fusão de 1 s** (`npm run clip`): o clipe do Flow começa e termina em posições diferentes; sem a fusão, o loop dá um pulo.
 - **Celular:** usa o 9:16 quando existe. Sem ele, recorta o 16:9 no ponto `focus` do clipe (padrão 60%).
 - **Preloader na camada de mídia, não por cima da página.** O texto do hero pinta antes de tudo e continua sendo o LCP. Progresso real em `store.load`: 10% ao hidratar e o resto conforme o primeiro clipe baixa (`progress`, `canplaythrough`). Sem clipe ou com movimento reduzido, vai direto a 100%. Se travar por 15 s, sai mesmo assim.
 - **Linha do preloader com `clipPath`, não com tracejado.** Com `vector-effect: non-scaling-stroke`, o Chrome mede o tracejado em pixels de tela, e a linha saía cortada em ~70%.
@@ -93,8 +95,8 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 
 ## 5. Pendências conhecidas
 
-- [ ] **Clipes do Flow** (seção 7). Começar validando 3 variações do hero.
-- [ ] **ffmpeg** neste computador, para comprimir os clipes e gerar as capas.
+- [ ] **Clipes do Flow dos 6 serviços e do contato** (seção 7). O hero está pronto.
+- [ ] **O 9:16 do hero tem uma faixa desfocada com borda reta** a ~72% da altura (o Flow "acalmou" a parte de baixo assim). O véu reforçado no celular disfarça. Para sumir de vez, gerar de novo com o bloco 9:16 atualizado do `PROMPTS-FLOW.md`.
 - [ ] **WhatsApp provisório**: usando (35) 99974-6093 (`content/site.ts`, `confirmado: false`).
 - [ ] **Ícone** provisório (`app/icon.svg`) até chegar o logo.
 - [ ] **Textos das etapas de "Como trabalhamos"** escritos por nós (a sequência é do briefing). Confirmar com a cliente, principalmente "valor e prazo antes de qualquer máquina entrar".
@@ -104,8 +106,8 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 
 ## 6. Próximos passos (ordem sugerida)
 
-1. **Clipes:** testar 3 variações do hero com o texto por cima, aprovar o estilo e só depois gerar os outros 7.
-2. **Comprimir e ligar os clipes** (seção 7) e revisar a página inteira em 1440 e 390 px.
+1. **Clipes:** gerar os outros 7 no mesmo estilo do hero (aprovado em 21/10).
+2. **Preparar e ligar os clipes** (`npm run clip`, seção 7) e revisar a página inteira em 1440 e 390 px.
 3. **Camada leve de poeira** por cima dos vídeos (canvas 2D, sem three): grãos e poeira reagindo ao scroll e ao mouse, para manter a "terra suspensa" viva entre os clipes.
 4. **Seções que faltam, dentro do painel de terra:** Frota (scroll horizontal + blueprint, fotos reais) → Antes e depois (caçamba como controle, fotos reais) → Onde atuamos (curvas de nível + anéis de raio) → Depoimentos (só reais). Todas dependem de material da cliente.
 5. **Detalhes:** tipografia que nivela (eixo `wdth` da Archivo) em 1 ou 2 títulos; curvas de nível em SVG como textura e divisores; poeira no hover do WhatsApp.
@@ -128,7 +130,13 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 - 16:9 em todos; 9:16 pelo menos no hero e no contato.
 - Conferir cada quadro: logo ou texto escondido, máquina deformada, braço atravessando a cabine.
 
-**Compressão (quando o ffmpeg estiver instalado):** H.264 em MP4, `-an` (sem áudio), `-movflags +faststart`, CRF entre 26 e 30 até caber no orçamento, e a capa do primeiro quadro em JPG. Se o loop "pular" no fim, cortar alguns quadros para o fim casar com o começo.
+**Fluxo de cada clipe:**
+1. O MP4 do Flow vai para `media-originais/` (fora do `public/` e do git: pesado).
+2. `npm run clip -- media-originais/<arquivo>.mp4 <parada> 16x9` (e o mesmo com `9x16`, se houver).
+3. Ligar em `content/media.ts`: `wide`, `tall`, `poster`, `posterTall` (e `focus` se não houver 9:16).
+4. Conferir em 1440 e 390 px, também com `--reduced`.
+
+Hero (21/10): 16:9 em 1920×1080 crf 27 = 2,30 MB; 9:16 em 720×1280 crf 23 = 1,43 MB; capas de 110 e 104 KB.
 
 ## 8. Skills (instalar em cada computador)
 

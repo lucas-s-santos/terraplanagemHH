@@ -18,7 +18,12 @@ export interface Clip {
 }
 
 export const clips: Record<StopId, Clip | null> = {
-  hero: null,
+  hero: {
+    wide: "/media/hero-16x9.mp4",
+    tall: "/media/hero-9x16.mp4",
+    poster: "/media/hero-16x9.jpg",
+    posterTall: "/media/hero-9x16.jpg",
+  },
   reservatorio: null,
   "preparo-solo": null,
   aracao: null,
