@@ -18,13 +18,12 @@ const REDUCED = "(prefers-reduced-motion: reduce)";
 // na hora, senão a primeira passada liga o vídeo com movimento reduzido e baixa o 16:9 no celular.
 const matches = (query: string) => window.matchMedia(query).matches;
 
+/** O formato certo para a tela, ou null (tela larga e só existe o 9:16: fica o fundo de terra). */
 function sources(clip: Clip, tall: boolean) {
-  return {
-    src: tall && clip.tall ? clip.tall : clip.wide,
-    poster: tall && clip.posterTall ? clip.posterTall : clip.poster,
-    // Sem versão vertical, o 16:9 é recortado no ponto de interesse.
-    position: tall && !clip.tall ? `${clip.focus ?? 60}% 50%` : "50% 50%",
-  };
+  if (tall && clip.tall) return { src: clip.tall.video, poster: clip.tall.poster, position: "50% 50%" };
+  if (!clip.wide) return null;
+  // Sem versão vertical, o 16:9 é recortado no ponto de interesse.
+  return { src: clip.wide.video, poster: clip.wide.poster, position: tall ? `${clip.focus ?? 60}% 50%` : "50% 50%" };
 }
 
 /**
@@ -91,7 +90,9 @@ export function MediaStage() {
           }
           return;
         }
-        const { src } = sources(clip, portrait);
+        const media = sources(clip, portrait);
+        if (!media) return;
+        const { src } = media;
         if (k >= current && k <= current + 1 + PRELOAD_AHEAD && video.getAttribute("src") !== src) video.src = src;
         if (visible && video.paused) video.play().catch(() => {});
         if (!visible && !video.paused) video.pause();

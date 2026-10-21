@@ -1,12 +1,19 @@
 # Estado do projeto: onde paramos
 
-Última sessão: 21/10/2026, na branch **`feat/video`**. **O hero já tem vídeo** (16:9 e 9:16 do Flow, comprimidos, em loop contínuo). Faltam os clipes dos 6 serviços e do contato.
+Última sessão: 21/10/2026, na branch **`feat/video`**. Clipes prontos:
+
+| Parada | 16:9 | 9:16 |
+|---|---|---|
+| hero | ✅ | ✅ |
+| reservatório | ❌ recusado ("CAT" legível no braço): gerar de novo | ✅ |
+| preparo de solo | ✅ | ❌ recusado (máquina fantasma): gerar de novo. No celular, o 16:9 recortado (`focus: 78`) |
+| aração, estradas, destoca, terrenos, contato | gerar | gerar |
 
 **Virada de direção (20/10):** as ilhas 3D deram lugar a **vídeos de máquinas trabalhando**, ilustrativos e gerados no Google Flow, como a cliente já fazia no site dela. O "surreal" (terra suspensa) vai para dentro dos próprios vídeos.
 - **`main`**: a versão 3D completa (`d6ad5ab`): ilhas por serviço, worker, preloader e painel. O `docs/ESTADO.md` de lá documenta as decisões do 3D.
 - **`feat/video`** (esta): o three.js saiu e entrou uma camada de vídeo guiada pelo scroll. Ficam o preloader "nivelamento", o painel de terra com "Como trabalhamos", o contato e o rodapé entalhado.
 
-**Falta para completar a versão em vídeo:** os outros 7 clipes do Flow (seção 7). Até eles chegarem, essas paradas mostram o fundo de terra.
+**Falta para completar a versão em vídeo:** os clipes da tabela acima (seção 7). Sem clipe, a parada mostra o fundo de terra. Com só o 9:16, a tela larga mostra o fundo de terra e o celular, o vídeo.
 
 A direção criativa está em [`BRIEFING.md`](BRIEFING.md) (com a atualização de 20/10 no topo). Este arquivo guarda o estado técnico, as decisões e os próximos passos. **Atualize no fim de cada sessão**: a memória do Claude Code fica na máquina, não vai para o git.
 
@@ -95,7 +102,7 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 
 ## 5. Pendências conhecidas
 
-- [ ] **Clipes do Flow dos 6 serviços e do contato** (seção 7). O hero está pronto.
+- [ ] **Clipes do Flow que faltam** (tabela no topo e seção 7).
 - [ ] **O 9:16 do hero tem uma faixa desfocada com borda reta** a ~72% da altura (o Flow "acalmou" a parte de baixo assim). O véu reforçado no celular disfarça. Para sumir de vez, gerar de novo com o bloco 9:16 atualizado do `PROMPTS-FLOW.md`.
 - [ ] **WhatsApp provisório**: usando (35) 99974-6093 (`content/site.ts`, `confirmado: false`).
 - [ ] **Ícone** provisório (`app/icon.svg`) até chegar o logo.
@@ -133,10 +140,11 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 **Fluxo de cada clipe:**
 1. O MP4 do Flow vai para `media-originais/` (fora do `public/` e do git: pesado).
 2. `npm run clip -- media-originais/<arquivo>.mp4 <parada> 16x9` (e o mesmo com `9x16`, se houver).
-3. Ligar em `content/media.ts`: `wide`, `tall`, `poster`, `posterTall` (e `focus` se não houver 9:16).
-4. Conferir em 1440 e 390 px, também com `--reduced`.
+3. Ligar em `content/media.ts`: `wide: source("<parada>-16x9")` e/ou `tall: source("<parada>-9x16")` (e `focus` se não houver 9:16).
+4. **Conferir de perto antes de aceitar** (`ffmpeg ... crop` em resolução cheia): emblema no braço e no contrapeso, máquina que se transforma no meio do clipe, e se a máquina não cai em cima do texto (no 16:9, terço esquerdo livre).
+5. Conferir em 1440 e 390 px, também com `--reduced`.
 
-Hero (21/10): 16:9 em 1920×1080 crf 27 = 2,30 MB; 9:16 em 720×1280 crf 23 = 1,43 MB; capas de 110 e 104 KB.
+Resultados (21/10): hero 16:9 2,30 MB e 9:16 1,43 MB; preparo de solo 16:9 2,29 MB; reservatório 9:16 1,29 MB. Capas entre 96 e 111 KB.
 
 ## 8. Skills (instalar em cada computador)
 
