@@ -6,7 +6,7 @@ export function Hero() {
   const telefone = telefones[0];
 
   return (
-    <section data-stop="hero" aria-labelledby="hero-titulo" className="relative flex min-h-svh flex-col">
+    <section data-stop="hero" data-regua={site.regua.inicio} aria-labelledby="hero-titulo" className="relative flex min-h-svh flex-col">
       <header className="mx-auto flex w-full max-w-(--max-conteudo) items-center justify-between px-(--gutter) pt-6 md:pt-8">
         <span className="text-[0.95rem] font-bold tracking-[-0.01em] [font-stretch:112%]">{site.nome}</span>
         <a href={`tel:${telefone.numero}`} className="link-discreto text-[0.95rem] font-medium">

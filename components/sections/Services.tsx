@@ -13,6 +13,7 @@ export function Services() {
         <article
           key={servico.id}
           data-stop={servico.id}
+          data-regua={servico.nome}
           className="flex min-h-[115svh] items-end pb-[12svh] md:items-center md:pb-0"
         >
           <div className="mx-auto w-full max-w-(--max-conteudo) px-(--gutter)">

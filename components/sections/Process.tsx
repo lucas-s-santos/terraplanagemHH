@@ -80,7 +80,7 @@ export function Process() {
   );
 
   return (
-    <section ref={root} aria-labelledby="processo-titulo" className="mx-auto w-full max-w-(--max-conteudo) px-(--gutter) py-[16svh]">
+    <section ref={root} data-regua={processo.titulo} aria-labelledby="processo-titulo" className="mx-auto w-full max-w-(--max-conteudo) px-(--gutter) py-[16svh]">
       <h2 id="processo-titulo" className="titulo-secao text-[clamp(2rem,3.4vw,3.1rem)]">
         {processo.titulo}
       </h2>

@@ -89,6 +89,13 @@ export const site = {
     rotulos: { telefones: "Telefones", email: "E-mail", endereco: "Endereço" },
   },
 
+  // Régua de nível (a barra de rolagem do site): uma estaca por seção.
+  regua: {
+    rotulo: "Seções da página",
+    inicio: "Início",
+    contato: "Contato",
+  },
+
   rodape: {
     linha: "Terraplanagem e destoca em Alterosa – MG",
   },

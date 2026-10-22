@@ -62,6 +62,114 @@
     }
   }
 
+  /* Régua de nível: substitui a barra de rolagem nas telas largas com mouse.
+     No toque (e em telas estreitas) fica a barra nativa, que lá já é sobreposta e discreta. */
+  .regua {
+    display: none;
+  }
+  @media (min-width: 48rem) and (pointer: fine) {
+    html {
+      scrollbar-width: none;
+    }
+    html::-webkit-scrollbar {
+      display: none;
+    }
+    .regua {
+      display: block;
+      position: fixed;
+      z-index: 30;
+      top: 50%;
+      right: 0.75rem;
+      width: 2.5rem;
+      height: min(72svh, 40rem);
+      translate: 0 -50%;
+    }
+  }
+  .regua-trilho {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    touch-action: none;
+  }
+  /* A lâmina amarela, a mesma do preloader. */
+  .regua-lamina {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 1.375rem;
+    height: 3px;
+    translate: -50% -50%;
+    border-radius: 2px;
+    background: var(--amarelo-maquina);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--solo-fundo) 55%, transparent);
+    pointer-events: none;
+  }
+  .regua-estaca {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    translate: 0 -50%;
+  }
+  .regua-estaca button {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 1.5rem;
+    cursor: pointer;
+  }
+  /* A estaca: um traço curto atravessando o perfil. */
+  .regua-estaca button::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0.625rem;
+    height: 1.5px;
+    translate: -50% -50%;
+    background: color-mix(in oklab, var(--poeira) 70%, transparent);
+    transition:
+      width 160ms ease-out,
+      background-color 160ms ease-out;
+  }
+  .regua-estaca button[aria-current]::before,
+  .regua-estaca button:hover::before {
+    width: 1rem;
+    background: var(--poeira);
+  }
+  .regua-rotulo {
+    position: absolute;
+    right: calc(100% + 0.25rem);
+    top: 50%;
+    translate: 0.375rem -50%;
+    padding: 0.2rem 0.55rem;
+    border-radius: 3px;
+    background: color-mix(in oklab, var(--solo-fundo) 82%, transparent);
+    color: var(--poeira);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 180ms ease-out,
+      translate 180ms ease-out;
+  }
+  /* Os nomes aparecem ao passar o mouse na régua (todos) ou ao focar uma estaca pelo teclado. */
+  .regua:hover .regua-rotulo,
+  .regua-estaca button:focus-visible .regua-rotulo {
+    opacity: 1;
+    translate: 0 -50%;
+  }
+  .regua-estaca button[aria-current] .regua-rotulo {
+    color: var(--amarelo-maquina);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .regua-rotulo,
+    .regua-estaca button::before {
+      transition: none;
+    }
+  }
+
   /* Parada com foto em vez de vídeo: um zoom bem lento para a imagem não parecer congelada. */
   .foto-lenta {
     transform-origin: 68% 58%;

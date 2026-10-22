@@ -1,4 +1,5 @@
 import { site } from "@/content/site";
+import { ContourField } from "./ContourField";
 import { TerrainEdge } from "./TerrainEdge";
 
 /** Rodapé: a página termina em chão firme. Os contatos por extenso e a marca entalhada na terra. */
@@ -9,6 +10,9 @@ export function SiteFooter() {
   return (
     <footer className="relative z-10 bg-solo-fundo text-poeira">
       <TerrainEdge />
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <ContourField layout="rodape" />
+      </div>
       <div className="mx-auto w-full max-w-(--max-conteudo) overflow-hidden px-(--gutter) pt-[10svh] pb-8">
         <dl className="grid gap-x-16 gap-y-8 sm:grid-cols-[auto_auto_1fr]">
           <div>

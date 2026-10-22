@@ -1,5 +1,6 @@
 import { MediaStage } from "@/components/media/MediaStage";
 import { ScrollDirector } from "@/components/motion/ScrollDirector";
+import { ScrollRuler } from "@/components/motion/ScrollRuler";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { Contact } from "@/components/sections/Contact";
 import { EarthPanel } from "@/components/sections/EarthPanel";
@@ -14,6 +15,7 @@ export default function Home() {
       <MediaStage />
       <SmoothScroll />
       <ScrollDirector />
+      <ScrollRuler />
       <main className="relative z-10">
         <Hero />
         <Services />

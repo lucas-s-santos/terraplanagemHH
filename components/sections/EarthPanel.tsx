@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ContourField } from "./ContourField";
 import { TerrainEdge } from "./TerrainEdge";
 
 /**
@@ -8,8 +9,12 @@ import { TerrainEdge } from "./TerrainEdge";
  */
 export function EarthPanel({ children }: { children: ReactNode }) {
   return (
-    <div className="relative bg-solo-fundo text-poeira">
+    <div className="relative isolate bg-solo-fundo text-poeira">
       <TerrainEdge />
+      {/* Curvas de nível no fundo do bloco (z negativo: ficam atrás do texto). */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <ContourField layout="painel" />
+      </div>
       {children}
       <TerrainEdge flip />
       <div data-stop="terrenos" aria-hidden="true" />

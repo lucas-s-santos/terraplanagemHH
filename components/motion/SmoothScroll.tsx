@@ -2,6 +2,7 @@
 
 import Lenis from "lenis";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { setLenis } from "@/lib/scroll";
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 
 /** Lenis movido pelo ticker do GSAP. Com movimento reduzido, fica o scroll nativo. */
@@ -16,8 +17,10 @@ export function SmoothScroll() {
       const tick = (time: number) => lenis.raf(time * 1000);
       gsap.ticker.add(tick);
       gsap.ticker.lagSmoothing(0);
+      setLenis(lenis);
 
       return () => {
+        setLenis(null);
         gsap.ticker.remove(tick);
         gsap.ticker.lagSmoothing(500, 33);
         lenis.destroy();
