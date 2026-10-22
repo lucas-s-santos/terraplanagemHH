@@ -26,8 +26,7 @@ const source = (file: string): ClipSource => ({ video: `/media/${file}.mp4`, pos
 
 export const clips: Record<StopId, Clip | null> = {
   hero: { wide: source("hero-16x9"), tall: source("hero-9x16") },
-  // 16:9 recusado (logo "CAT" legível no braço): gerar de novo.
-  reservatorio: { tall: source("reservatorio-9x16") },
+  reservatorio: { wide: source("reservatorio-16x9"), tall: source("reservatorio-9x16") },
   // 9:16 recusado (máquina "fantasma" no meio do clipe): no celular, o 16:9 recortado na máquina.
   "preparo-solo": { wide: source("preparo-solo-16x9"), focus: 78 },
   aracao: { wide: source("aracao-16x9"), focus: 74 },

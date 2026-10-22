@@ -5,7 +5,7 @@
 | Parada | 16:9 | 9:16 |
 |---|---|---|
 | hero | ✅ | ✅ |
-| reservatório | ❌ recusado ("CAT" legível no braço): gerar de novo | ✅ |
+| reservatório | ✅ (refeito em 22/10, sem a pintura da Caterpillar; 2,18 MB) | ✅ |
 | preparo de solo | ✅ | ❌ recusado (máquina fantasma): gerar de novo. No celular, o 16:9 recortado (`focus: 78`) |
 | aração | ✅ (1,92 MB) | opcional: no celular o 16:9 recortado (`focus: 74`) ficou bom |
 | estradas, destoca, terrenos, contato | gerar | gerar |
