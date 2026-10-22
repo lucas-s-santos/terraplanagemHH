@@ -1,4 +1,5 @@
 import { MediaStage } from "@/components/media/MediaStage";
+import { DustOnHover } from "@/components/motion/DustOnHover";
 import { ScrollDirector } from "@/components/motion/ScrollDirector";
 import { ScrollRuler } from "@/components/motion/ScrollRuler";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
@@ -8,6 +9,7 @@ import { Hero } from "@/components/sections/Hero";
 import { Process } from "@/components/sections/Process";
 import { Services } from "@/components/sections/Services";
 import { SiteFooter } from "@/components/sections/SiteFooter";
+import { LocalBusinessJsonLd } from "@/components/seo/LocalBusinessJsonLd";
 
 export default function Home() {
   return (
@@ -16,6 +18,7 @@ export default function Home() {
       <SmoothScroll />
       <ScrollDirector />
       <ScrollRuler />
+      <DustOnHover />
       <main className="relative z-10">
         <Hero />
         <Services />
@@ -26,6 +29,7 @@ export default function Home() {
         <Contact />
       </main>
       <SiteFooter />
+      <LocalBusinessJsonLd />
     </>
   );
 }

@@ -1,6 +1,6 @@
 # Estado do projeto: onde paramos
 
-Última sessão: 21/10/2026, na branch **`feat/video`**. Clipes prontos:
+Última sessão: 23/10/2026, na branch **`feat/video`**. Todas as paradas têm mídia. Prontos também: régua de nível, curvas de nível, corte de solo 3D, título que nivela, poeira no hover do WhatsApp e SEO (OG + JSON-LD). Clipes:
 
 | Parada | 16:9 | 9:16 |
 |---|---|---|
@@ -17,7 +17,7 @@ Alternativas das fotos do contato em `media-originais/contato-*-alt-*`. Para usa
 - **`main`**: a versão 3D completa (`d6ad5ab`): ilhas por serviço, worker, preloader e painel. O `docs/ESTADO.md` de lá documenta as decisões do 3D.
 - **`feat/video`** (esta): o three.js saiu e entrou uma camada de vídeo guiada pelo scroll. Ficam o preloader "nivelamento", o painel de terra com "Como trabalhamos", o contato e o rodapé entalhado.
 
-**Falta para completar a versão em vídeo:** os clipes da tabela acima (seção 7). Sem clipe, a parada mostra o fundo de terra. Com só o 9:16, a tela larga mostra o fundo de terra e o celular, o vídeo.
+**Opcionais nos clipes:** os 16:9 de estradas, destoca e terrenos (hoje numa janela vertical na tela larga) e o 9:16 do preparo de solo. Sem 16:9, a tela larga mostra o 9:16 numa janela; sem 9:16, o celular recorta o 16:9.
 
 A direção criativa está em [`BRIEFING.md`](BRIEFING.md) (com a atualização de 20/10 no topo). Este arquivo guarda o estado técnico, as decisões e os próximos passos. **Atualize no fim de cada sessão**: a memória do Claude Code fica na máquina, não vai para o git.
 
@@ -77,6 +77,10 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 | `lib/scroll.ts` | `scrollToY` (pelo Lenis quando ativo), `maxScroll`, `centerScroll` |
 | `components/sections/ContourField.tsx` | Curvas de nível em SVG (geradas por código, sem cruzar) no fundo do painel e do rodapé; desenham-se com o scroll |
 | `components/sections/SoilCut.tsx` + `lib/soil/scene.ts` | **Corte de solo 3D** em "Como trabalhamos": bloco com camadas de solo; estacas do gabarito sobem na visita técnica, a frente de corte nivela o topo na execução, entrega com terra batida. Preso na tela (sticky) enquanto as etapas passam. three.js sob demanda, só desenha visível; movimento reduzido = estado final parado |
+| `components/motion/LevelingTitle.tsx` | Título do hero que nivela: palavras desniveladas que se alinham no fim do preloader |
+| `components/motion/DustOnHover.tsx` | Poeira ao passar o mouse em `[data-poeira]` (os botões do WhatsApp) |
+| `components/seo/LocalBusinessJsonLd.tsx` + `lib/siteUrl.ts` | Dados estruturados da empresa; endereço público do site |
+| `app/opengraph-image.jpg` (+ `.alt.txt`) | Imagem de compartilhamento |
 | `components/motion/MagneticLink.tsx` | Link magnético (o WhatsApp do contato). Só com mouse e sem movimento reduzido |
 | `components/sections/{Hero,Services}.tsx` | Hero e as 6 paradas de serviço |
 | `components/sections/EarthPanel.tsx` | Painel de terra opaco depois dos serviços. Tem no fim o marcador que segura o clipe de "terrenos" |
@@ -103,6 +107,10 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 - **Linha do preloader com `clipPath`, não com tracejado.** Com `vector-effect: non-scaling-stroke`, o Chrome mede o tracejado em pixels de tela, e a linha saía cortada em ~70%.
 - **Barra de rolagem nativa escondida só onde a régua aparece** (largura ≥ 48rem e `pointer: fine`). No toque, a barra nativa já é sobreposta e some sozinha, e uma régua por cima do texto atrapalharia.
 - **Corte de solo: camadas com 44 linhas por parede e transição suavizada.** Com 12 linhas, os estratos saíam em degraus.
+- **Título que nivela por palavra, não por letra.** Separar as letras em spans quebra o kerning (o espaço entre pares como "Tr" e "fo"), o que aparece num título grande. Só `translate`/`rotate` (sem mudar a largura): mudar o eixo `wdth` por palavra mudaria as quebras de linha e causaria layout shift. O texto pinta desnivelado de primeira (é o LCP) e nivela no fim do preloader.
+- **Poeira no hover:** nuvem por trás da base do botão e grãos na frente da borda. Por trás, os grãos ficavam escondidos pelo próprio botão.
+- **Imagem OG** (`app/opengraph-image.jpg`, 1200×630, 106 KB): quadro do hero aos 4,8 s (torrões no ar) com o título na Archivo e o véu, montada no Chrome a partir de um HTML. Em `next dev` a `og:image` aponta para localhost (comportamento do Next); no build usa o `metadataBase`.
+- **JSON-LD `GeneralContractor`** (o tipo de LocalBusiness mais próximo de terraplanagem), com endereço, telefone, área atendida e serviços.
 - **Torrões 3D flutuando por cima do site: testados e removidos** (22/10, o Lucas não gostou). O código está no commit `1279aa1`, se um dia servir de base.
 - **Entrada do vídeo:** aparece em 1,4 s e se aproxima devagar (escala de 1,08 para 1 em 2,6 s). Substitui o mergulho da câmera do 3D.
 - **Depois dos serviços, painel de terra por cima** (decisão do Lucas, 20/10). As seções sobem num bloco de solo opaco, com borda irregular e faixa de terra roxa. O clipe de "terrenos" fica enquanto o painel passa; quando ele termina, entra o do contato.
@@ -121,18 +129,20 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 - [ ] **Textos das etapas de "Como trabalhamos"** escritos por nós (a sequência é do briefing). Confirmar com a cliente, principalmente "valor e prazo antes de qualquer máquina entrar".
 - [ ] **Telefones sem rótulo de quem é quem** (o briefing pede "telefones com rótulo"). Perguntar à cliente junto com qual é o WhatsApp.
 - [ ] Linha "imagens ilustrativas" discreta no rodapé, se a cliente concordar.
+- [ ] **Domínio provisório** em `content/site.ts` (`seo.url`: hehterraplanagem.com.br). Ele vai no link canônico, na imagem OG e no JSON-LD. Na Vercel, a variável `NEXT_PUBLIC_SITE_URL` tem precedência.
 - [ ] Pendências com a cliente: lista em `BRIEFING.md`.
 
 ## 6. Próximos passos (ordem sugerida)
 
-1. **Clipes:** gerar os outros 7 no mesmo estilo do hero (aprovado em 21/10).
-2. **Preparar e ligar os clipes** (`npm run clip`, seção 7) e revisar a página inteira em 1440 e 390 px.
-3. **Maquete topográfica** em "Onde atuamos": relevo da região em curvas de nível, com os anéis de raio de atendimento pulsando (depende da lista de cidades). Mesmo padrão do `lib/soil/` (three puro, sob demanda). Régua de nível, curvas de nível e corte de solo prontos em 22/10.
-4. **Seções que faltam, dentro do painel de terra:** Frota (scroll horizontal + blueprint, fotos reais) → Antes e depois (caçamba como controle, fotos reais) → Onde atuamos (curvas de nível + anéis de raio) → Depoimentos (só reais). Todas dependem de material da cliente.
-5. **Detalhes:** tipografia que nivela (eixo `wdth` da Archivo) em 1 ou 2 títulos; curvas de nível em SVG como textura e divisores; poeira no hover do WhatsApp.
-6. **SEO:** JSON-LD `LocalBusiness` e imagem OG (um quadro do clipe do hero).
-7. **Performance:** Lighthouse de verdade (perfil celular) com os clipes reais.
-8. **Decidir entre `main` (3D) e `feat/video`** e fazer o merge da escolhida.
+1. **Seções que faltam, dentro do painel de terra** (é só colocar dentro do `<EarthPanel>`):
+   - **Frota:** cards empilhados com a palavra gigante saindo da borda (a ideia da referência WePink), com linhas de planta técnica apontando partes da máquina. Fotos do Flow com os prompts da conversa de 22/10, **só das máquinas que a cliente tem**.
+   - **Antes e depois:** slider com a caçamba como controle. Pares de fotos (ANTES gerado, DEPOIS editando o ANTES).
+   - **Onde atuamos:** maquete topográfica 3D (relevo em curvas de nível, anéis de raio pulsando), mesmo padrão do `lib/soil/`. Depende da lista de cidades.
+   - **Números** (anos, obras, hectares, cidades), contando ao aparecer. Só com números reais.
+   - **Depoimentos:** só reais.
+2. **Máquina 3D no hero** (ideia do Lucas, 22/10): foto de fundo do Flow + escavadeira 3D comprada, testada numa versão separada contra o hero em vídeo. Prompt da foto de fundo na conversa de 22/10. O modelo precisa ter: **peças separadas com o pivô na junta** (base, cabine, lança, braço, caçamba; sem isso não anima a escavação), **licença para web e modificação**, ~40 mil triângulos, materiais PBR e **nenhum logo**. Pipeline: Blender (tirar logos, nomear os nós) → `gltf-transform` (Draco/Meshopt + KTX2) → `public/models/escavadeira.glb` com ≤ 1,5 MB.
+3. **Performance:** Lighthouse de verdade (perfil celular) com os clipes reais.
+4. **Decidir entre `main` (3D) e `feat/video`** e fazer o merge da escolhida.
 
 ## 7. Vídeos
 

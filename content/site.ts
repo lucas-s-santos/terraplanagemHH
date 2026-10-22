@@ -21,9 +21,14 @@ export const site = {
   },
 
   seo: {
+    // PROVISÓRIO: o domínio ainda não foi confirmado com a cliente. Na Vercel, NEXT_PUBLIC_SITE_URL tem precedência.
+    url: "https://hehterraplanagem.com.br",
     titulo: "H e H Terraplanagem | Terraplanagem e destoca em Alterosa – MG",
     descricao:
       "Terraplanagem, destoca de eucalipto, reservatórios, estradas rurais e preparo de solo em Alterosa e região.",
+    // Para os dados estruturados (LocalBusiness).
+    endereco: { rua: "Rodovia MG 184, s/n, trevo de Alterosa", cidade: "Alterosa", estado: "MG", pais: "BR" },
+    areaAtendida: "Alterosa e região, Sul de Minas Gerais",
   },
 
   hero: {

@@ -248,6 +248,20 @@
     text-wrap: balance;
   }
 
+  /* Título que nivela (LevelingTitle): cada palavra é uma placa de terreno fora de nível. */
+  .palavra-desnivel {
+    display: inline-block;
+    translate: 0 calc(var(--desnivel, 0) * 1em);
+    rotate: calc(var(--inclinacao, 0) * 1deg);
+    transform-origin: 50% 100%;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .palavra-desnivel {
+      translate: none;
+      rotate: none;
+    }
+  }
+
   .titulo-secao {
     font-stretch: 112%;
     font-weight: 720;
@@ -278,6 +292,34 @@
   }
   .botao-primario:active {
     translate: 0 1px;
+  }
+
+  /* Poeira no hover (DustOnHover): uma nuvem atrás da base do botão e grãos na frente da borda. */
+  [data-poeira] {
+    position: relative;
+  }
+  .grao {
+    position: absolute;
+    bottom: -3px;
+    z-index: 1;
+    border-radius: 50% 45% 55% 50%;
+    background: var(--poeira);
+    pointer-events: none;
+  }
+  .grao[data-tom="escuro"] {
+    background: color-mix(in oklab, var(--terra-roxa) 70%, var(--poeira));
+  }
+  .nuvem-poeira {
+    position: absolute;
+    left: 6%;
+    bottom: -0.9rem;
+    z-index: -1;
+    width: 88%;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--poeira) 80%, transparent), transparent);
+    filter: blur(2px);
+    pointer-events: none;
   }
 
   /* O WhatsApp do contato final: grande (e magnético, ver MagneticLink). */

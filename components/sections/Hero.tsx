@@ -1,3 +1,4 @@
+import { LevelingTitle } from "@/components/motion/LevelingTitle";
 import { site } from "@/content/site";
 import { whatsappHref } from "@/lib/whatsapp";
 
@@ -16,14 +17,12 @@ export function Hero() {
 
       <div className="mx-auto flex w-full max-w-(--max-conteudo) flex-1 items-end px-(--gutter) pb-[9svh] md:items-center md:pb-[4svh]">
         <div className="veu-leitura max-w-[44rem]">
-          <h1 id="hero-titulo" className="titulo-display text-[clamp(2.4rem,4.9vw,4.75rem)]">
-            {hero.titulo}
-          </h1>
+          <LevelingTitle id="hero-titulo" text={hero.titulo} className="titulo-display text-[clamp(2.4rem,4.9vw,4.75rem)]" />
           <p className="mt-6 max-w-[38ch] text-[1.0625rem] leading-relaxed text-poeira/85 md:text-lg">
             {hero.apoio}
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
-            <a href={whatsappHref()} target="_blank" rel="noopener" className="botao-primario">
+            <a href={whatsappHref()} target="_blank" rel="noopener" className="botao-primario" data-poeira>
               {hero.ctaPrincipal}
             </a>
             <a href="#servicos" className="link-secundario">

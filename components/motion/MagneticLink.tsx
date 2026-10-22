@@ -9,13 +9,15 @@ interface MagneticLinkProps {
   children: ReactNode;
   /** Quanto o link segue o cursor (fração da distância até o centro). */
   strength?: number;
+  /** Solta poeira ao passar o mouse (ver DustOnHover). */
+  poeira?: boolean;
 }
 
 /**
  * Link "magnético": dentro de uma área um pouco maior que ele, é puxado de leve na direção
  * do cursor. Só com mouse; com movimento reduzido ou toque, é um link comum.
  */
-export function MagneticLink({ href, className, children, strength = 0.3 }: MagneticLinkProps) {
+export function MagneticLink({ href, className, children, strength = 0.3, poeira = false }: MagneticLinkProps) {
   const field = useRef<HTMLSpanElement>(null);
   const link = useRef<HTMLAnchorElement>(null);
 
@@ -51,7 +53,7 @@ export function MagneticLink({ href, className, children, strength = 0.3 }: Magn
   return (
     // A área de atração passa um pouco do botão (padding) sem mudar o layout (margem negativa).
     <span ref={field} className="-m-8 inline-block p-8">
-      <a ref={link} href={href} target="_blank" rel="noopener" className={className}>
+      <a ref={link} href={href} target="_blank" rel="noopener" className={className} data-poeira={poeira || undefined}>
         {children}
       </a>
     </span>

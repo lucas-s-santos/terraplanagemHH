@@ -20,7 +20,7 @@ export function Contact() {
             {contato.apoio}
           </p>
           <div className="mt-10">
-            <MagneticLink href={whatsappHref()} className="botao-primario botao-grande">
+            <MagneticLink href={whatsappHref()} className="botao-primario botao-grande" poeira>
               {contato.cta}
             </MagneticLink>
           </div>
