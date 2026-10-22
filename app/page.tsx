@@ -1,4 +1,3 @@
-import { FloatingClods } from "@/components/media/FloatingClods";
 import { MediaStage } from "@/components/media/MediaStage";
 import { ScrollDirector } from "@/components/motion/ScrollDirector";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
@@ -13,7 +12,6 @@ export default function Home() {
   return (
     <>
       <MediaStage />
-      <FloatingClods />
       <SmoothScroll />
       <ScrollDirector />
       <main className="relative z-10">

@@ -8,7 +8,6 @@ Objetivo: gerar contato no WhatsApp e servir de peça de portfólio de UI/UX.
 ## Stack
 - Next.js (App Router) + TypeScript estrito + Tailwind
 - Mídia: clipes de vídeo (máquinas trabalhando, ilustrativos, gerados no Google Flow) em `public/media/`
-- 3D leve: three.js puro (sem React Three Fiber) só para os torrões flutuantes (`lib/clods/`), carregado depois do preloader
 - Motion: GSAP (ScrollTrigger, SplitText) + Lenis para scroll suave
 - Imagens: next/image (AVIF/WebP). Deploy: Vercel
 
