@@ -157,7 +157,8 @@ export function createClods({ canvas, count, narrow, colors, getStop, lastStop }
   };
 
   const clods: Clod[] = Array.from({ length: count }, (_, i) => {
-    const z = MathUtils.randFloat(-14, 4);
+    // Na tela estreita, perto da câmera um torrão vira uma bola na frente da máquina.
+    const z = MathUtils.randFloat(-14, narrow ? 0 : 4);
     const size = MathUtils.randFloat(0.14, 0.42) * (narrow ? 0.85 : 1);
     return {
       mesh: i % 2,

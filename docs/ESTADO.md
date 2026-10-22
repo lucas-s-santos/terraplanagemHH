@@ -9,7 +9,9 @@
 | preparo de solo | ✅ | ❌ recusado (máquina fantasma): gerar de novo. No celular, o 16:9 recortado (`focus: 78`) |
 | aração | ✅ (1,92 MB) | opcional: no celular o 16:9 recortado (`focus: 74`) ficou bom |
 | estradas, destoca, terrenos | não há (na tela larga, o 9:16 aparece numa janela à direita) | ✅ (22/10; 1,50 / 1,14 / 1,27 MB) |
-| contato | vai ser **foto** (falta suporte a imagem na `MediaStage`) | foto |
+| contato | ✅ **foto** WebP 99 KB, com zoom lento (`.foto-lenta`) | ✅ foto WebP 125 KB |
+
+Alternativas das fotos do contato em `media-originais/contato-*-alt-*`. Para usar foto em qualquer parada: `photo("<arquivo>")` em `content/media.ts` (WebP em `public/media/`).
 
 **Virada de direção (20/10):** as ilhas 3D deram lugar a **vídeos de máquinas trabalhando**, ilustrativos e gerados no Google Flow, como a cliente já fazia no site dela. O "surreal" (terra suspensa) vai para dentro dos próprios vídeos.
 - **`main`**: a versão 3D completa (`d6ad5ab`): ilhas por serviço, worker, preloader e painel. O `docs/ESTADO.md` de lá documenta as decisões do 3D.

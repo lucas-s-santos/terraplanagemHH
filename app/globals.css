@@ -62,6 +62,22 @@
     }
   }
 
+  /* Parada com foto em vez de vídeo: um zoom bem lento para a imagem não parecer congelada. */
+  .foto-lenta {
+    transform-origin: 68% 58%;
+    animation: foto-lenta 26s ease-in-out infinite alternate;
+  }
+  @keyframes foto-lenta {
+    to {
+      scale: 1.08;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .foto-lenta {
+      animation: none;
+    }
+  }
+
   /* Clipe só em pé (9:16) numa tela larga: o vídeo numa janela à direita, onde a máquina
      costuma ficar, sobre a própria capa desfocada. O texto continua à esquerda. */
   .janela-fundo {

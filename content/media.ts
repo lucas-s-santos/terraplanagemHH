@@ -5,9 +5,12 @@ import type { StopId } from "@/lib/stops";
  * `null` enquanto o clipe não chega: a parada mostra o fundo de terra.
  * Arquivos em public/media/ (como preparar: docs/ESTADO.md, seção "Vídeos").
  */
-/** Um formato do clipe: o vídeo e a capa (quadro parado, para carregar e para movimento reduzido). */
+/**
+ * Um formato do clipe: o vídeo e a capa (quadro parado, para carregar e para movimento reduzido).
+ * Sem vídeo, é uma foto: aparece parada, com um zoom bem lento.
+ */
 export interface ClipSource {
-  video: string;
+  video?: string;
   poster: string;
 }
 
@@ -23,6 +26,7 @@ export interface Clip {
 }
 
 const source = (file: string): ClipSource => ({ video: `/media/${file}.mp4`, poster: `/media/${file}.jpg` });
+const photo = (file: string): ClipSource => ({ poster: `/media/${file}.webp` });
 
 export const clips: Record<StopId, Clip | null> = {
   hero: { wide: source("hero-16x9"), tall: source("hero-9x16") },
@@ -34,5 +38,6 @@ export const clips: Record<StopId, Clip | null> = {
   estradas: { tall: source("estradas-9x16") },
   destoca: { tall: source("destoca-9x16") },
   terrenos: { tall: source("terrenos-9x16") },
-  contato: null,
+  // Foto (cena parada: fim do dia, terreno pronto). As alternativas estão em media-originais/.
+  contato: { wide: photo("contato-16x9"), tall: photo("contato-9x16") },
 };

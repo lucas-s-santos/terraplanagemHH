@@ -101,8 +101,8 @@ export function MediaStage() {
           return;
         }
         const media = sources(clip, portrait);
-        if (!media) return;
-        const { src } = media;
+        const src = media?.src;
+        if (!src) return;
         if (k >= current && k <= current + 1 + PRELOAD_AHEAD && video.getAttribute("src") !== src) video.src = src;
         if (visible && video.paused) video.play().catch(() => {});
         if (!visible && !video.paused) video.pause();
@@ -130,7 +130,10 @@ export function MediaStage() {
               style={{ opacity: k === 0 ? 1 : 0, visibility: k === 0 ? "visible" : "hidden" }}
             >
               {media?.window && <img src={media.poster} alt="" className="janela-fundo" />}
-              {media && (
+              {media && !media.src && (
+                <img src={media.poster} alt="" className="foto-lenta h-full w-full object-cover" />
+              )}
+              {media?.src && (
                 <div className={media.window ? "janela-video" : "absolute inset-0"}>
                   <video
                     ref={(el) => {
