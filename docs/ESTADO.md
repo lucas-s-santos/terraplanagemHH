@@ -68,6 +68,7 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 | `lib/store.ts` | zustand: `stop` (parada contínua), `load` (0 a 1, só sobe) e `revealed` (o vídeo entrou) |
 | `lib/useMediaQuery.ts` | Media query reativa (`usePrefersReducedMotion` usa) |
 | `components/media/MediaStage.tsx` | **A camada de mídia fixa**: clipes empilhados, crossfade entre 35% e 65% do caminho, só tocam os visíveis, só baixam o atual e os próximos, recorte do 16:9 no celular |
+| `components/media/FloatingClods.tsx` + `lib/clods/scene.ts` | **Torrões que saem do vídeo**: 18 torrões 3D no desktop e 9 no celular, num canvas transparente entre o vídeo e o texto (z 5, abaixo do `main` z 10: o painel e o rodapé cobrem). Sobem devagar, o scroll empurra, o mouse inclina a câmera e, na parada `contato`, assentam. three.js puro, carregado só depois do preloader; sem movimento reduzido |
 | `components/media/Preloader.tsx` | Preloader "nivelamento": linha de terreno aplainada por uma lâmina amarela conforme o primeiro clipe carrega |
 | `components/motion/SmoothScroll.tsx` | Lenis no ticker do GSAP (desligado com movimento reduzido) |
 | `components/motion/ScrollDirector.tsx` | Scroll → `stop`: a parada acontece quando um marcador `[data-stop]` está centralizado. **Vários marcadores da mesma parada = o clipe espera** entre eles |
@@ -95,6 +96,7 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 - **Tela larga sem 16:9:** o 9:16 aparece numa janela vertical à direita (`.janela-video`), sobre a própria capa desfocada (`.janela-fundo`). Os créditos do Flow acabaram antes dos 16:9 de estradas, destoca e terrenos; esticar um vídeo de 720 px de largura para a tela cheia ficaria borrado. Se o 16:9 vier, ele substitui a janela sozinho.
 - **Preloader na camada de mídia, não por cima da página.** O texto do hero pinta antes de tudo e continua sendo o LCP. Progresso real em `store.load`: 10% ao hidratar e o resto conforme o primeiro clipe baixa (`progress`, `canplaythrough`). Sem clipe ou com movimento reduzido, vai direto a 100%. Se travar por 15 s, sai mesmo assim.
 - **Linha do preloader com `clipPath`, não com tracejado.** Com `vector-effect: non-scaling-stroke`, o Chrome mede o tracejado em pixels de tela, e a linha saía cortada em ~70%.
+- **Torrões 3D com exposição baixa (0,72) e névoa da cor da terra.** O canvas fica acima do véu escuro do vídeo; na exposição normal, os torrões brilhavam mais que a cena e pareciam colados por cima. Poucos e pequenos, para não brigar com os clipes (que já têm torrões flutuando).
 - **Entrada do vídeo:** aparece em 1,4 s e se aproxima devagar (escala de 1,08 para 1 em 2,6 s). Substitui o mergulho da câmera do 3D.
 - **Depois dos serviços, painel de terra por cima** (decisão do Lucas, 20/10). As seções sobem num bloco de solo opaco, com borda irregular e faixa de terra roxa. O clipe de "terrenos" fica enquanto o painel passa; quando ele termina, entra o do contato.
 - **O contato é só o convite e o WhatsApp grande**, como o hero. Telefones, e-mail e endereço ficam no chão do rodapé.
@@ -118,7 +120,10 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 
 1. **Clipes:** gerar os outros 7 no mesmo estilo do hero (aprovado em 21/10).
 2. **Preparar e ligar os clipes** (`npm run clip`, seção 7) e revisar a página inteira em 1440 e 390 px.
-3. **Camada leve de poeira** por cima dos vídeos (canvas 2D, sem three): grãos e poeira reagindo ao scroll e ao mouse, para manter a "terra suspensa" viva entre os clipes.
+3. **3D por seção** (os torrões que atravessam o site já estão prontos, desde 22/10):
+   - **Corte de solo** em "Como trabalhamos": um bloco com as camadas de terra que vai sendo acertado a cada etapa, até ficar plano na "Entrega".
+   - **Maquete topográfica** em "Onde atuamos": relevo da região em curvas de nível, com os anéis de raio de atendimento pulsando (depende da lista de cidades).
+   - Os dois reaproveitam o `lib/clods/` (three puro, carregado sob demanda).
 4. **Seções que faltam, dentro do painel de terra:** Frota (scroll horizontal + blueprint, fotos reais) → Antes e depois (caçamba como controle, fotos reais) → Onde atuamos (curvas de nível + anéis de raio) → Depoimentos (só reais). Todas dependem de material da cliente.
 5. **Detalhes:** tipografia que nivela (eixo `wdth` da Archivo) em 1 ou 2 títulos; curvas de nível em SVG como textura e divisores; poeira no hover do WhatsApp.
 6. **SEO:** JSON-LD `LocalBusiness` e imagem OG (um quadro do clipe do hero).
