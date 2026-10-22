@@ -18,12 +18,22 @@ const REDUCED = "(prefers-reduced-motion: reduce)";
 // na hora, senão a primeira passada liga o vídeo com movimento reduzido e baixa o 16:9 no celular.
 const matches = (query: string) => window.matchMedia(query).matches;
 
-/** O formato certo para a tela, ou null (tela larga e só existe o 9:16: fica o fundo de terra). */
+/**
+ * O formato certo para a tela. Na tela larga sem 16:9, o 9:16 vai numa janela à direita
+ * (`window`), sobre a própria capa desfocada, em vez de ser esticado.
+ */
 function sources(clip: Clip, tall: boolean) {
-  if (tall && clip.tall) return { src: clip.tall.video, poster: clip.tall.poster, position: "50% 50%" };
-  if (!clip.wide) return null;
+  if (tall && clip.tall) return { src: clip.tall.video, poster: clip.tall.poster, position: "50% 50%", window: false };
+  if (!clip.wide) {
+    return clip.tall ? { src: clip.tall.video, poster: clip.tall.poster, position: "50% 50%", window: true } : null;
+  }
   // Sem versão vertical, o 16:9 é recortado no ponto de interesse.
-  return { src: clip.wide.video, poster: clip.wide.poster, position: tall ? `${clip.focus ?? 60}% 50%` : "50% 50%" };
+  return {
+    src: clip.wide.video,
+    poster: clip.wide.poster,
+    position: tall ? `${clip.focus ?? 60}% 50%` : "50% 50%",
+    window: false,
+  };
 }
 
 /**
@@ -119,19 +129,22 @@ export function MediaStage() {
               className="fundo-terra absolute inset-0"
               style={{ opacity: k === 0 ? 1 : 0, visibility: k === 0 ? "visible" : "hidden" }}
             >
+              {media?.window && <img src={media.poster} alt="" className="janela-fundo" />}
               {media && (
-                <video
-                  ref={(el) => {
-                    videos.current[k] = el;
-                  }}
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
-                  poster={media.poster}
-                  className="h-full w-full object-cover"
-                  style={{ objectPosition: media.position }}
-                />
+                <div className={media.window ? "janela-video" : "absolute inset-0"}>
+                  <video
+                    ref={(el) => {
+                      videos.current[k] = el;
+                    }}
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    poster={media.poster}
+                    className="h-full w-full object-cover"
+                    style={{ objectPosition: media.position }}
+                  />
+                </div>
               )}
             </div>
           );

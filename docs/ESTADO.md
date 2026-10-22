@@ -8,7 +8,8 @@
 | reservatório | ✅ (refeito em 22/10, sem a pintura da Caterpillar; 2,18 MB) | ✅ |
 | preparo de solo | ✅ | ❌ recusado (máquina fantasma): gerar de novo. No celular, o 16:9 recortado (`focus: 78`) |
 | aração | ✅ (1,92 MB) | opcional: no celular o 16:9 recortado (`focus: 74`) ficou bom |
-| estradas, destoca, terrenos, contato | gerar | gerar |
+| estradas, destoca, terrenos | não há (na tela larga, o 9:16 aparece numa janela à direita) | ✅ (22/10; 1,50 / 1,14 / 1,27 MB) |
+| contato | vai ser **foto** (falta suporte a imagem na `MediaStage`) | foto |
 
 **Virada de direção (20/10):** as ilhas 3D deram lugar a **vídeos de máquinas trabalhando**, ilustrativos e gerados no Google Flow, como a cliente já fazia no site dela. O "surreal" (terra suspensa) vai para dentro dos próprios vídeos.
 - **`main`**: a versão 3D completa (`d6ad5ab`): ilhas por serviço, worker, preloader e painel. O `docs/ESTADO.md` de lá documenta as decisões do 3D.
@@ -91,6 +92,7 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 - **Movimento reduzido:** só as capas. O vídeo nem baixa. Os efeitos da `MediaStage` leem o `matchMedia` na hora: os hooks começam com o valor do servidor (`false`) na hidratação, e a primeira passada ligava o vídeo mesmo com movimento reduzido (e baixava o 16:9 no celular antes do 9:16).
 - **Loop com fusão de 1 s** (`npm run clip`): o clipe do Flow começa e termina em posições diferentes; sem a fusão, o loop dá um pulo.
 - **Celular:** usa o 9:16 quando existe. Sem ele, recorta o 16:9 no ponto `focus` do clipe (padrão 60%).
+- **Tela larga sem 16:9:** o 9:16 aparece numa janela vertical à direita (`.janela-video`), sobre a própria capa desfocada (`.janela-fundo`). Os créditos do Flow acabaram antes dos 16:9 de estradas, destoca e terrenos; esticar um vídeo de 720 px de largura para a tela cheia ficaria borrado. Se o 16:9 vier, ele substitui a janela sozinho.
 - **Preloader na camada de mídia, não por cima da página.** O texto do hero pinta antes de tudo e continua sendo o LCP. Progresso real em `store.load`: 10% ao hidratar e o resto conforme o primeiro clipe baixa (`progress`, `canplaythrough`). Sem clipe ou com movimento reduzido, vai direto a 100%. Se travar por 15 s, sai mesmo assim.
 - **Linha do preloader com `clipPath`, não com tracejado.** Com `vector-effect: non-scaling-stroke`, o Chrome mede o tracejado em pixels de tela, e a linha saía cortada em ~70%.
 - **Entrada do vídeo:** aparece em 1,4 s e se aproxima devagar (escala de 1,08 para 1 em 2,6 s). Substitui o mergulho da câmera do 3D.

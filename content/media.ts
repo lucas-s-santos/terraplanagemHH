@@ -30,8 +30,9 @@ export const clips: Record<StopId, Clip | null> = {
   // 9:16 recusado (máquina "fantasma" no meio do clipe): no celular, o 16:9 recortado na máquina.
   "preparo-solo": { wide: source("preparo-solo-16x9"), focus: 78 },
   aracao: { wide: source("aracao-16x9"), focus: 74 },
-  estradas: null,
-  destoca: null,
-  terrenos: null,
+  // Só em pé: na tela larga aparecem numa janela à direita (ver MediaStage).
+  estradas: { tall: source("estradas-9x16") },
+  destoca: { tall: source("destoca-9x16") },
+  terrenos: { tall: source("terrenos-9x16") },
   contato: null,
 };
