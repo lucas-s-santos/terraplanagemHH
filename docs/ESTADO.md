@@ -7,7 +7,8 @@
 | hero | ✅ | ✅ |
 | reservatório | ❌ recusado ("CAT" legível no braço): gerar de novo | ✅ |
 | preparo de solo | ✅ | ❌ recusado (máquina fantasma): gerar de novo. No celular, o 16:9 recortado (`focus: 78`) |
-| aração, estradas, destoca, terrenos, contato | gerar | gerar |
+| aração | ✅ (1,92 MB) | opcional: no celular o 16:9 recortado (`focus: 74`) ficou bom |
+| estradas, destoca, terrenos, contato | gerar | gerar |
 
 **Virada de direção (20/10):** as ilhas 3D deram lugar a **vídeos de máquinas trabalhando**, ilustrativos e gerados no Google Flow, como a cliente já fazia no site dela. O "surreal" (terra suspensa) vai para dentro dos próprios vídeos.
 - **`main`**: a versão 3D completa (`d6ad5ab`): ilhas por serviço, worker, preloader e painel. O `docs/ESTADO.md` de lá documenta as decisões do 3D.

@@ -30,7 +30,7 @@ export const clips: Record<StopId, Clip | null> = {
   reservatorio: { tall: source("reservatorio-9x16") },
   // 9:16 recusado (máquina "fantasma" no meio do clipe): no celular, o 16:9 recortado na máquina.
   "preparo-solo": { wide: source("preparo-solo-16x9"), focus: 78 },
-  aracao: null,
+  aracao: { wide: source("aracao-16x9"), focus: 74 },
   estradas: null,
   destoca: null,
   terrenos: null,
