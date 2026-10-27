@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { type Clip, clips } from "@/content/media";
+import { type Clip, clips, heroBackdrop3d } from "@/content/media";
 import { smoothstep } from "@/lib/math";
-import { STOP_IDS } from "@/lib/stops";
+import { STOP_IDS, type StopId } from "@/lib/stops";
 import { useStageStore } from "@/lib/store";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
+import { BackhoeStage } from "./BackhoeStage";
 import { Preloader } from "./Preloader";
 
 /** Além do clipe atual e do próximo, quantos começam a baixar antes de aparecer. */
@@ -40,8 +41,10 @@ function sources(clip: Clip, tall: boolean) {
  * A única camada de mídia, fixa atrás da página: um clipe por parada, empilhados.
  * O scroll (store.stop) escolhe o clipe; entre duas seções o próximo aparece por cima
  * no meio do caminho. Só tocam os clipes visíveis; só baixam o atual e os seguintes.
+ * Com `hero3d`, o hero é a retroescavadeira 3D sobre uma foto (rota /hero-3d), no lugar do vídeo.
  */
-export function MediaStage() {
+export function MediaStage({ hero3d = false }: { hero3d?: boolean }) {
+  const clipOf = (id: StopId) => (hero3d && id === "hero" ? null : clips[id]);
   const reduced = usePrefersReducedMotion();
   const tall = useMediaQuery(TALL);
   const revealed = useStageStore((s) => s.revealed);
@@ -52,6 +55,8 @@ export function MediaStage() {
   useEffect(() => {
     const { setLoad } = useStageStore.getState();
     setLoad(0.1);
+    // Na versão 3D, quem informa o carregamento é a cena (BackhoeStage).
+    if (hero3d) return;
     const first = videos.current[0];
     if (!first || matches(REDUCED)) {
       setLoad(1);
@@ -71,7 +76,7 @@ export function MediaStage() {
       first.removeEventListener("canplaythrough", done);
       first.removeEventListener("error", done);
     };
-  }, [reduced]);
+  }, [reduced, hero3d]);
 
   // Qual clipe aparece, qual toca e qual baixa, conforme a parada.
   useEffect(() => {
@@ -89,7 +94,7 @@ export function MediaStage() {
           layer.style.visibility = visible ? "visible" : "hidden";
         }
         const video = videos.current[k];
-        const clip = clips[id];
+        const clip = clipOf(id);
         if (!video || !clip) return;
         // Com movimento reduzido fica a imagem parada (poster): o vídeo nem baixa.
         if (still) {
@@ -112,13 +117,13 @@ export function MediaStage() {
     return useStageStore.subscribe((state, previous) => {
       if (state.stop !== previous.stop) apply(state.stop);
     });
-  }, [reduced, tall]);
+  }, [reduced, tall, hero3d]);
 
   return (
     <div aria-hidden="true" data-palco className="fundo-terra pointer-events-none fixed inset-0 z-0 overflow-hidden">
       <div className="palco absolute inset-0" data-revelado={revealed}>
         {STOP_IDS.map((id, k) => {
-          const clip = clips[id];
+          const clip = clipOf(id);
           const media = clip && sources(clip, tall);
           return (
             <div
@@ -129,6 +134,15 @@ export function MediaStage() {
               className="fundo-terra absolute inset-0"
               style={{ opacity: k === 0 ? 1 : 0, visibility: k === 0 ? "visible" : "hidden" }}
             >
+              {hero3d && k === 0 && (
+                <>
+                  <picture>
+                    <source media={TALL} srcSet={heroBackdrop3d.tall} />
+                    <img src={heroBackdrop3d.wide} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                  </picture>
+                  <BackhoeStage />
+                </>
+              )}
               {media?.window && <img src={media.poster} alt="" className="janela-fundo" />}
               {media && !media.src && (
                 <img src={media.poster} alt="" className="foto-lenta h-full w-full object-cover" />

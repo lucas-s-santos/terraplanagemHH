@@ -1,6 +1,13 @@
 # Estado do projeto: onde paramos
 
-Última sessão: 23/10/2026, na branch **`feat/video`**. Todas as paradas têm mídia. Prontos também: régua de nível, curvas de nível, corte de solo 3D, título que nivela, poeira no hover do WhatsApp e SEO (OG + JSON-LD). Clipes:
+Última sessão: 23/10/2026 (tarde), na branch **`feat/retroescavadeira`** (sem commit no fim da sessão: ver o `git status`). A **`main` agora é a versão em vídeo** (merge de `feat/video` em 23/10); a versão 3D das ilhas ficou na tag **`versao-3d`**.
+
+Novidades desta sessão:
+- **Retroescavadeira 3D feita em código** (`lib/backhoe/`), sem modelo comprado, genérica e sem marca, cavando no hero da rota **`/hero-3d`** (versão de comparação, fora do Google). A home `/` continua com o vídeo. **Falta o Lucas decidir qual hero fica.**
+- **Onde atuamos**: maquete 3D da região (`lib/region/`) com Alterosa, os 6 municípios vizinhos e anéis de 15 e 30 km.
+- **Prompts do Flow para completar o site** em `PROMPTS-FLOW.md`, seção "Para completar o site": fundo do hero 3D, frota, antes e depois e os clipes que faltam.
+
+Todas as paradas têm mídia. Prontos também: régua de nível, curvas de nível, corte de solo 3D, título que nivela, poeira no hover do WhatsApp e SEO (OG + JSON-LD). Clipes:
 
 | Parada | 16:9 | 9:16 |
 |---|---|---|
@@ -14,8 +21,8 @@
 Alternativas das fotos do contato em `media-originais/contato-*-alt-*`. Para usar foto em qualquer parada: `photo("<arquivo>")` em `content/media.ts` (WebP em `public/media/`).
 
 **Virada de direção (20/10):** as ilhas 3D deram lugar a **vídeos de máquinas trabalhando**, ilustrativos e gerados no Google Flow, como a cliente já fazia no site dela. O "surreal" (terra suspensa) vai para dentro dos próprios vídeos.
-- **`main`**: a versão 3D completa (`d6ad5ab`): ilhas por serviço, worker, preloader e painel. O `docs/ESTADO.md` de lá documenta as decisões do 3D.
-- **`feat/video`** (esta): o three.js saiu e entrou uma camada de vídeo guiada pelo scroll. Ficam o preloader "nivelamento", o painel de terra com "Como trabalhamos", o contato e o rodapé entalhado.
+- **Tag `versao-3d`** (`d6ad5ab`): a versão 3D completa, com ilhas por serviço, worker, preloader e painel. O `docs/ESTADO.md` de lá documenta as decisões do 3D.
+- **`main`** (desde 23/10, igual à `feat/video`): a camada de vídeo guiada pelo scroll. Ficam o preloader "nivelamento", o painel de terra com "Como trabalhamos", o contato e o rodapé entalhado.
 
 **Opcionais nos clipes:** os 16:9 de estradas, destoca e terrenos (hoje numa janela vertical na tela larga) e o 9:16 do preparo de solo. Sem 16:9, a tela larga mostra o 9:16 numa janela; sem 9:16, o celular recorta o 16:9.
 
@@ -77,6 +84,10 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 | `lib/scroll.ts` | `scrollToY` (pelo Lenis quando ativo), `maxScroll`, `centerScroll` |
 | `components/sections/ContourField.tsx` | Curvas de nível em SVG (geradas por código, sem cruzar) no fundo do painel e do rodapé; desenham-se com o scroll |
 | `components/sections/SoilCut.tsx` + `lib/soil/scene.ts` | **Corte de solo 3D** em "Como trabalhamos": bloco com camadas de solo; estacas do gabarito sobem na visita técnica, a frente de corte nivela o topo na execução, entrega com terra batida. Preso na tela (sticky) enquanto as etapas passam. three.js sob demanda, só desenha visível; movimento reduzido = estado final parado |
+| `components/Landing.tsx` | A página inteira. `app/page.tsx` usa com o vídeo; `app/hero-3d/page.tsx` usa com `hero3d` (noindex, canônico `/`) |
+| `lib/backhoe/` | **Retroescavadeira 3D**: `materials.ts` (pintura, aço, borracha, vidro e poeira de terra roxa no shader), `parts.ts` (perfis curvos, pneus, aros, caçambas, cilindros hidráulicos, fusão de peças fixas), `model.ts` (montagem e juntas: giro, lança, braço, caçamba com balancim e biela, pá, sapatas), `cycle.ts` (pose de transporte, entrada e ciclo de escavação de 11 s), `scene.ts` (câmera, luz de fim de tarde com sombra, reflexo de céu, chão com vala e monte, poeira, torrões que flutuam) |
+| `components/media/BackhoeStage.tsx` | Liga a retroescavadeira à camada de mídia: carrega o three depois da hidratação, avisa o preloader, acorda a máquina quando o vídeo "entraria" e pausa quando o hero sai |
+| `components/sections/Region.tsx` + `lib/region/scene.ts` + `lib/geo.ts` | **Onde atuamos**: lista das cidades vizinhas com a distância em linha reta (a informação) e a maquete 3D (bloco de solo, curvas de nível, anéis, estacas, nomes em HTML projetados) |
 | `components/motion/LevelingTitle.tsx` | Título do hero que nivela: palavras desniveladas que se alinham no fim do preloader |
 | `components/motion/DustOnHover.tsx` | Poeira ao passar o mouse em `[data-poeira]` (os botões do WhatsApp) |
 | `components/seo/LocalBusinessJsonLd.tsx` + `lib/siteUrl.ts` | Dados estruturados da empresa; endereço público do site |
@@ -119,6 +130,17 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 - **Botão primário usa `translate` no `:active`, não `transform`:** o ímã do WhatsApp anima o `transform` pelo GSAP, e os dois brigariam.
 - **Ao medir desempenho no Windows, aqueça o navegador:** a primeira requisição de um Chrome recém-aberto leva ~1,8 s, e isso não é do site.
 - **Editar texto pelo PowerShell 5.1 corrompe acentos:** `Get-Content`/`Set-Content` leem UTF-8 sem BOM como ANSI. Use a ferramenta de edição ou o Node.
+- **Retroescavadeira feita em código, não comprada** (decisão do Lucas, 23/10). As referências eram fotos de uma Caterpillar 432F2; a nossa é genérica: sem CAT, sem número de modelo, sem Michelin. Peças com pivô na junta, então tudo anima: lança, braço, caçamba, pá, sapatas e cilindros que esticam.
+- **A retroescavadeira mora na camada de mídia, no lugar do clipe do hero**, e não dentro da seção. Assim fica presa ao próprio fundo (dentro da seção, ela subiria com o texto e se soltaria do chão) e se funde com o reservatório no mesmo crossfade dos vídeos.
+- **Articulação da caçamba de trás como na máquina real:** o cilindro empurra um balancim, que puxa a biela presa na caçamba. A posição do balancim sai da interseção de dois círculos (`solveBucketLinkage`).
+- **A vala e o monte saem do próprio ciclo:** a cena mede onde a boca da caçamba raspa e onde ela despeja, e o chão é moldado ali. Se mudar as poses em `cycle.ts`, o chão acompanha.
+- **Chão 3D só perto da máquina, sumindo nas bordas** (alfa por vértice), por cima da foto de fundo desfocada como profundidade de campo. A cor é a terra roxa "no sol" (`#b5562c` misturado ao token), porque o token é a cor na sombra.
+- **Fundo provisório do hero 3D:** a foto alternativa B do contato, com a escavadeira coberta por um trecho clonado do lado (ffmpeg, borda suavizada) e desfocada. O 9:16 é um recorte da 16:9 limpa, com o chão na altura certa para o celular. A versão limpa sem desfoque está em `media-originais/hero-3d-limpo-16x9.png`.
+- **Desempenho da retroescavadeira:** peças fixas fundidas por material (de 345 para 134 chamadas de desenho por quadro, contando a sombra; ~130 mil triângulos por passada). Pixel ratio até 1,5 no celular e sombra de 1024 px.
+- **O `dt` do laço nunca é negativo.** O carimbo do `requestAnimationFrame` pode vir antes do `performance.now()` guardado; no Chrome headless isso deu segundos negativos, e a entrada "andava para trás".
+- **`checkShaderErrors` desligado em produção** nas cenas com three. No Windows, o ANGLE solta avisos `X4122` nos shaders de sombra do próprio three: inofensivos, mas enchiam o console.
+- **`__retro` no console (só em dev):** `__retro.at(0.7)` congela o ciclo numa fase, `__retro.pose({ boom: -0.5 })` mexe numa junta, `__retro.view({ azimuth: 1 })` muda o enquadramento e `__retro.info()` mostra o estado. Útil para capturas e para afinar as poses.
+- **Onde atuamos sem prometer área de atendimento:** só os 6 municípios vizinhos (lista e direções do plano municipal de saúde de Alterosa; coordenadas conferidas com ~1 km de margem) e a distância em linha reta. O relevo da maquete é estilizado, não o real. A cliente ainda precisa dizer quais cidades atende.
 
 ## 5. Pendências conhecidas
 
@@ -131,18 +153,19 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 - [ ] Linha "imagens ilustrativas" discreta no rodapé, se a cliente concordar.
 - [ ] **Domínio provisório** em `content/site.ts` (`seo.url`: hehterraplanagem.com.br). Ele vai no link canônico, na imagem OG e no JSON-LD. Na Vercel, a variável `NEXT_PUBLIC_SITE_URL` tem precedência.
 - [ ] Pendências com a cliente: lista em `BRIEFING.md`.
+- [ ] **Cidades atendidas:** o mapa de "Onde atuamos" mostra só os vizinhos de Alterosa. Com a lista da cliente, trocar em `content/site.ts` (`atuacao.cidades`) e, se fizer sentido, o texto.
+- [ ] **Fundo do hero 3D provisório** (foto do contato retocada): gerar o próprio no Flow.
 
 ## 6. Próximos passos (ordem sugerida)
 
-1. **Seções que faltam, dentro do painel de terra** (é só colocar dentro do `<EarthPanel>`):
-   - **Frota:** cards empilhados com a palavra gigante saindo da borda (a ideia da referência WePink), com linhas de planta técnica apontando partes da máquina. Fotos do Flow com os prompts da conversa de 22/10, **só das máquinas que a cliente tem**.
+1. **Decidir o hero:** vídeo (`/`) ou retroescavadeira 3D (`/hero-3d`). Se a 3D ganhar, a home passa a usar `<Landing hero3d />` e a rota de comparação sai.
+2. **Gerar no Flow** o que está em `PROMPTS-FLOW.md`, seção "Para completar o site": fundo do hero 3D, fotos da frota, pares de antes e depois e os clipes que faltam.
+3. **Seções que faltam, dentro do painel de terra** (é só colocar dentro do `<EarthPanel>`, em `components/Landing.tsx`):
+   - **Frota:** cards empilhados com a palavra gigante saindo da borda (a ideia da referência WePink), com linhas de planta técnica apontando partes da máquina. O primeiro cartão pode ser a retroescavadeira 3D (`lib/backhoe/`, câmera de lado); os outros, as fotos do Flow, **só das máquinas que a cliente tem**.
    - **Antes e depois:** slider com a caçamba como controle. Pares de fotos (ANTES gerado, DEPOIS editando o ANTES).
-   - **Onde atuamos:** maquete topográfica 3D (relevo em curvas de nível, anéis de raio pulsando), mesmo padrão do `lib/soil/`. Depende da lista de cidades.
    - **Números** (anos, obras, hectares, cidades), contando ao aparecer. Só com números reais.
    - **Depoimentos:** só reais.
-2. **Máquina 3D no hero** (ideia do Lucas, 22/10): foto de fundo do Flow + escavadeira 3D comprada, testada numa versão separada contra o hero em vídeo. Prompt da foto de fundo na conversa de 22/10. O modelo precisa ter: **peças separadas com o pivô na junta** (base, cabine, lança, braço, caçamba; sem isso não anima a escavação), **licença para web e modificação**, ~40 mil triângulos, materiais PBR e **nenhum logo**. Pipeline: Blender (tirar logos, nomear os nós) → `gltf-transform` (Draco/Meshopt + KTX2) → `public/models/escavadeira.glb` com ≤ 1,5 MB.
-3. **Performance:** Lighthouse de verdade (perfil celular) com os clipes reais.
-4. **Decidir entre `main` (3D) e `feat/video`** e fazer o merge da escolhida.
+4. **Performance:** Lighthouse de verdade (perfil celular) com os clipes reais e com o hero 3D.
 
 ## 7. Vídeos
 

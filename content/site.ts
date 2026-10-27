@@ -87,6 +87,94 @@ export const site = {
     ],
   },
 
+  // Máquinas: para que serve cada uma (explicação, não "nossa frota": a lista da cliente ainda não veio).
+  // Os ids das peças são os pontos da planta em lib/backhoe/blueprint.ts.
+  maquinas: {
+    titulo: "A máquina certa para cada serviço",
+    apoio: "Cada uma resolve uma parte da obra. Veja a retroescavadeira, peça por peça.",
+    nome: "Retroescavadeira",
+    abertura: {
+      nome: "Duas máquinas numa só",
+      texto: "Na frente, uma pá carregadeira. Atrás, uma escavadeira. Ela anda, carrega e cava sem trocar de máquina.",
+    },
+    pecas: [
+      {
+        id: "loader",
+        nome: "Pá carregadeira",
+        texto: "Raspa, carrega e espalha terra solta. Também ajuda a deixar o chão no nível.",
+      },
+      {
+        id: "stabilizer",
+        nome: "Sapatas",
+        texto: "Antes de cavar, descem e travam a máquina no chão. Firme, ela não balança e o corte sai no lugar certo.",
+      },
+      {
+        id: "boom",
+        nome: "Lança e braço",
+        texto: "Dão o alcance: abrem valas e cavam fundo sem a máquina sair do lugar.",
+      },
+      {
+        id: "bucket",
+        nome: "Caçamba",
+        texto: "Os dentes rasgam o solo. A caçamba enche, sobe e despeja a terra ao lado da vala.",
+      },
+    ],
+  },
+
+  // Antes e depois: pares ilustrativos do Flow (não são obras da empresa, e a legenda diz isso).
+  // Só aparecem os pares com imagem em content/media.ts; sem nenhum, a seção sai.
+  antesDepois: {
+    titulo: "Antes e depois",
+    apoio: "O mesmo lugar, antes e depois do serviço. Arraste a caçamba para raspar o terreno.",
+    rotuloAntes: "Antes",
+    rotuloDepois: "Depois",
+    rotuloControle: "Caçamba: arraste para comparar o antes e o depois",
+    rotuloPares: "Escolha o serviço",
+    aviso: "Imagens ilustrativas.",
+    pares: [
+      {
+        id: "destoca",
+        nome: "Destoca",
+        altAntes: "Área de eucalipto cortado, com tocos, raízes e galhos no chão",
+        altDepois: "A mesma área sem tocos, com a terra gradeada e pronta para plantar",
+      },
+      {
+        id: "terreno",
+        nome: "Terreno",
+        altAntes: "Lote em declive com mato alto e uma erosão de terra vermelha",
+        altDepois: "O mesmo lote nivelado e compactado, com o talude cortado ao fundo",
+      },
+      {
+        id: "estrada",
+        nome: "Estrada rural",
+        altAntes: "Estrada de terra com buracos, poças e valetas de erosão",
+        altDepois: "A mesma estrada patrolada, com caimento e valetas laterais",
+      },
+    ],
+  },
+
+  // Onde atuamos: maquete da região. A lista de cidades atendidas ainda não veio da cliente: o mapa mostra
+  // os municípios vizinhos e a distância em linha reta, sem prometer área de atendimento.
+  atuacao: {
+    titulo: "Onde atuamos",
+    texto:
+      "Saímos do trevo de Alterosa, na MG-184, na região do Lago de Furnas. Sua obra fica em outra cidade? Chame no WhatsApp e consulte.",
+    rotuloLista: "Distância em linha reta a partir de Alterosa",
+    rotuloMapa: "Maquete do relevo da região, com Alterosa no centro e as cidades vizinhas",
+    origem: { nome: "Alterosa", detalhe: "Trevo da MG-184", lat: -21.254, lon: -46.143 },
+    // Sedes dos municípios vizinhos (plano municipal de saúde de Alterosa); posições aproximadas.
+    cidades: [
+      { nome: "Areado", lat: -21.359, lon: -46.146 },
+      { nome: "Conceição da Aparecida", lat: -21.096, lon: -46.205 },
+      { nome: "Monte Belo", lat: -21.326, lon: -46.368 },
+      { nome: "Alfenas", lat: -21.429, lon: -45.947 },
+      { nome: "Carmo do Rio Claro", lat: -20.972, lon: -46.126 },
+      { nome: "Nova Resende", lat: -21.129, lon: -46.416 },
+    ],
+    /** Anéis de distância, em km. */
+    aneis: [15, 30],
+  },
+
   contato: {
     titulo: "Conte o que o seu terreno precisa.",
     apoio: "Atendemos Alterosa e região. O orçamento começa com uma conversa no WhatsApp.",
@@ -107,3 +195,4 @@ export const site = {
 } as const;
 
 export type ServiceId = (typeof site.servicos.itens)[number]["id"];
+export type BeforeAfterId = (typeof site.antesDepois.pares)[number]["id"];

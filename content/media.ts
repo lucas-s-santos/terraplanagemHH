@@ -1,3 +1,4 @@
+import type { BeforeAfterId } from "@/content/site";
 import type { StopId } from "@/lib/stops";
 
 /**
@@ -40,4 +41,31 @@ export const clips: Record<StopId, Clip | null> = {
   terrenos: { tall: source("terrenos-9x16") },
   // Foto (cena parada: fim do dia, terreno pronto). As alternativas estão em media-originais/.
   contato: { wide: photo("contato-16x9"), tall: photo("contato-9x16") },
+};
+
+/**
+ * Fundo do hero na versão com a retroescavadeira 3D (rota /hero-3d): só a paisagem, desfocada
+ * como profundidade de campo. A máquina e o chão perto dela vêm do three.js (lib/backhoe/).
+ * Quadro dos 6 s do clipe do Flow (media-originais/hero-3d-fundo-16x9_flow_*.mp4): o sol entra pela direita, como a luz
+ * da cena. O 9:16 é um recorte do mesmo quadro, sem o céu de cima e nos eucaliptos, com o chão na altura do celular.
+ */
+export const heroBackdrop3d = {
+  wide: "/media/hero-3d-fundo-16x9.webp",
+  tall: "/media/hero-3d-fundo-9x16.webp",
+} as const;
+
+/**
+ * Antes e depois (o slider da caçamba): o mesmo lugar, com a mesma câmera, ilustrativos, gerados no Flow
+ * ("Antes e depois" em docs/PROMPTS-FLOW.md). WebP 16:9 em public/media/. `null` até o par chegar:
+ * só aparecem os pares com imagem e, sem nenhum, a seção sai.
+ */
+export interface BeforeAfterPair {
+  antes: string;
+  depois: string;
+}
+
+export const beforeAfter: Record<BeforeAfterId, BeforeAfterPair | null> = {
+  destoca: null,
+  terreno: null,
+  estrada: null,
 };

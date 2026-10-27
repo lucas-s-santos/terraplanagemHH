@@ -111,3 +111,87 @@ CAMERA: low wide shot at about 2 meters high, slow lateral slide from left to ri
 0–8 s: almost static and peaceful; the clods settle one by one; the dust slowly fades.
 CAMERA: very slow push-in at about 3 meters high, almost static; the excavator on the right third of the frame, wide open calm space on the left.
 ```
+
+---
+
+# Para completar o site (23/10)
+
+**Prioridade (27/10): os pares do antes e depois (seção 3).** O slider da caçamba já está pronto no site e só aparece quando chegar o primeiro par. Depois, as fotos da frota e os clipes que faltam.
+
+**Fotos, não vídeos** (exceto os clipes da lista do fim): no Flow, gere como imagem, na maior resolução. Entrega em `media-originais/`, com o nome indicado; eu comprimo (`npm run foto`), recorto e ligo no site.
+
+## Bloco de estilo das fotos
+
+Cole no fim de todos os prompts de foto desta parte (é o mesmo mundo dos vídeos, sem movimento):
+
+**PHOTO STYLE**
+```
+PHOTO STYLE: Photorealistic photograph, full-frame camera, 35mm lens, natural depth of field. Late afternoon golden hour in the rolling hills of southern Minas Gerais, Brazil: deep red-purple latosol soil (terra roxa), patches of green pasture, distant rows of eucalyptus, soft hills on the horizon. Warm amber sunlight coming from the right, long soft shadows, light haze and glowing dust in the air. Color palette: dark brown earth, red-brown soil, machine yellow, warm sand and dusty beige highlights, muted olive green grass; gentle film contrast, no oversaturation. Machines are generic modern construction equipment with plain solid yellow body panels and dark grey mechanical parts: no black stripes, no badges, no emblems, no logos, no brand names, no letters, no numbers and no decals anywhere. No people, no faces, no text, no watermark.
+```
+
+## 1. Fundo do hero 3D (feito, e não é mais usado)
+
+Gerado em 23/10 (veio como vídeo: `media-originais/hero-3d-fundo-16x9_flow_*.mp4`; o fundo foi o quadro dos 6 s). Em 27/10 o hero ficou com o vídeo, e a retroescavadeira 3D foi para a seção "A máquina certa para cada serviço", sem foto de fundo. O prompt fica aqui caso precise de um terreno vazio.
+
+**16:9** → `hero-3d-fundo-16x9.jpg`
+```
+A wide, empty construction site on a farm: a large flat terrace of freshly cut and compacted red earth (terra roxa) in the foreground and middle ground, with faint tire tracks, a few small clods and fine dust on the surface. Behind the terrace, a low bank of red soil with green grass on top, then rolling pasture hills, rows of eucalyptus and soft blue hills far away. Late golden hour: the sun is low on the right side of the frame, just above the hills, with warm haze and glowing dust in the light. Completely empty: no machines, no vehicles, no people, no tools.
+CAMERA: eye level, about 1.6 meters above the ground, looking straight ahead with the camera level; the horizon line sits in the upper third of the frame; the flat terrace fills the lower half. Wide 16:9 landscape.
+```
+(+ PHOTO STYLE)
+
+**9:16** → `hero-3d-fundo-9x16.jpg`: o mesmo prompt, trocando a última frase de CAMERA por: `Vertical 9:16: the horizon line sits at about one fifth from the top; the flat terrace starts at the middle of the frame and fills the whole bottom half.`
+
+## 2. Frota (as outras máquinas da seção "A máquina certa para cada serviço")
+
+Um retrato de cada máquina, **de lado** (o site desenha por cima linhas de planta técnica apontando as partes, então o perfil precisa estar limpo). A retroescavadeira não precisa: ela já existe em 3D, com as peças animadas. Gere **só as máquinas que a cliente tem**; enquanto ela não confirmar, estas cinco são as mais comuns numa empresa de terraplanagem do Sul de Minas.
+
+Bloco comum de composição (cole depois da descrição de cada máquina):
+```
+COMPOSITION: the machine seen exactly from the side (pure side profile, 90 degrees), standing still on a flat pad of compacted red earth, whole machine visible with generous empty space around it, centered, the ground line in the lower third. Clean, calm background: soft out-of-focus hills and a warm hazy sky, nothing in front of the machine. 3:2 landscape.
+```
+(+ PHOTO STYLE)
+
+| Arquivo | Descrição (início do prompt) |
+|---|---|
+| `frota-escavadeira.jpg` | `A generic yellow hydraulic crawler excavator, about 20 tons, with steel tracks, a cab on the left side of the upper structure, the boom raised and the arm folded so the bucket rests on the ground in front of the tracks.` |
+| `frota-trator-esteira.jpg` | `A generic yellow crawler bulldozer (track-type tractor) with a large straight blade in front, slightly raised, and a single-shank ripper at the rear, steel tracks with a little red mud.` |
+| `frota-motoniveladora.jpg` | `A generic yellow motor grader with six large tires, a long front frame, the angled moldboard blade under the middle of the machine and the cab at the rear, a small front push plate.` |
+| `frota-pa-carregadeira.jpg` | `A generic yellow wheel loader with four large tires, articulated frame, a wide general-purpose bucket lowered close to the ground, cab in the middle.` |
+| `frota-rolo.jpg` | `A generic yellow single-drum vibratory soil compactor with a large smooth steel drum in front, two big tires at the rear and an open cab with a roof.` |
+
+## 3. Antes e depois (o slider da caçamba)
+
+Cada par é **o mesmo lugar, com a mesma câmera**: gere o ANTES; depois, no Flow, **edite a própria imagem do antes** (não gere do zero) pedindo o DEPOIS. Assim o enquadramento bate e o slider funciona. 16:9.
+
+**Destoca** → `antes-destoca.jpg` / `depois-destoca.jpg`
+```
+ANTES: A former eucalyptus plantation on red soil right after the harvest: rows of cut eucalyptus stumps with tangled roots, dry bark, branches and leaves scattered on the ground, some young sprouts coming out of the stumps. Seen from a slightly raised point, about 3 meters high, looking across the rows toward the hills.
+```
+```
+DEPOIS (editar a imagem do antes): Keep exactly the same place, camera, horizon, hills, light and shadows. Remove every stump, root, branch and sprout: the whole area is now cleared, raked and evenly harrowed red soil with fine parallel lines, ready for planting. Nothing else changes.
+```
+
+**Terreno** → `antes-terreno.jpg` / `depois-terreno.jpg`
+```
+ANTES: A sloping rural lot at the edge of a small town: uneven ground covered with tall dry grass, weeds and a few termite mounds, a gully of red soil cut by rain, a wire fence on one side. Seen from about 2 meters high, looking up the slope.
+```
+```
+DEPOIS (editar a imagem do antes): Keep exactly the same place, camera, horizon, fence, hills and light. The lot is now a perfectly level building pad of compacted red earth with faint roller marks, a clean cut slope (talude) at the back showing red and ochre soil layers with grass on top, and thin wooden grade stakes with yellow tips at the corners. No weeds, no gully. Nothing else changes.
+```
+
+**Estrada rural** → `antes-estrada.jpg` / `depois-estrada.jpg`
+```
+ANTES: A damaged rural dirt road between pastures after the rainy season: deep ruts and potholes full of muddy water, eroded edges, a washed-out side with exposed rocks, grass invading the track. Seen from the middle of the road at about 1.7 meters high, the road curving away toward the hills.
+```
+```
+DEPOIS (editar a imagem do antes): Keep exactly the same place, camera, curve, pastures, hills and light. The road is now freshly graded: a smooth, slightly crowned red dirt surface with neat drainage ditches on both sides and a small water outlet turning into the pasture. No ruts, no puddles. Nothing else changes.
+```
+
+## 4. Clipes que ainda faltam (vídeo, prompts acima)
+
+| Clipe | Prompt | Observação |
+|---|---|---|
+| `preparo-solo-9x16.mp4` | nº 3 com o COMPOSITION 9:16 | o anterior foi recusado (máquina fantasma) |
+| `hero-9x16.mp4` | nº 1 com o COMPOSITION 9:16 | não precisa mais: a faixa colada embaixo foi trocada por chão desfocado (27/10, `media-originais/hero-9x16_flow_*_sem-faixa.mp4`) |
+| `estradas-16x9.mp4`, `destoca-16x9.mp4`, `terrenos-16x9.mp4` | nº 5, 6 e 7 | opcionais: hoje aparecem numa janela vertical na tela larga |
