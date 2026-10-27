@@ -101,7 +101,7 @@ function sequencePose(p: number, out: Pose): Pose {
   out.loaderLift = lerp(lerp(lerp(TRAVEL.loaderLift, -0.02, scrape), 0.85, carry), -0.02, park);
   out.loaderTilt = lerp(lerp(lerp(TRAVEL.loaderTilt, 0, scrape), 0.65, carry), 0, park);
   out.stabilizers = span(p, 2, 0.35, 0.85);
-  // Lança e braço: desdobram e esticam até o chão. Caçamba: raspa, enche e levanta (o ciclo do hero, de 0,1 a 0,46).
+  // Lança e braço: desdobram e esticam até o chão. Caçamba: raspa, enche e levanta (o ciclo de escavação, de 0,1 a 0,46).
   const filling = span(p, 4, 0.08, 0.9);
   if (filling > 0) {
     cyclePose(lerp(0.1, 0.46, filling), dig);
@@ -298,7 +298,7 @@ export function createBackhoeBlueprint({ canvas, colors, getProgress, onFrame, s
   resize();
 
   if (process.env.NODE_ENV !== "production") {
-    // Para revisar pelo console (e pelas capturas): __planta.at(0.5) congela a sequência num ponto.
+    // Para revisar pelo console (e pelas capturas): __planta.at(0.5) congela a sequência num ponto; __planta.info() mostra o estado.
     (window as unknown as Record<string, unknown>).__planta = {
       at: (p: number) => {
         running = false;
@@ -306,6 +306,7 @@ export function createBackhoeBlueprint({ canvas, colors, getProgress, onFrame, s
         shown = p;
         draw(p);
       },
+      info: () => ({ running, shown, progress: getProgress(), frames: renderer.info.render.frame }),
     };
   }
 

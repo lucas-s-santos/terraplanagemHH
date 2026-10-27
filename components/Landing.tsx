@@ -14,11 +14,11 @@ import { Services } from "@/components/sections/Services";
 import { SiteFooter } from "@/components/sections/SiteFooter";
 import { LocalBusinessJsonLd } from "@/components/seo/LocalBusinessJsonLd";
 
-/** A página inteira. `hero3d`: o hero com a retroescavadeira 3D no lugar do vídeo (rota /hero-3d). */
-export function Landing({ hero3d = false }: { hero3d?: boolean }) {
+/** A página inteira. */
+export function Landing() {
   return (
     <>
-      <MediaStage hero3d={hero3d} />
+      <MediaStage />
       <SmoothScroll />
       <ScrollDirector />
       <ScrollRuler />
@@ -35,7 +35,7 @@ export function Landing({ hero3d = false }: { hero3d?: boolean }) {
         <Contact />
       </main>
       <SiteFooter />
-      {!hero3d && <LocalBusinessJsonLd />}
+      <LocalBusinessJsonLd />
     </>
   );
 }

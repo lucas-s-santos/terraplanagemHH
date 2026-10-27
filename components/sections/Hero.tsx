@@ -21,7 +21,8 @@ export function Hero() {
           <p className="mt-6 max-w-[38ch] text-[1.0625rem] leading-relaxed text-poeira/85 md:text-lg">
             {hero.apoio}
           </p>
-          <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
+          {/* No celular, o link fica sempre embaixo do botão: lado a lado, ele cabia ou não conforme a fonte já tivesse chegado. */}
+          <div className="mt-9 flex flex-col items-start gap-x-8 gap-y-4 sm:flex-row sm:flex-wrap sm:items-center">
             <a href={whatsappHref()} target="_blank" rel="noopener" className="botao-primario" data-poeira>
               {hero.ctaPrincipal}
             </a>

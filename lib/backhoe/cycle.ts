@@ -40,13 +40,6 @@ const KEYS: readonly (ArmPose & { at: number })[] = [
   { at: 1, swing: 0, boom: -0.3, stick: -0.62, bucket: -0.5, load: 0 },
 ];
 
-/** Duração de um ciclo, em segundos. Lento de propósito: o vídeo de fundo também é calmo. */
-export const CYCLE_SECONDS = 11;
-/** Trecho do ciclo em que a terra cai da caçamba (para soltar os torrões). */
-export const DUMP_WINDOW = [0.64, 0.78] as const;
-/** Trecho em que a caçamba raspa o chão (para levantar poeira). */
-export const SCRAPE_WINDOW = [0.1, 0.34] as const;
-
 const fields = ["swing", "boom", "stick", "bucket", "load"] as const;
 
 /** A pose do braço num ponto do ciclo (0 a 1), com aceleração e frenagem em cada trecho. */
@@ -62,24 +55,4 @@ export function cyclePose(phase: number, out: Pose): Pose {
   out.loaderTilt = PARKED.loaderTilt;
   out.stabilizers = PARKED.stabilizers;
   return out;
-}
-
-/**
- * Entrada (depois do preloader): da pose de transporte até o começo do ciclo.
- * Primeiro descem a pá e as sapatas, depois a retro se desdobra.
- */
-export function introPose(progress: number, out: Pose): Pose {
-  const start = cyclePose(0, { ...TRAVEL });
-  const ground = smoothstep(progress, 0, 0.45);
-  const arm = smoothstep(progress, 0.3, 1);
-  out.loaderLift = lerp(TRAVEL.loaderLift, PARKED.loaderLift, ground);
-  out.loaderTilt = lerp(TRAVEL.loaderTilt, PARKED.loaderTilt, ground);
-  out.stabilizers = lerp(TRAVEL.stabilizers, PARKED.stabilizers, smoothstep(progress, 0.12, 0.5));
-  for (const field of fields) out[field] = lerp(TRAVEL[field], start[field], arm);
-  return out;
-}
-
-/** Pose parada para movimento reduzido: a caçamba cheia, saindo da vala. */
-export function stillPose(): Pose {
-  return cyclePose(0.42, { ...TRAVEL });
 }

@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { type Clip, clips, heroBackdrop3d } from "@/content/media";
+import { type Clip, clips } from "@/content/media";
 import { smoothstep } from "@/lib/math";
-import { STOP_IDS, type StopId } from "@/lib/stops";
+import { STOP_IDS } from "@/lib/stops";
 import { useStageStore } from "@/lib/store";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
-import { BackhoeStage } from "./BackhoeStage";
 import { Preloader } from "./Preloader";
 
 /** Além do clipe atual e do próximo, quantos começam a baixar antes de aparecer. */
@@ -41,10 +40,8 @@ function sources(clip: Clip, tall: boolean) {
  * A única camada de mídia, fixa atrás da página: um clipe por parada, empilhados.
  * O scroll (store.stop) escolhe o clipe; entre duas seções o próximo aparece por cima
  * no meio do caminho. Só tocam os clipes visíveis; só baixam o atual e os seguintes.
- * Com `hero3d`, o hero é a retroescavadeira 3D sobre uma foto (rota /hero-3d), no lugar do vídeo.
  */
-export function MediaStage({ hero3d = false }: { hero3d?: boolean }) {
-  const clipOf = (id: StopId) => (hero3d && id === "hero" ? null : clips[id]);
+export function MediaStage() {
   const reduced = usePrefersReducedMotion();
   const tall = useMediaQuery(TALL);
   const revealed = useStageStore((s) => s.revealed);
@@ -55,8 +52,6 @@ export function MediaStage({ hero3d = false }: { hero3d?: boolean }) {
   useEffect(() => {
     const { setLoad } = useStageStore.getState();
     setLoad(0.1);
-    // Na versão 3D, quem informa o carregamento é a cena (BackhoeStage).
-    if (hero3d) return;
     const first = videos.current[0];
     if (!first || matches(REDUCED)) {
       setLoad(1);
@@ -76,15 +71,17 @@ export function MediaStage({ hero3d = false }: { hero3d?: boolean }) {
       first.removeEventListener("canplaythrough", done);
       first.removeEventListener("error", done);
     };
-  }, [reduced, hero3d]);
+  }, [reduced]);
 
   // Qual clipe aparece, qual toca e qual baixa, conforme a parada.
   useEffect(() => {
     const still = matches(REDUCED);
     const portrait = matches(TALL);
-    const apply = (stop: number) => {
+    const apply = (stop: number, revealed: boolean) => {
       const current = Math.min(Math.floor(stop), STOP_IDS.length - 1);
       const blend = smoothstep(0.35, 0.65, stop - current);
+      // Até o vídeo entrar, só o hero baixa: no 4G, dividir a banda com os seguintes atrasava a entrada em segundos.
+      const last = revealed ? current + 1 + PRELOAD_AHEAD : current;
       STOP_IDS.forEach((id, k) => {
         // Cada camada tem fundo próprio: a de cima, quando cobre tudo, esconde (e pausa) a de baixo.
         const visible = (k === current && blend < 1) || (k === current + 1 && blend > 0);
@@ -93,9 +90,18 @@ export function MediaStage({ hero3d = false }: { hero3d?: boolean }) {
           layer.style.opacity = String(k <= current ? 1 : k === current + 1 ? blend : 0);
           layer.style.visibility = visible ? "visible" : "hidden";
         }
+        const clip = clips[id];
+        const media = clip && sources(clip, portrait);
+        // Capas e fotos também só baixam perto de aparecer, e já no formato da tela (no HTML não vêm:
+        // o servidor não sabe se é celular, e o celular baixava as 16:9 e depois as 9:16).
+        if (layer && media && k >= current && k <= last) {
+          layer.querySelectorAll("img").forEach((img) => {
+            if (img.getAttribute("src") !== media.poster) img.src = media.poster;
+          });
+        }
         const video = videos.current[k];
-        const clip = clipOf(id);
         if (!video || !clip) return;
+        if (media && k >= current && k <= last && video.getAttribute("poster") !== media.poster) video.poster = media.poster;
         // Com movimento reduzido fica a imagem parada (poster): o vídeo nem baixa.
         if (still) {
           if (video.hasAttribute("src")) {
@@ -105,25 +111,25 @@ export function MediaStage({ hero3d = false }: { hero3d?: boolean }) {
           }
           return;
         }
-        const media = sources(clip, portrait);
         const src = media?.src;
         if (!src) return;
-        if (k >= current && k <= current + 1 + PRELOAD_AHEAD && video.getAttribute("src") !== src) video.src = src;
+        if (k >= current && k <= last && video.getAttribute("src") !== src) video.src = src;
         if (visible && video.paused) video.play().catch(() => {});
         if (!visible && !video.paused) video.pause();
       });
     };
-    apply(useStageStore.getState().stop);
+    const { stop, revealed } = useStageStore.getState();
+    apply(stop, revealed);
     return useStageStore.subscribe((state, previous) => {
-      if (state.stop !== previous.stop) apply(state.stop);
+      if (state.stop !== previous.stop || state.revealed !== previous.revealed) apply(state.stop, state.revealed);
     });
-  }, [reduced, tall, hero3d]);
+  }, [reduced, tall]);
 
   return (
     <div aria-hidden="true" data-palco className="fundo-terra pointer-events-none fixed inset-0 z-0 overflow-hidden">
       <div className="palco absolute inset-0" data-revelado={revealed}>
         {STOP_IDS.map((id, k) => {
-          const clip = clipOf(id);
+          const clip = clips[id];
           const media = clip && sources(clip, tall);
           return (
             <div
@@ -134,18 +140,10 @@ export function MediaStage({ hero3d = false }: { hero3d?: boolean }) {
               className="fundo-terra absolute inset-0"
               style={{ opacity: k === 0 ? 1 : 0, visibility: k === 0 ? "visible" : "hidden" }}
             >
-              {hero3d && k === 0 && (
-                <>
-                  <picture>
-                    <source media={TALL} srcSet={heroBackdrop3d.tall} />
-                    <img src={heroBackdrop3d.wide} alt="" className="absolute inset-0 h-full w-full object-cover" />
-                  </picture>
-                  <BackhoeStage />
-                </>
-              )}
-              {media?.window && <img src={media.poster} alt="" className="janela-fundo" />}
+              {/* Capas sem src: a imagem certa entra quando a parada se aproxima (ver o efeito acima). */}
+              {media?.window && <img alt="" className="janela-fundo" />}
               {media && !media.src && (
-                <img src={media.poster} alt="" className="foto-lenta h-full w-full object-cover" />
+                <img alt="" className="foto-lenta h-full w-full object-cover" />
               )}
               {media?.src && (
                 <div className={media.window ? "janela-video" : "absolute inset-0"}>
@@ -157,7 +155,6 @@ export function MediaStage({ hero3d = false }: { hero3d?: boolean }) {
                     loop
                     playsInline
                     preload="auto"
-                    poster={media.poster}
                     className="h-full w-full object-cover"
                     style={{ objectPosition: media.position }}
                   />

@@ -489,8 +489,6 @@ export function createBackhoe(m: BackhoeMaterials) {
   load.position.set(0.0, -0.4, 0);
   load.castShadow = true;
   bucket.add(load);
-  /** Boca da caçamba: de onde a terra sai no despejo. */
-  const mouth = anchor(bucket, 0.1, -0.35, 0);
   /** Onde as linhas da planta técnica tocam cada peça, no lado -z (o que as câmeras mostram). */
   const callouts = {
     loader: anchor(loaderBucket, 0.45, -0.05, -LOADER_WIDTH / 2),
@@ -596,9 +594,6 @@ export function createBackhoe(m: BackhoeMaterials) {
   return {
     root,
     setPose,
-    /** Pontos que a cena acompanha: a boca da caçamba (despejo) e o giroflex (luz). */
-    mouth,
-    beacon,
     callouts,
     dispose: () => geometries.forEach((geometry) => geometry.dispose()),
   };

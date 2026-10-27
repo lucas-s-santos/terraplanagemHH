@@ -8,7 +8,7 @@ Objetivo: gerar contato no WhatsApp e servir de peça de portfólio de UI/UX.
 ## Stack
 - Next.js (App Router) + TypeScript estrito + Tailwind
 - Mídia: clipes de vídeo (máquinas trabalhando, ilustrativos, gerados no Google Flow) em `public/media/`
-- 3D pontual: three.js puro (sem React Three Fiber), carregado sob demanda: o corte de solo (`lib/soil/`) e a maquete da região (`lib/region/`) dentro das seções; a retroescavadeira (`lib/backhoe/`) na camada de mídia, no lugar do clipe do hero, só na rota de comparação `/hero-3d`
+- 3D pontual: three.js puro (sem React Three Fiber), carregado sob demanda: o corte de solo (`lib/soil/`), a retroescavadeira como planta técnica (`lib/backhoe/`) e a maquete da região (`lib/region/`), todos dentro das seções
 - Motion: GSAP (ScrollTrigger, SplitText) + Lenis para scroll suave
 - Imagens: next/image (AVIF/WebP). Deploy: Vercel
 

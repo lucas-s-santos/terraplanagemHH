@@ -81,6 +81,8 @@ for (const vp of viewports) {
       window.scrollTo({ top, behavior: "instant" });
     }, stop);
     await page.waitForTimeout(Number(values.wait));
+    // Dois quadros antes da captura: sem isso, os canvas 3D às vezes saíam com um quadro velho, meio apagado.
+    await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
     const file = path.join(outDir, `${vp.name}-${stop.replace("~", "--").replace(/[^\w.-]+/g, "_")}${values.reduced ? "-reduzido" : ""}.png`);
     await page.screenshot({ path: file });
     console.log("captura:", file);

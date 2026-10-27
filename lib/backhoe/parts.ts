@@ -3,7 +3,6 @@ import {
   type Curve,
   CylinderGeometry,
   ExtrudeGeometry,
-  IcosahedronGeometry,
   InstancedMesh,
   LatheGeometry,
   type Material,
@@ -90,21 +89,6 @@ export function rodZ(radius: number, length: number, segments = 18): BufferGeome
 /** Cilindro em pé, com a base em y = 0. */
 export function post(radius: number, height: number, segments = 16, top = radius): BufferGeometry {
   return new CylinderGeometry(top, radius, height, segments).translate(0, height / 2, 0);
-}
-
-/** Torrão: uma pedra de terra irregular. */
-export function clod(radius: number, seed: number): BufferGeometry {
-  const geometry = new IcosahedronGeometry(radius, 1);
-  const position = geometry.getAttribute("position");
-  const p = new Vector3();
-  for (let i = 0; i < position.count; i++) {
-    p.fromBufferAttribute(position, i);
-    const bump = 1 + 0.22 * Math.sin(p.x * 31 + seed) * Math.cos(p.y * 27 - seed * 1.7) + 0.12 * Math.sin(p.z * 43 + seed * 2.3);
-    p.multiplyScalar(bump).multiply(new Vector3(1, 0.78, 1));
-    position.setXYZ(i, p.x, p.y, p.z);
-  }
-  geometry.computeVertexNormals();
-  return geometry;
 }
 
 // ---------- Pneus e aros ----------

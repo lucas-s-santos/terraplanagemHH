@@ -32,7 +32,9 @@ export const site = {
   },
 
   hero: {
-    titulo: "Transformando terrenos em obras prontas para construir.",
+    // Linhas fixas (\n): a quebra não depende da fonte, então a troca da reserva pela Archivo (larga) não
+    // mexe no layout (antes, 3 linhas viravam 4 e o hero inteiro pulava: CLS 0,13 no 4G).
+    titulo: "Transformando\nterrenos em\nobras prontas\npara construir.",
     apoio:
       "Terraplanagem, destoca, estradas e preparo de solo para o campo e para a obra. Alterosa e região.",
     ctaPrincipal: "Chamar no WhatsApp",
