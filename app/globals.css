@@ -240,6 +240,81 @@
     }
   }
 
+  /* A logo: o nome por extenso embaixo da marca (a largura vem do textLength do SVG). */
+  .logo-nome {
+    font-weight: 700;
+    font-stretch: 110%;
+  }
+
+  /* A logo 3D do hero: arrasta na horizontal; na vertical, o toque continua rolando a página. */
+  .logo-3d {
+    cursor: grab;
+    touch-action: pan-y;
+  }
+  .dica-girar {
+    position: absolute;
+    left: 50%;
+    bottom: 4%;
+    translate: -50% 0;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--solo-fundo) 65%, transparent);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--poeira);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 600ms ease 900ms;
+  }
+  .dica-girar[data-visivel="true"] {
+    opacity: 0.85;
+  }
+
+  /* No hero, o vídeo vira ambiente atrás da logo 3D: mais escuro e desfocado (ampliado, para a borda
+     desfocada não aparecer). */
+  .video-ambiente {
+    filter: blur(3px) brightness(0.7) saturate(0.9);
+    scale: 1.04;
+  }
+
+  /* Grão de filme sobre os clipes: tira o liso "limpo demais" da imagem gerada e junta clipes diferentes
+     num filme só. Ruído em SVG (nada para baixar), trocando de lugar em saltos como grão de verdade. */
+  .grao-filme {
+    position: absolute;
+    inset: -50%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    opacity: 0.2;
+    mix-blend-mode: overlay;
+    animation: grao-filme 0.8s steps(1) infinite;
+  }
+  @keyframes grao-filme {
+    0% {
+      translate: 0 0;
+    }
+    17% {
+      translate: -4% 3%;
+    }
+    33% {
+      translate: 3% -5%;
+    }
+    50% {
+      translate: -6% -2%;
+    }
+    67% {
+      translate: 5% 4%;
+    }
+    83% {
+      translate: -2% 6%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .grao-filme {
+      animation: none;
+    }
+  }
+
   .titulo-display {
     font-stretch: var(--largura-titulo);
     font-weight: 780;

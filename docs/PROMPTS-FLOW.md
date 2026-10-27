@@ -2,6 +2,8 @@
 
 Um clipe por parte do site. Os prompts estão em inglês, porque o modelo costuma render melhor assim.
 
+> **27/10: os vídeos saíram com cara de IA, e o Lucas não gostou.** As causas principais estavam nestes prompts: o "detalhe surreal" (torrões que sobem e flutuam, que o modelo desenha como pedras voando) e a luz de pôr do sol cinematográfica. Os blocos STYLE e PHOTO STYLE e as linhas de cada clipe foram reescritos para **filmagem documental**: luz comum de tarde, máquina usada com barro, física de verdade e velocidade normal. Nos clipes que já existiam, o site usa só os trechos sem pedras voando (`npm run clip` com início e fim), alguns em câmera lenta.
+
 ## Antes de gerar
 
 - **Duração: 8 s, não 10.** É o tamanho de uma geração no Flow, e é o ideal para o site: o visitante fica de 3 a 6 s em cada seção, o clipe roda em loop e, quanto mais curto, mais leve. Não precisa estender.
@@ -19,7 +21,7 @@ Cole **STYLE** no fim de todos e o **COMPOSITION** do formato que estiver gerand
 
 **STYLE**
 ```
-STYLE: Photorealistic cinematic footage, shot on a full-frame cinema camera with a 35mm lens look, natural depth of field. Late afternoon golden hour in the rolling hills of southern Minas Gerais, Brazil: deep red-purple latosol soil (terra roxa), patches of green pasture, distant rows of eucalyptus, soft hills on the horizon. Warm amber sunlight coming from the right, long soft shadows, light haze and glowing dust floating in the sunbeams. Color palette: dark brown earth, red-brown soil, machine yellow, warm sand and dusty beige highlights, muted olive green grass; gentle film contrast, no oversaturation. One subtle impossible detail that defines the whole series: a few clods of red earth drift slowly upward and hang suspended in the air, catching the light, calm and elegant, never chaotic. Slow, smooth, perfectly stable camera movement at constant speed; no cuts, no shake, no sudden zoom. Machines are generic modern construction equipment with plain solid yellow body panels and dark grey mechanical parts: no black stripes, no badges, no emblems, no logos, no brand names, no letters, no numbers and no decals anywhere, not even small ones on the boom or the counterweight. Exactly one main machine, whose shape and direction stay consistent for the whole shot: it never morphs, never duplicates, no ghost or transparent machines, no attachment switching sides. No people in close-up, no faces. No on-screen text, no captions, no watermarks, no UI. Keep the horizon line in the upper third of the frame.
+STYLE: Real documentary footage from an actual earthmoving job in rural southern Minas Gerais, Brazil, as if filmed by a colleague of the operator with a consumer drone or a phone on a tripod. Ordinary mid-afternoon daylight with a slight haze, natural muted colors, no color grading. Deep red-purple soil (terra roxa), patches of pasture, rows of eucalyptus, soft hills. Real physics only: soil and dust fall down and settle naturally; nothing floats, hovers or flies upward. Normal real-time speed, no slow motion. The machine is a used generic yellow construction machine: worn and faded paint, scratches, dried red mud on the tracks and lower body, plain panels without any logo, brand name, letters, numbers or decals. Exactly one main machine, whose shape and direction stay consistent for the whole shot: it never morphs or duplicates. Simple, slightly imperfect framing; steady camera at constant speed; no cuts, no lens flares, no glowing sunbeams, no dramatic sunset sky. No on-screen text, no watermark, no faces in close-up.
 ```
 
 **COMPOSITION, 16:9 (horizontal)**
@@ -39,8 +41,8 @@ COMPOSITION (9:16 vertical website background): the main action fills the top 55
 ```
 8-second shot. A generic yellow hydraulic excavator works on a freshly cut terrace of deep red earth on a hillside farm, the landscape opening behind it at sunset.
 0–3 s: the bucket bites into the red soil and lifts a full, heavy load; fine dust rises and glows in the sunlight.
-3–6 s: as the arm rises, several clods of earth detach from the bucket and, instead of falling, float upward and hang weightless in the golden light, rotating very slowly.
-6–8 s: the arm holds still at the top; the suspended clods keep drifting gently; dust settles; the scene feels calm and powerful.
+3–6 s: the arm rises and swings; a few clods drop from the edge of the bucket back to the ground.
+6–8 s: the load is dumped on a pile beside the cut; dust drifts away with the wind and settles.
 CAMERA: slow lateral drone orbit from left to right at about 15 meters, slightly above the machine, constant speed, the excavator always on the right side of the frame.
 ```
 
@@ -49,7 +51,7 @@ CAMERA: slow lateral drone orbit from left to right at about 15 meters, slightly
 ```
 8-second shot. A farm water reservoir under construction: a wide basin dug into red earth, surrounded by smooth compacted earthen dam walls; the bottom already holds a calm pool of water reflecting the warm golden sky. A generic yellow excavator stands on the dam crest, shaping and smoothing the inner slope with the back of its bucket.
 0–3 s: the bucket slides down the slope, leaving a clean, smooth compacted surface.
-3–6 s: the water surface ripples gently and mirrors the sunset; a few clods of red earth float just above the water, reflected on it.
+3–6 s: the water surface ripples gently and reflects the sky; a little loose soil slides down the slope into the water.
 6–8 s: the machine pauses; the reflection settles; dust glows over the dam.
 CAMERA: high drone shot looking down at about 30 degrees, slowly pushing forward over the dam toward the water, the reservoir on the right side of the frame.
 ```
@@ -59,7 +61,7 @@ CAMERA: high drone shot looking down at about 30 degrees, slowly pushing forward
 ```
 8-second shot. A generic yellow crawler tractor pulls a heavy subsoiler (ripper) with deep steel shanks through hard, compacted red-brown soil on a gentle farm slope. Behind the shanks the ground opens into dark, loose, crumbly earth with broken clods, contrasting with the pale compacted ground ahead.
 0–3 s: the shanks cut into the soil, lifting and cracking the hard crust.
-3–6 s: small clods kicked up by the ripper float upward and hang in the air behind the tractor, catching the low sun.
+3–6 s: chunks of broken crust roll aside behind the shanks; a thin trail of dust follows the tractor.
 6–8 s: the tractor keeps moving steadily; the loosened strip of dark earth stretches behind it.
 CAMERA: low side tracking shot at about 1.5 meters above the ground, moving alongside the tractor at walking speed; the tractor on the right side of the frame, moving from left to right.
 ```
@@ -69,7 +71,7 @@ CAMERA: low side tracking shot at about 1.5 meters above the ground, moving alon
 ```
 8-second shot. A large farm field of deep red soil: a generic yellow tractor pulls a wide disc harrow, leaving perfectly parallel furrows of freshly turned earth that converge toward the horizon. Part of the field is already harrowed in neat lines; the rest is still green pasture, with a clean border between them.
 0–3 s: the discs turn the soil, throwing a soft curtain of red dust behind the tractor.
-3–6 s: a few clods rise from the furrows and float above the lines of earth, glowing in the sunlight.
+3–6 s: loose soil and small clods tumble off the discs and fall back onto the furrows.
 6–8 s: the tractor keeps a steady line; the furrow pattern fills more of the frame.
 CAMERA: drone at about 20 meters, slowly moving backward along the direction of the furrows, so the lines point toward the camera and converge to the horizon; the tractor on the right side of the frame.
 ```
@@ -79,7 +81,7 @@ CAMERA: drone at about 20 meters, slowly moving backward along the direction of 
 ```
 8-second shot. A generic yellow motor grader shapes a winding red dirt road that curves through green pasture hills. The angled blade leaves a smooth, slightly crowned surface, with neat drainage ditches on both sides and a small water outlet turning into the field.
 0–3 s: the blade pushes a long ridge of loose red earth to the side, leaving the road surface clean and even.
-3–6 s: a fine curtain of dust rises behind the blade; a few clods lift off and hang in the air above the road.
+3–6 s: a fine curtain of dust rises behind the blade and drifts over the pasture.
 6–8 s: the grader continues around the curve; the finished road stretches behind it in an elegant S shape.
 CAMERA: drone following the road's S-curve from above and slightly behind the grader, slowly descending; the road crosses the frame diagonally and the grader stays on the right side.
 ```
@@ -89,7 +91,7 @@ CAMERA: drone following the road's S-curve from above and slightly behind the gr
 ```
 8-second shot. A former eucalyptus plantation on red soil: on the left, neat rows of cut eucalyptus stumps; on the right, the area is already cleared, raked and clean. Between them, a long windrow pile of uprooted stumps with tangled roots. A generic yellow excavator with a root rake pulls a large stump out of the ground, its roots full of red earth.
 0–3 s: the rake hooks under the stump and lifts it out; roots snap free and soil falls away.
-3–6 s: crumbs of earth falling from the roots slow down and float in the air around the stump, glowing in the sunlight.
+3–6 s: soil falls from the roots in clumps as the stump is shaken.
 6–8 s: the machine swings the stump toward the windrow pile; dust drifts over the clean side.
 CAMERA: slow drone pull-back and rise, revealing the contrast between the stump rows and the cleared land; the excavator on the right third of the frame.
 ```
@@ -99,7 +101,7 @@ CAMERA: slow drone pull-back and rise, revealing the contrast between the stump 
 ```
 8-second shot. A perfectly level building pad cut into a hillside: a wide, flat surface of compacted light red earth with faint parallel roller marks; behind it, a clean angled cut slope (talude) showing exposed layers of red and ochre soil, with green grass on top of the bank. Thin wooden grade stakes with yellow tips mark the corners of the pad. A generic yellow crawler bulldozer makes a final pass, its blade leaving a flat, smooth surface; a smooth drum roller rests in the background.
 0–3 s: the bulldozer moves forward, the blade trimming the last uneven ridge.
-3–6 s: a few clods lifted by the blade float upward and hang above the flat ground.
+3–6 s: the blade rolls a low wave of loose soil forward and spreads it flat.
 6–8 s: the machine stops at the edge; the pad lies perfectly level in the warm light.
 CAMERA: low wide shot at about 2 meters high, slow lateral slide from left to right; perfectly level horizon; the bulldozer on the right side of the frame.
 ```
@@ -107,8 +109,8 @@ CAMERA: low wide shot at about 2 meters high, slow lateral slide from left to ri
 ## 8. Contato: "Conte o que o seu terreno precisa."
 
 ```
-8-second shot. The end of the workday: a finished, leveled plot of compacted red earth, ready for construction, glowing in the last warm light of sunset. A generic yellow excavator is parked at the edge of the plot, its bucket resting on the ground, engine off. The few clods of earth that were floating in the air slowly descend and settle softly on the flat ground: the work is done. Light dust hangs in the sunbeams; soft clouds in a warm amber sky.
-0–8 s: almost static and peaceful; the clods settle one by one; the dust slowly fades.
+8-second shot. The end of the workday: a finished, leveled plot of compacted red earth, ready for construction, glowing in the last warm light of sunset. A generic yellow excavator is parked at the edge of the plot, its bucket resting on the ground, engine off. The work is done; a little dust still drifts over the flat ground; ordinary late-afternoon sky.
+0–8 s: almost static and peaceful; the dust slowly fades.
 CAMERA: very slow push-in at about 3 meters high, almost static; the excavator on the right third of the frame, wide open calm space on the left.
 ```
 
@@ -126,7 +128,7 @@ Cole no fim de todos os prompts de foto desta parte (é o mesmo mundo dos vídeo
 
 **PHOTO STYLE**
 ```
-PHOTO STYLE: Photorealistic photograph, full-frame camera, 35mm lens, natural depth of field. Late afternoon golden hour in the rolling hills of southern Minas Gerais, Brazil: deep red-purple latosol soil (terra roxa), patches of green pasture, distant rows of eucalyptus, soft hills on the horizon. Warm amber sunlight coming from the right, long soft shadows, light haze and glowing dust in the air. Color palette: dark brown earth, red-brown soil, machine yellow, warm sand and dusty beige highlights, muted olive green grass; gentle film contrast, no oversaturation. Machines are generic modern construction equipment with plain solid yellow body panels and dark grey mechanical parts: no black stripes, no badges, no emblems, no logos, no brand names, no letters, no numbers and no decals anywhere. No people, no faces, no text, no watermark.
+PHOTO STYLE: An ordinary, unedited photo taken with a phone on a real rural job site in southern Minas Gerais, Brazil. Mid-afternoon natural daylight, slight haze, true-to-life muted colors, no HDR, no cinematic grading, no lens flare. Deep red-purple soil (terra roxa), dry pasture, eucalyptus rows and soft hills, with real everyday details: tire tracks, dust, small stones, dry grass, a wire fence. Machines, if any, are used generic yellow equipment with worn paint, scratches and dried red mud, and no logo, brand, letters, numbers or decals. Nothing floating in the air. No people, no text, no watermark.
 ```
 
 ## 1. Fundo do hero 3D (feito, e não é mais usado)

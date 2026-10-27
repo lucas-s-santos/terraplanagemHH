@@ -155,7 +155,8 @@ export function MediaStage() {
                     loop
                     playsInline
                     preload="auto"
-                    className="h-full w-full object-cover"
+                    // No hero, o vídeo é ambiente atrás da logo 3D (components/sections/HeroLogo.tsx).
+                    className={`h-full w-full object-cover ${id === "hero" ? "video-ambiente" : ""}`}
                     style={{ objectPosition: media.position }}
                   />
                 </div>
@@ -165,6 +166,7 @@ export function MediaStage() {
         })}
       </div>
       <div className="veu-video absolute inset-0" />
+      <div className="grao-filme" />
       <Preloader />
     </div>
   );

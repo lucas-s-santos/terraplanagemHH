@@ -5,6 +5,12 @@
 export const site = {
   nome: "H e H Terraplanagem",
   marca: "H e H",
+  // A logo (proposta nossa, 27/10: a cliente ainda não mandou a dela): a marca "H e H" cortada pela
+  // linha de nível e o nome embaixo. Desenho em lib/logo/marca.ts.
+  logo: {
+    nome: "TERRAPLANAGEM",
+    dicaGirar: "Arraste para girar",
+  },
   regiao: "Alterosa – MG",
   endereco: "Rodovia MG 184, s/n, trevo de Alterosa, Alterosa/MG",
   email: "contato@hehterraplanagem.com.br",

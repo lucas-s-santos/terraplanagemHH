@@ -10,22 +10,34 @@ Novidades desta sessão (27/10):
 - **Desempenho:** capas e fotos só da parada atual e das próximas (e no formato da tela); antes do vídeo entrar, só o hero baixa. No 4G lento, o vídeo do hero passou a entrar em 6,5 s (antes 19,9 s). Título do hero com linhas fixas: CLS de 0,132 para 0,008.
 - `npm run foto` (fotos do Flow para WebP) e paradas `[seletor]@fração` no `npm run shots`.
 
-**Prioridade agora: os 16:9 de estradas, destoca e terrenos** (prompts 5, 6 e 7 do `PROMPTS-FLOW.md`). Na tela larga eles aparecem numa janela vertical, que o Lucas não gostou (27/10), e a janela de "terrenos" aparece por cima do contato na transição. Com o 16:9 ligado em `content/media.ts`, a janela some sozinha.
+**Noite de 27/10 (parado no meio, a pedido do Lucas): logo nova e logo 3D no hero.**
+- A cliente nunca mandou a logo; o Lucas pediu uma **nova, do zero**. Conceito "a linha de nível": um monograma **H e H** cortado por uma só barra horizontal, que é o travessão dos H e a barra do e (`lib/logo/marca.ts`, a mesma geometria no SVG e no 3D). Logo com o nome embaixo em `components/brand/Logo.tsx`, já no cabeçalho do hero. É proposta: a cliente precisa aprovar.
+- **Logo 3D no hero, para pegar e girar** (`components/sections/HeroLogo.tsx` + `lib/logo/scene.ts`): letras em pintura amarela de máquina, barra em aço; arrastar gira com inércia, solta ela volta de frente balançando; entra junto com o vídeo (a barra passa e as letras assentam). O vídeo do hero ficou como ambiente, mais escuro e desfocado (`.video-ambiente`). O three baixa num momento ocioso, depois da hidratação.
+- **Falta (próxima sessão):** (1) **rodapé novo**: o Lucas não gostou do atual (o "HeH" entalhado parece uma barra marrom listrada); a ideia era tirar o entalhe, organizar os contatos e usar a logo nova; (2) a **barra de aço ainda puxa para o bronze**: ajustar o reflexo/material em `lib/logo/scene.ts`; (3) **ícone da aba** (`app/icon.svg`) com o H e a linha de nível; (4) conferir o desempenho (Lighthouse) com o three no hero.
+- Imagens do Flow (27/10): o **antes da destoca** ficou ótimo; as duas tentativas de **depois** são de outro lugar (geradas do zero) e não servem para o slider (`media-originais/depois-destoca-outro-lugar*`). O depois precisa ser feito **editando a foto do antes**.
 
-Todas as paradas têm mídia. Prontos também: régua de nível, curvas de nível, corte de solo 3D, título que nivela, poeira no hover do WhatsApp, SEO (OG + JSON-LD), Onde atuamos e a seção das máquinas. Clipes (todos com a emenda de poeira, 7,1 s):
+**Fim da tarde de 27/10: "cara de IA".** O Lucas gerou os 16:9 de estradas, destoca e terrenos e achou os vídeos (todos) com cara de IA. A causa principal eram os meus prompts: o "detalhe surreal" (torrões flutuando, que o Veo desenha como pedras voando) e a luz de pôr do sol cinematográfica. O que foi feito, sem gastar crédito:
+- **Só os trechos limpos** de cada clipe (sem pedras no ar), conferidos segundo a segundo. Os curtos demais viraram câmera lenta com quadros interpolados (`minterpolate`, originais `*_lento.mp4` em `media-originais/`). Terrenos 16:9: de 0 a 3,3 s em câmera lenta (0,55×); a partir de 3,5 s os torrões sobem da lâmina. O reservatório 9:16 tinha pedras sobre a água o clipe inteiro e saiu: o celular recorta o 16:9.
+- **Grão de filme** sobre a camada de mídia (`.grao-filme`): tira o liso de imagem gerada.
+- **Prompts reescritos** para filmagem documental (`PROMPTS-FLOW.md`), e a memória do Claude guarda a regra.
+- Estradas, destoca e terrenos agora ocupam a tela larga inteira: a janela vertical (que o Lucas não gostou) e o vazamento dela no contato sumiram.
+
+Todas as paradas têm mídia. Prontos também: régua de nível, curvas de nível, corte de solo 3D, título que nivela, poeira no hover do WhatsApp, SEO (OG + JSON-LD), Onde atuamos e a seção das máquinas. Clipes (todos com a emenda de poeira; os em câmera lenta ficaram com loops de 4,4 a 5,2 s):
 
 | Parada | 16:9 | 9:16 |
 |---|---|---|
-| hero | ✅ 2,15 MB | ✅ 1,33 MB (sem a faixa) |
-| reservatório | ✅ 2,07 MB | ✅ 1,22 MB |
-| preparo de solo | ✅ 2,25 MB | ❌ recusado (máquina fantasma). No celular, o 16:9 recortado (`focus: 78`) |
-| aração | ✅ 2,36 MB | opcional: no celular o 16:9 recortado (`focus: 74`) ficou bom |
-| estradas, destoca, terrenos | **faltam (prioridade)**: na tela larga, o 9:16 aparece numa janela à direita | ✅ 1,39 / 1,44 / 1,14 MB |
+| hero | ✅ 27/10: de 0 a 3,8 s em câmera lenta (0,62×), 2,26 MB | ✅ 27/10: de 0 a 4 s (sem a faixa) em câmera lenta (0,65×), 0,86 MB |
+| reservatório | ✅ 2,07 MB (limpo) | ❌ tirado em 27/10 (pedras sobre a água o clipe inteiro). No celular, o 16:9 recortado (`focus: 70`) |
+| preparo de solo | ✅ 27/10: de 0 a 3,5 s em câmera lenta (0,6×), 1,70 MB | ❌ recusado (máquina fantasma). No celular, o 16:9 recortado (`focus: 78`) |
+| aração | ✅ 27/10: de 0 a 2,7 s em câmera lenta (0,5×), 1,38 MB | opcional: no celular o 16:9 recortado (`focus: 74`) ficou bom |
+| estradas | ✅ 27/10: trecho de 5,6 s a 10 s em câmera lenta (0,65×), 2,46 MB | ✅ 1,39 MB |
+| destoca | ✅ 27/10: de 0 a 8 s (limpo inteiro), 2,26 MB | ✅ 1,44 MB |
+| terrenos | ✅ 27/10: de 0 a 3,3 s em câmera lenta (0,55×), 1,66 MB | ✅ 1,14 MB |
 | contato | ✅ **foto** WebP 99 KB, com zoom lento (`.foto-lenta`) | ✅ foto WebP 125 KB |
 
 Alternativas das fotos do contato em `media-originais/contato-*-alt-*`. Para usar foto em qualquer parada: `photo("<arquivo>")` em `content/media.ts` (WebP em `public/media/`).
 
-**Virada de direção (20/10):** as ilhas 3D deram lugar a **vídeos de máquinas trabalhando**, ilustrativos e gerados no Google Flow, como a cliente já fazia no site dela. O "surreal" (terra suspensa) vai para dentro dos próprios vídeos.
+**Virada de direção (20/10):** as ilhas 3D deram lugar a **vídeos de máquinas trabalhando**, ilustrativos e gerados no Google Flow, como a cliente já fazia no site dela. O "surreal" (terra suspensa) ia para dentro dos próprios vídeos, mas em 27/10 isso foi abandonado: virava pedras voando, com cara de IA. A ousadia fica no código (3D, tipografia, régua).
 - **Tag `versao-3d`** (`d6ad5ab`): a versão 3D completa, com ilhas por serviço, worker, preloader e painel. O `docs/ESTADO.md` de lá documenta as decisões do 3D.
 - **`main`** (desde 23/10, igual à `feat/video`): a camada de vídeo guiada pelo scroll. Ficam o preloader "nivelamento", o painel de terra com "Como trabalhamos", o contato e o rodapé entalhado.
 
@@ -93,6 +105,8 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 | `components/sections/ContourField.tsx` | Curvas de nível em SVG (geradas por código, sem cruzar) no fundo do painel e do rodapé; desenham-se com o scroll |
 | `components/sections/SoilCut.tsx` + `lib/soil/scene.ts` | **Corte de solo 3D** em "Como trabalhamos": bloco com camadas de solo; estacas do gabarito sobem na visita técnica, a frente de corte nivela o topo na execução, entrega com terra batida. Preso na tela (sticky) enquanto as etapas passam. three.js sob demanda, só desenha visível; movimento reduzido = estado final parado |
 | `components/Landing.tsx` | A página inteira (`app/page.tsx` só a usa) |
+| `lib/logo/marca.ts` + `components/brand/Logo.tsx` | A marca "H e H" com a linha de nível (caminhos SVG, altura 100) e a logo com o nome embaixo |
+| `components/sections/HeroLogo.tsx` + `lib/logo/scene.ts` | A logo 3D do hero: extrusão dos caminhos da marca, arrastar para girar, entrada com o vídeo |
 | `lib/backhoe/` | **Retroescavadeira 3D**: `materials.ts` (pintura, aço, borracha, vidro e poeira de terra roxa no shader), `parts.ts` (perfis curvos, pneus, aros, caçambas, cilindros hidráulicos, fusão de peças fixas), `model.ts` (montagem, juntas e os pontos das linhas de chamada: giro, lança, braço, caçamba com balancim e biela, pá, sapatas), `cycle.ts` (pose de transporte e ciclo de escavação), `sky.ts` (reflexo de céu), `blueprint.ts` (a cena da seção das máquinas). A cena do antigo hero 3D está no commit `367ab2c` |
 | `components/sections/Machines.tsx` | **A máquina certa para cada serviço**: palco preso na tela (`[data-pecas]`, 5 trechos de 100svh). A retro, de lado, começa como desenho de arestas (planta técnica) e a lâmina amarela a pinta (planos de recorte); depois pá, sapatas, lança e braço e caçamba trabalham, cada uma no seu trecho, com a linha de chamada saindo da legenda. Palavra gigante atrás. Movimento reduzido ou sem WebGL: máquina parada e as legendas em lista |
 | `components/sections/BeforeAfter.tsx` | **Antes e depois**: lâmina com a caçamba como controle (`role="slider"`, setas, Home/End), um botão por par, entrada automática até o meio. Só os pares com imagem em `content/media.ts`; sem nenhum, não aparece |
@@ -103,7 +117,7 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 | `app/opengraph-image.jpg` (+ `.alt.txt`) | Imagem de compartilhamento |
 | `components/motion/MagneticLink.tsx` | Link magnético (o WhatsApp do contato). Só com mouse e sem movimento reduzido |
 | `components/sections/{Hero,Services}.tsx` | Hero e as 6 paradas de serviço |
-| `components/sections/EarthPanel.tsx` | Painel de terra opaco depois dos serviços. Tem no fim o marcador que segura o clipe de "terrenos" |
+| `components/sections/EarthPanel.tsx` | Painel de terra opaco depois dos serviços. No topo, os marcadores que trocam "terrenos" pelo contato enquanto ele cobre a tela |
 | `components/sections/TerrainEdge.tsx` | Borda irregular de bloco de solo (faixa de terra roxa + solo escuro); `flip` para a borda de baixo |
 | `components/sections/Process.tsx` | Como trabalhamos: linha de nível (ondulada → reta) desenhada no scroll, etapas que acendem na estaca |
 | `components/sections/Contact.tsx` | Contato final (parada `contato`): título, apoio e o WhatsApp grande |
@@ -134,7 +148,7 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 - **JSON-LD `GeneralContractor`** (o tipo de LocalBusiness mais próximo de terraplanagem), com endereço, telefone, área atendida e serviços.
 - **Torrões 3D flutuando por cima do site: testados e removidos** (22/10, o Lucas não gostou). O código está no commit `1279aa1`, se um dia servir de base.
 - **Entrada do vídeo:** aparece em 1,4 s e se aproxima devagar (escala de 1,08 para 1 em 2,6 s). Substitui o mergulho da câmera do 3D.
-- **Depois dos serviços, painel de terra por cima** (decisão do Lucas, 20/10). As seções sobem num bloco de solo opaco, com borda irregular e faixa de terra roxa. O clipe de "terrenos" fica enquanto o painel passa; quando ele termina, entra o do contato.
+- **Depois dos serviços, painel de terra por cima** (decisão do Lucas, 20/10). As seções sobem num bloco de solo opaco, com borda irregular e faixa de terra roxa. A troca de "terrenos" para o contato acontece **logo no começo do painel**, com ele já cobrindo a tela (marcador `terrenos` no topo e `contato` 160svh abaixo). Antes (até 27/10) o marcador de "terrenos" ficava no fim do painel, e o contato subia com o trator de esteira por trás: o Lucas viu e pediu a correção.
 - **O contato é só o convite e o WhatsApp grande**, como o hero. Telefones, e-mail e endereço ficam no chão do rodapé.
 - **"H e H" entalhado:** fonte em `cqi` (31% da largura do contêiner), para ocupar ~95% da largura em qualquer tela. As camadas de solo vêm de `background-clip: text`, e a aresta vem de `filter: drop-shadow` (o `text-shadow` pinta por cima do recorte e apaga as camadas).
 - **Botão primário usa `translate` no `:active`, não `transform`:** o ímã do WhatsApp anima o `transform` pelo GSAP, e os dois brigariam.
@@ -174,8 +188,8 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 
 ## 6. Próximos passos (ordem sugerida)
 
-1. **Gerar no Flow os 16:9 de estradas, destoca e terrenos** (prompts 5, 6 e 7 do `PROMPTS-FLOW.md`, com o COMPOSITION 16:9). O Lucas tem 66 créditos (27/10): um por serviço, conferindo cada um antes de gastar o seguinte. Ligar com `npm run clip` e `wide: source(...)` em `content/media.ts`; a janela vertical some sozinha.
-2. **Pares do antes e depois** (seção 3 do `PROMPTS-FLOW.md`): o slider já está pronto e aparece com o primeiro par.
+1. **Vídeos: nada a gerar.** Os créditos do Flow foram para os 16:9 de estradas, destoca e terrenos (27/10), e todas as paradas têm mídia limpa. Se um dia gerar de novo, usar os prompts documentais do `PROMPTS-FLOW.md` e conferir quadro a quadro (pedras voando, máquina que muda de forma).
+2. **Pares do antes e depois** (seção 3 do `PROMPTS-FLOW.md`, com o PHOTO STYLE documental): o slider já está pronto e aparece com o primeiro par. **Destoca:** o ANTES veio ótimo (27/10, `public/media/antes-destoca.webp`, original em `media-originais/antes-destoca_flow_798aea2a.jpg`). O DEPOIS que veio é de outro lugar (gerado do zero, não editado do antes) e não serve para o slider; está guardado como `depois-destoca-outro-lugar_flow_*.jpg`. Falta o DEPOIS editado a partir do antes; aí é só `npm run foto` e ligar `destoca` em `beforeAfter`.
 3. **Outras máquinas na seção de máquinas** (fotos de lado, seção 2 do `PROMPTS-FLOW.md`), **só das que a cliente tem**: cartões depois da retroescavadeira, com as mesmas linhas de chamada em SVG por cima da foto.
 4. **Desempenho:** `compileAsync` na cena das máquinas e o TBT (pendências acima). Resultado de 27/10 (celular, produção): desempenho 79, acessibilidade, boas práticas e SEO 100; LCP 2,4 s com limitação real, CLS 0,008.
 5. **Números e depoimentos:** só com dados reais da cliente.

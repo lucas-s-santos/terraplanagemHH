@@ -1,9 +1,11 @@
 /**
  * Prepara um clipe do Flow para o site: loop sem pulo, compressão até o orçamento e capa.
  *
- *   npm run clip -- <original.mp4> <parada> <16x9|9x16>
+ *   npm run clip -- <original.mp4> <parada> <16x9|9x16> [início] [fim]
  *   npm run clip -- media-originais/hero-16x9.mp4 hero 16x9
+ *   npm run clip -- media-originais/estradas-16x9.mp4 estradas 16x9 5.6 10   (só o trecho de 5,6 s a 10 s)
  *
+ * - Trecho (opcional, em segundos): para aproveitar só a parte boa de um clipe (sem defeito de IA).
  * - Loop: o fim se funde com o começo (o clipe fica 0,9 s mais curto e repete sem corte). A câmera do Flow
  *   anda o clipe todo, então começo e fim nunca batem: uma fusão simples mostra a máquina em dois lugares.
  *   Por isso a emenda passa por uma lufada de poeira (véu da cor `poeira` que sobe e desce) e a troca de
@@ -17,9 +19,9 @@ import { execFileSync } from "node:child_process";
 import { mkdirSync, renameSync, statSync, unlinkSync } from "node:fs";
 import path from "node:path";
 
-const [input, stop, shape] = process.argv.slice(2);
+const [input, stop, shape, fromArg, toArg] = process.argv.slice(2);
 if (!input || !stop || !["16x9", "9x16"].includes(shape)) {
-  console.error("uso: npm run clip -- <original.mp4> <parada> <16x9|9x16>");
+  console.error("uso: npm run clip -- <original.mp4> <parada> <16x9|9x16> [início] [fim]");
   process.exit(1);
 }
 
@@ -45,9 +47,18 @@ const poster = path.join(outDir, `${stop}-${shape}.jpg`);
 const trial = path.join(outDir, `_${stop}-${shape}.tmp.mp4`);
 
 const run = (bin, args) => execFileSync(bin, args, { stdio: ["ignore", "ignore", "pipe"] });
-const duration = Number(
+const total = Number(
   execFileSync(FFPROBE, ["-v", "error", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", input]).toString(),
 );
+const from = Number(fromArg ?? 0);
+const to = Math.min(Number(toArg ?? total), total);
+const duration = to - from;
+if (!(duration > 2 * OVERLAP)) {
+  console.error(`trecho inválido: de ${from} s a ${to} s (o clipe tem ${total.toFixed(1)} s)`);
+  process.exit(1);
+}
+/** Lê só o trecho pedido (como opção de entrada: o corte sai no quadro certo, porque o vídeo é recodificado). */
+const source = ["-ss", String(from), "-t", String(duration), "-i", input];
 const body = duration - OVERLAP;
 
 // Na emenda (P vai de 1 a 0): a mistura A→B acontece no terço do meio, sob o véu de poeira (seno, pico no meio).
@@ -65,7 +76,7 @@ const encode = ([w, h], crf) => {
     `[corpo][cabeca]xfade=transition=custom:expr='${seam}':duration=${OVERLAP}:offset=${body - OVERLAP},` +
     `scale=${w}:${h}:force_original_aspect_ratio=increase:flags=lanczos,crop=${w}:${h},format=yuv420p[v]`;
   run(FFMPEG, [
-    "-y", "-v", "error", "-i", input,
+    "-y", "-v", "error", ...source,
     "-filter_complex", filter, "-map", "[v]", "-an",
     "-c:v", "libx264", "-preset", "slow", "-crf", String(crf), "-profile:v", "high",
     "-movflags", "+faststart", trial,
