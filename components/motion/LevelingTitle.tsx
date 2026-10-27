@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { useStageStore } from "@/lib/store";
 
@@ -20,11 +20,13 @@ interface LevelingTitleProps {
  * Título que nivela: as palavras começam desniveladas, como placas de terreno, e quando o
  * vídeo entra (store.revealed, fim do preloader) a lâmina passa da esquerda para a direita e
  * deixa todas na mesma linha. Só transform (sem layout shift); o texto pinta de primeira.
- * Com movimento reduzido, já começa nivelado.
+ * Com movimento reduzido, já começa nivelado. `\n` no texto marca as quebras de linha.
  */
 export function LevelingTitle({ id, text, className }: LevelingTitleProps) {
   const root = useRef<HTMLHeadingElement>(null);
-  const words = text.split(" ");
+  const lines = text.split("\n").map((line) => line.split(" "));
+  // O desnível segue a contagem das palavras no título inteiro, não por linha.
+  const firstOfLine = lines.map((_, l) => lines.slice(0, l).reduce((total, line) => total + line.length, 0));
 
   useGSAP(
     () => {
@@ -53,22 +55,28 @@ export function LevelingTitle({ id, text, className }: LevelingTitleProps) {
   );
 
   return (
-    <h1 ref={root} id={id} className={className} aria-label={text}>
-      {words.map((word, i) => {
-        const { y, tilt } = unevenness(i);
-        return (
-          <span key={`${word}-${i}`} aria-hidden="true">
-            <span
-              data-palavra
-              className="palavra-desnivel"
-              style={{ "--desnivel": y, "--inclinacao": tilt } as React.CSSProperties}
-            >
-              {word}
-            </span>
-            {i < words.length - 1 && " "}
-          </span>
-        );
-      })}
+    <h1 ref={root} id={id} className={className} aria-label={text.replaceAll("\n", " ")}>
+      {lines.map((words, l) => (
+        <Fragment key={l}>
+          {l > 0 && <br />}
+          {words.map((word, w) => {
+            const i = firstOfLine[l] + w;
+            const { y, tilt } = unevenness(i);
+            return (
+              <span key={`${word}-${i}`} aria-hidden="true">
+                <span
+                  data-palavra
+                  className="palavra-desnivel"
+                  style={{ "--desnivel": y, "--inclinacao": tilt } as React.CSSProperties}
+                >
+                  {word}
+                </span>
+                {w < words.length - 1 && " "}
+              </span>
+            );
+          })}
+        </Fragment>
+      ))}
     </h1>
   );
 }

@@ -7,7 +7,8 @@
  *   npm run shots -- --url http://localhost:3000 --stops hero,reservatorio~preparo-solo,terrenos --only mobile
  *   npm run shots -- --reduced          (simula prefers-reduced-motion)
  *
- * Paradas: ids de data-stop. "a~b" fotografa o meio do caminho entre duas paradas; "fim" é o rodapé.
+ * Paradas: ids de data-stop. "a~b" fotografa o meio do caminho entre duas paradas; "fim" é o rodapé;
+ * "[seletor]@0.4" fotografa 40% do trecho em que um bloco alto (palco preso) atravessa a tela.
  * Saída: .shots/ (ignorada pelo git).
  */
 import { mkdirSync } from "node:fs";
@@ -66,12 +67,23 @@ for (const vp of viewports) {
         const r = el.getBoundingClientRect();
         return Math.max(0, r.top + window.scrollY + r.height / 2 - window.innerHeight / 2);
       };
+      // "[seletor]@0.4": 40% do trecho em que um bloco alto (com palco preso) atravessa a tela.
+      const within = (sel, fraction) => {
+        const el = document.querySelector(sel);
+        if (!el) throw new Error(`${sel} não existe`);
+        const r = el.getBoundingClientRect();
+        return r.top + window.scrollY + Number(fraction) * Math.max(0, r.height - window.innerHeight);
+      };
       const [a, b] = spec.split("~");
-      const top = spec === "fim" ? document.documentElement.scrollHeight : b ? (center(a) + center(b)) / 2 : center(a);
+      const top = spec === "fim"
+        ? document.documentElement.scrollHeight
+        : spec.includes("@") ? within(...spec.split("@")) : b ? (center(a) + center(b)) / 2 : center(a);
       window.scrollTo({ top, behavior: "instant" });
     }, stop);
     await page.waitForTimeout(Number(values.wait));
-    const file = path.join(outDir, `${vp.name}-${stop.replace("~", "--")}${values.reduced ? "-reduzido" : ""}.png`);
+    // Dois quadros antes da captura: sem isso, os canvas 3D às vezes saíam com um quadro velho, meio apagado.
+    await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+    const file = path.join(outDir, `${vp.name}-${stop.replace("~", "--").replace(/[^\w.-]+/g, "_")}${values.reduced ? "-reduzido" : ""}.png`);
     await page.screenshot({ path: file });
     console.log("captura:", file);
   }

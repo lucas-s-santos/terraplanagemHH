@@ -8,7 +8,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "shots": "node scripts/screenshots.mjs",
-    "clip": "node scripts/prepare-clip.mjs"
+    "clip": "node scripts/prepare-clip.mjs",
+    "foto": "node scripts/prepare-photo.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

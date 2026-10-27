@@ -8,7 +8,7 @@ Objetivo: gerar contato no WhatsApp e servir de peça de portfólio de UI/UX.
 ## Stack
 - Next.js (App Router) + TypeScript estrito + Tailwind
 - Mídia: clipes de vídeo (máquinas trabalhando, ilustrativos, gerados no Google Flow) em `public/media/`
-- 3D pontual: three.js puro (sem React Three Fiber), só dentro de seções e carregado sob demanda (hoje: o corte de solo, `lib/soil/`)
+- 3D pontual: three.js puro (sem React Three Fiber), carregado sob demanda: o corte de solo (`lib/soil/`), a retroescavadeira como planta técnica (`lib/backhoe/`) e a maquete da região (`lib/region/`), todos dentro das seções
 - Motion: GSAP (ScrollTrigger, SplitText) + Lenis para scroll suave
 - Imagens: next/image (AVIF/WebP). Deploy: Vercel
 
@@ -18,7 +18,7 @@ Objetivo: gerar contato no WhatsApp e servir de peça de portfólio de UI/UX.
 - Estado do scroll compartilhado num store leve (zustand): a mídia lê, as seções escrevem.
 - Só tocam os clipes visíveis; só baixam o atual e os próximos. Clipes e capas ficam listados em `content/media.ts`.
 - Máquinas genéricas: **sem logo da Caterpillar ou de qualquer marca** em nenhum quadro.
-- (Até 20/10/2026 a cena era 3D com three.js. Essa versão está na `main`; a de vídeo, na branch `feat/video`.)
+- (Até 20/10/2026 a cena era 3D, com ilhas: está na tag `versao-3d`. A `main` é a versão em vídeo desde 23/10.)
 
 ## Design tokens (fonte da verdade: `styles/tokens.css`)
 - Cores: solo-fundo #2B1D15 · terra-roxa #6B2E1D · amarelo-maquina #F2B705 · poeira #E7C78F · pasto #5E6B3A · neblina #CBB89A

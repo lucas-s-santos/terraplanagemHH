@@ -72,7 +72,7 @@ export function SoilCut({ progress }: { progress: RefObject<number> }) {
     <canvas
       ref={canvas}
       aria-hidden="true"
-      className={`block h-full w-full transition-opacity duration-700 ${state === "on" ? "opacity-100" : "opacity-0"}`}
+      className={`block h-full w-full transition-opacity duration-700 motion-reduce:transition-none ${state === "on" ? "opacity-100" : "opacity-0"}`}
     />
   );
 }

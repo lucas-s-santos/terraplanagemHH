@@ -77,9 +77,11 @@ export function MediaStage() {
   useEffect(() => {
     const still = matches(REDUCED);
     const portrait = matches(TALL);
-    const apply = (stop: number) => {
+    const apply = (stop: number, revealed: boolean) => {
       const current = Math.min(Math.floor(stop), STOP_IDS.length - 1);
       const blend = smoothstep(0.35, 0.65, stop - current);
+      // Até o vídeo entrar, só o hero baixa: no 4G, dividir a banda com os seguintes atrasava a entrada em segundos.
+      const last = revealed ? current + 1 + PRELOAD_AHEAD : current;
       STOP_IDS.forEach((id, k) => {
         // Cada camada tem fundo próprio: a de cima, quando cobre tudo, esconde (e pausa) a de baixo.
         const visible = (k === current && blend < 1) || (k === current + 1 && blend > 0);
@@ -88,9 +90,18 @@ export function MediaStage() {
           layer.style.opacity = String(k <= current ? 1 : k === current + 1 ? blend : 0);
           layer.style.visibility = visible ? "visible" : "hidden";
         }
-        const video = videos.current[k];
         const clip = clips[id];
+        const media = clip && sources(clip, portrait);
+        // Capas e fotos também só baixam perto de aparecer, e já no formato da tela (no HTML não vêm:
+        // o servidor não sabe se é celular, e o celular baixava as 16:9 e depois as 9:16).
+        if (layer && media && k >= current && k <= last) {
+          layer.querySelectorAll("img").forEach((img) => {
+            if (img.getAttribute("src") !== media.poster) img.src = media.poster;
+          });
+        }
+        const video = videos.current[k];
         if (!video || !clip) return;
+        if (media && k >= current && k <= last && video.getAttribute("poster") !== media.poster) video.poster = media.poster;
         // Com movimento reduzido fica a imagem parada (poster): o vídeo nem baixa.
         if (still) {
           if (video.hasAttribute("src")) {
@@ -100,17 +111,17 @@ export function MediaStage() {
           }
           return;
         }
-        const media = sources(clip, portrait);
         const src = media?.src;
         if (!src) return;
-        if (k >= current && k <= current + 1 + PRELOAD_AHEAD && video.getAttribute("src") !== src) video.src = src;
+        if (k >= current && k <= last && video.getAttribute("src") !== src) video.src = src;
         if (visible && video.paused) video.play().catch(() => {});
         if (!visible && !video.paused) video.pause();
       });
     };
-    apply(useStageStore.getState().stop);
+    const { stop, revealed } = useStageStore.getState();
+    apply(stop, revealed);
     return useStageStore.subscribe((state, previous) => {
-      if (state.stop !== previous.stop) apply(state.stop);
+      if (state.stop !== previous.stop || state.revealed !== previous.revealed) apply(state.stop, state.revealed);
     });
   }, [reduced, tall]);
 
@@ -129,9 +140,10 @@ export function MediaStage() {
               className="fundo-terra absolute inset-0"
               style={{ opacity: k === 0 ? 1 : 0, visibility: k === 0 ? "visible" : "hidden" }}
             >
-              {media?.window && <img src={media.poster} alt="" className="janela-fundo" />}
+              {/* Capas sem src: a imagem certa entra quando a parada se aproxima (ver o efeito acima). */}
+              {media?.window && <img alt="" className="janela-fundo" />}
               {media && !media.src && (
-                <img src={media.poster} alt="" className="foto-lenta h-full w-full object-cover" />
+                <img alt="" className="foto-lenta h-full w-full object-cover" />
               )}
               {media?.src && (
                 <div className={media.window ? "janela-video" : "absolute inset-0"}>
@@ -143,8 +155,8 @@ export function MediaStage() {
                     loop
                     playsInline
                     preload="auto"
-                    poster={media.poster}
-                    className="h-full w-full object-cover"
+                    // No hero, o vídeo é ambiente atrás da logo 3D (components/sections/HeroLogo.tsx).
+                    className={`h-full w-full object-cover ${id === "hero" ? "video-ambiente" : ""}`}
                     style={{ objectPosition: media.position }}
                   />
                 </div>
@@ -154,6 +166,7 @@ export function MediaStage() {
         })}
       </div>
       <div className="veu-video absolute inset-0" />
+      <div className="grao-filme" />
       <Preloader />
     </div>
   );

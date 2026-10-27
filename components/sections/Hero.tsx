@@ -1,6 +1,8 @@
+import { Logo } from "@/components/brand/Logo";
 import { LevelingTitle } from "@/components/motion/LevelingTitle";
 import { site } from "@/content/site";
 import { whatsappHref } from "@/lib/whatsapp";
+import { HeroLogo } from "./HeroLogo";
 
 export function Hero() {
   const { hero, telefones } = site;
@@ -8,12 +10,15 @@ export function Hero() {
 
   return (
     <section data-stop="hero" data-regua={site.regua.inicio} aria-labelledby="hero-titulo" className="relative flex min-h-svh flex-col">
-      <header className="mx-auto flex w-full max-w-(--max-conteudo) items-center justify-between px-(--gutter) pt-6 md:pt-8">
-        <span className="text-[0.95rem] font-bold tracking-[-0.01em] [font-stretch:112%]">{site.nome}</span>
+      <header className="relative z-10 mx-auto flex w-full max-w-(--max-conteudo) items-center justify-between px-(--gutter) pt-6 md:pt-8">
+        <Logo className="block h-9 text-poeira md:h-11" />
         <a href={`tel:${telefone.numero}`} className="link-discreto text-[0.95rem] font-medium">
           {telefone.rotulo}
         </a>
       </header>
+
+      {/* A logo 3D: no celular em cima do texto; na tela larga à direita, sobre o vídeo desfocado. */}
+      <HeroLogo className="absolute inset-x-0 top-[12svh] h-[32svh] md:inset-x-auto md:top-[13svh] md:right-[3vw] md:h-[70svh] md:w-[46vw]" />
 
       <div className="mx-auto flex w-full max-w-(--max-conteudo) flex-1 items-end px-(--gutter) pb-[9svh] md:items-center md:pb-[4svh]">
         <div className="veu-leitura max-w-[44rem]">
@@ -21,7 +26,8 @@ export function Hero() {
           <p className="mt-6 max-w-[38ch] text-[1.0625rem] leading-relaxed text-poeira/85 md:text-lg">
             {hero.apoio}
           </p>
-          <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
+          {/* No celular, o link fica sempre embaixo do botão: lado a lado, ele cabia ou não conforme a fonte já tivesse chegado. */}
+          <div className="mt-9 flex flex-col items-start gap-x-8 gap-y-4 sm:flex-row sm:flex-wrap sm:items-center">
             <a href={whatsappHref()} target="_blank" rel="noopener" className="botao-primario" data-poeira>
               {hero.ctaPrincipal}
             </a>

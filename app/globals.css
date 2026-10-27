@@ -240,6 +240,81 @@
     }
   }
 
+  /* A logo: o nome por extenso embaixo da marca (a largura vem do textLength do SVG). */
+  .logo-nome {
+    font-weight: 700;
+    font-stretch: 110%;
+  }
+
+  /* A logo 3D do hero: arrasta na horizontal; na vertical, o toque continua rolando a página. */
+  .logo-3d {
+    cursor: grab;
+    touch-action: pan-y;
+  }
+  .dica-girar {
+    position: absolute;
+    left: 50%;
+    bottom: 4%;
+    translate: -50% 0;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--solo-fundo) 65%, transparent);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--poeira);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 600ms ease 900ms;
+  }
+  .dica-girar[data-visivel="true"] {
+    opacity: 0.85;
+  }
+
+  /* No hero, o vídeo vira ambiente atrás da logo 3D: mais escuro e desfocado (ampliado, para a borda
+     desfocada não aparecer). */
+  .video-ambiente {
+    filter: blur(3px) brightness(0.7) saturate(0.9);
+    scale: 1.04;
+  }
+
+  /* Grão de filme sobre os clipes: tira o liso "limpo demais" da imagem gerada e junta clipes diferentes
+     num filme só. Ruído em SVG (nada para baixar), trocando de lugar em saltos como grão de verdade. */
+  .grao-filme {
+    position: absolute;
+    inset: -50%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    opacity: 0.2;
+    mix-blend-mode: overlay;
+    animation: grao-filme 0.8s steps(1) infinite;
+  }
+  @keyframes grao-filme {
+    0% {
+      translate: 0 0;
+    }
+    17% {
+      translate: -4% 3%;
+    }
+    33% {
+      translate: 3% -5%;
+    }
+    50% {
+      translate: -6% -2%;
+    }
+    67% {
+      translate: 5% 4%;
+    }
+    83% {
+      translate: -2% 6%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .grao-filme {
+      animation: none;
+    }
+  }
+
   .titulo-display {
     font-stretch: var(--largura-titulo);
     font-weight: 780;
@@ -268,6 +343,249 @@
     line-height: 1;
     letter-spacing: -0.02em;
     text-wrap: balance;
+  }
+
+  /* Máquinas: o nome gigante atrás da retroescavadeira, atravessando a tela e saindo pela borda. */
+  .palavra-gigante {
+    position: absolute;
+    top: 9svh;
+    left: 0;
+    white-space: nowrap;
+    font-size: clamp(5.5rem, 17vw, 17rem);
+    font-stretch: 125%;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: color-mix(in oklab, var(--poeira) 7%, transparent);
+    user-select: none;
+  }
+
+  /* A planta técnica por cima do canvas: as coordenadas vêm da projeção 3D, em pixels (sem viewBox). */
+  .planta line,
+  .planta path {
+    fill: none;
+  }
+  .planta-chao {
+    stroke: var(--poeira);
+    stroke-opacity: 0.3;
+    stroke-dasharray: 6 7;
+  }
+  /* A lâmina que pinta o desenho: a mesma amarela do preloader e da régua. */
+  .planta-lamina {
+    stroke: var(--amarelo-maquina);
+    stroke-width: 3;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 6px color-mix(in oklab, var(--amarelo-maquina) 70%, transparent));
+    opacity: 0;
+    transition: opacity 300ms;
+  }
+  .planta-chamada {
+    stroke: var(--poeira);
+    stroke-opacity: 0.75;
+    stroke-width: 1.25;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .planta-ponto {
+    fill: var(--amarelo-maquina);
+  }
+  .planta-alvo {
+    fill: none;
+    stroke: var(--amarelo-maquina);
+    stroke-width: 1.25;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: planta-alvo 2.4s ease-out infinite;
+  }
+  @keyframes planta-alvo {
+    from {
+      scale: 0.4;
+      opacity: 0.9;
+    }
+    to {
+      scale: 1.5;
+      opacity: 0;
+    }
+  }
+  .planta [data-visivel] {
+    opacity: 0;
+    transition: opacity 400ms;
+  }
+  .planta [data-visivel="true"] {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .planta-alvo {
+      animation: none;
+    }
+  }
+  /* Marcos da sequência (a máquina inteira e cada peça): o atual é a lâmina amarela. */
+  .planta-marco {
+    display: block;
+    width: 0.75rem;
+    height: 3px;
+    border-radius: 2px;
+    background: color-mix(in oklab, var(--poeira) 30%, transparent);
+    transition:
+      width 400ms,
+      background-color 400ms;
+  }
+  .planta-marco[data-ativo="true"] {
+    width: 1.375rem;
+    background: var(--amarelo-maquina);
+  }
+  /* As legendas ficam empilhadas no mesmo lugar e trocam com a peça. Paradas, viram uma lista. */
+  .legendas {
+    display: grid;
+  }
+  .legendas > li {
+    grid-area: 1 / 1;
+    opacity: 0;
+    translate: 0 0.75rem;
+    transition:
+      opacity 450ms ease,
+      translate 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .legendas > li[data-ativo="true"] {
+    opacity: 1;
+    translate: 0 0;
+  }
+  .legendas[data-estatico="true"] {
+    display: block;
+  }
+  .legendas[data-estatico="true"] > li {
+    opacity: 1;
+    translate: none;
+  }
+  .legendas[data-estatico="true"] > li + li {
+    margin-top: 2rem;
+  }
+
+  /* Antes e depois: o "antes" fica à direita da lâmina; a caçamba empurra para a direita e deixa o "depois" para trás. */
+  .comparacao {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 3px;
+    background: var(--terra-roxa);
+    cursor: ew-resize;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  @media (min-width: 48rem) {
+    .comparacao {
+      aspect-ratio: 16 / 9;
+    }
+  }
+  .comparacao-antes {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 0 0 var(--corte));
+  }
+  .comparacao-lamina {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--corte);
+    width: 3px;
+    translate: -50% 0;
+    background: var(--amarelo-maquina);
+    box-shadow: 0 0 14px color-mix(in oklab, var(--amarelo-maquina) 55%, transparent);
+  }
+  .comparacao-lamina:focus-visible {
+    outline-offset: 5px;
+  }
+  /* O dente encosta na lâmina; o corpo da caçamba fica do lado do "depois". */
+  .comparacao-cacamba {
+    position: absolute;
+    right: 1px;
+    bottom: 10%;
+    width: clamp(4.75rem, 8vw, 7rem);
+    overflow: visible;
+    rotate: var(--inclinacao, 0deg);
+    transform-origin: 85% 92%;
+    transition: rotate 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.45));
+  }
+  .comparacao-rotulo {
+    position: absolute;
+    top: 0.75rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 2px;
+    background: color-mix(in oklab, var(--solo-fundo) 75%, transparent);
+    font-size: 0.875rem;
+    font-weight: 650;
+    pointer-events: none;
+  }
+  .botao-par {
+    min-height: 2.75rem;
+    padding: 0 1.1rem;
+    border: 1px solid color-mix(in oklab, var(--poeira) 30%, transparent);
+    border-radius: 2px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      background-color 200ms,
+      border-color 200ms,
+      color 200ms;
+  }
+  .botao-par:hover {
+    border-color: var(--poeira);
+  }
+  .botao-par[aria-pressed="true"] {
+    border-color: var(--poeira);
+    background: var(--poeira);
+    color: var(--solo-fundo);
+  }
+
+  /* Nomes sobre a maquete (Onde atuamos): a posição vem da projeção 3D, a cada quadro;
+     o translate centraliza o nome acima da estaca. */
+  .rotulo-mapa {
+    position: absolute;
+    left: 0;
+    top: 0;
+    translate: -50% calc(-100% - 0.3rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    color: var(--poeira);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.15;
+    white-space: nowrap;
+    text-shadow:
+      0 1px 0.6rem var(--solo-fundo),
+      0 0 0.25rem var(--solo-fundo);
+    will-change: transform;
+  }
+  .rotulo-mapa-origem {
+    color: var(--amarelo-maquina);
+    font-size: 1rem;
+    font-weight: 750;
+    font-stretch: 110%;
+  }
+  .rotulo-mapa-detalhe {
+    color: var(--poeira);
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-stretch: 100%;
+    opacity: 0.75;
+  }
+  .rotulo-mapa-anel {
+    translate: 0.45rem -50%;
+    color: color-mix(in oklab, var(--amarelo-maquina) 80%, var(--poeira));
+    font-size: 0.75rem;
+  }
+  @media (max-width: 47.99rem) {
+    .rotulo-mapa {
+      font-size: 0.6875rem;
+    }
+    .rotulo-mapa-origem {
+      font-size: 0.875rem;
+    }
   }
 
   .botao-primario {
