@@ -12,12 +12,14 @@ export function Services() {
       {servicos.itens.map((servico) => (
         <article
           key={servico.id}
-          data-stop={servico.id}
+          id={servico.id}
           data-regua={servico.nome}
           className="flex min-h-[115svh] items-end pb-[12svh] md:items-center md:pb-0"
         >
           <div className="mx-auto w-full max-w-(--max-conteudo) px-(--gutter)">
-            <div className="veu-leitura max-w-[30rem]">
+            {/* O marcador da parada é o texto, não o artigo: no celular o texto fica embaixo, e pelo centro
+                do artigo o clipe trocava para o do serviço seguinte com o texto ainda na tela. */}
+            <div data-stop={servico.id} className="veu-leitura max-w-[30rem]">
               <h3 className="titulo-secao text-[clamp(2rem,3.4vw,3.1rem)]">{servico.nome}</h3>
               <p className="mt-4 max-w-[34ch] text-lg leading-relaxed text-poeira/85">{servico.texto}</p>
             </div>

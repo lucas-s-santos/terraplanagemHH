@@ -57,8 +57,11 @@ const hills = (x: number, z: number) =>
  */
 export function createSoilCut({ canvas, colors, getProgress, still }: SoilCutOptions) {
   const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "low-power" });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+  // No celular, 1,5x basta (menos pixels para a GPU pintar a cada quadro, sem diferença visível).
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, canvas.clientWidth < 700 ? 1.5 : 1.75));
   renderer.setClearColor(0x000000, 0);
+  // Em produção, sem checar shaders: compila mais rápido (a checagem força a compilação na hora).
+  renderer.debug.checkShaderErrors = process.env.NODE_ENV !== "production";
   renderer.toneMapping = NeutralToneMapping;
   renderer.toneMappingExposure = 0.95;
 
@@ -200,31 +203,41 @@ export function createSoilCut({ canvas, colors, getProgress, still }: SoilCutOpt
     out.multiplyScalar(lerp(1, 0.55, clamp((0.1 - y) / (0.1 - BOTTOM), 0, 1)));
   };
 
-  const update = (p: number) => {
-    const cut = smoothstep(p, 0.45, 0.9);
-    front = lerp(-1.35, 1.35, cut);
-
+  const write = (array: Float32Array, v: number, a: number, b: number, d: number) => {
+    array[v * 3] = a;
+    array[v * 3 + 1] = b;
+    array[v * 3 + 2] = d;
+  };
+  /**
+   * Refaz só os vértices com x entre `lo` e `hi`: o terreno só muda perto da frente de corte (a
+   * faixa de transição e a terra solta somem a ~0,3 dela). Antes, o bloco inteiro (~13.500 vértices,
+   * com senos e cores) era refeito a cada quadro de rolagem.
+   */
+  const rebuild = (lo: number, hi: number) => {
+    const inRange = (x: number) => x >= lo && x <= hi;
     for (let j = 0; j <= N; j++) {
       for (let i = 0; i <= N; i++) {
         const x = -1 + (2 * i) / N;
+        if (!inRange(x)) continue;
         const z = -1 + (2 * j) / N;
         const v = j * (N + 1) + i;
-        topPos.set([x * SIZE_X, heightAt(x, z), z * SIZE_Z], v * 3);
+        write(topPos, v, x * SIZE_X, heightAt(x, z), z * SIZE_Z);
         paintTop(x, z, color);
-        topCol.set([color.r, color.g, color.b], v * 3);
+        write(topCol, v, color.r, color.g, color.b);
       }
     }
-    edges.forEach((edge, s) => {
-      const base = s * (N + 1) * (ROWS + 1);
+    edges.forEach((edge, side) => {
+      const base = side * (N + 1) * (ROWS + 1);
       edge.forEach(([x, z], i) => {
+        if (!inRange(x)) return;
         const yTop = heightAt(x, z);
         for (let r = 0; r <= ROWS; r++) {
           const y = lerp(yTop, BOTTOM, r / ROWS);
           const v = base + r * (N + 1) + i;
-          wallPos.set([x * SIZE_X, y, z * SIZE_Z], v * 3);
+          write(wallPos, v, x * SIZE_X, y, z * SIZE_Z);
           if (r === 0) paintTop(x, z, color);
           else strataAt(x, z, y, color);
-          wallCol.set([color.r, color.g, color.b], v * 3);
+          write(wallCol, v, color.r, color.g, color.b);
         }
       });
     });
@@ -233,7 +246,21 @@ export function createSoilCut({ canvas, colors, getProgress, still }: SoilCutOpt
     walls.attributes.position.needsUpdate = true;
     walls.attributes.color.needsUpdate = true;
     top.computeVertexNormals();
-    walls.computeVertexNormals();
+  };
+
+  let lastFront = Number.NaN;
+  const update = (p: number) => {
+    const next = lerp(-1.35, 1.35, smoothstep(p, 0.45, 0.9));
+    if (next !== lastFront) {
+      const first = Number.isNaN(lastFront);
+      const lo = first ? -Infinity : Math.min(next, lastFront) - 0.3;
+      const hi = first ? Infinity : Math.max(next, lastFront) + 0.3;
+      front = next;
+      rebuild(lo, hi);
+      // As paredes são planos verticais: o topo desce, mas a normal não muda. Calculadas uma vez.
+      if (first) walls.computeVertexNormals();
+      lastFront = next;
+    }
 
     // Estacas sobem uma a uma na visita técnica e ficam no nível do chão.
     stakes.forEach((stake, k) => {

@@ -131,7 +131,7 @@ export function Region() {
         <div
           role="img"
           aria-label={regiao.rotuloMapa}
-          className={`relative -mx-(--gutter) aspect-[5/4] md:mx-0 md:aspect-[6/5] ${state === "off" ? "hidden" : ""}`}
+          className={`relative -mx-(--gutter) aspect-square md:mx-0 md:aspect-[6/5] ${state === "off" ? "hidden" : ""}`}
         >
           <canvas
             ref={canvas}

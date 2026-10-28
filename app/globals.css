@@ -251,6 +251,20 @@
     cursor: grab;
     touch-action: pan-y;
   }
+  /* Sem placa de vídeo: a mesma logo em SVG, parada, com as cores do 3D (letras amarelas, barra de aço). */
+  .logo-plana {
+    display: block;
+    width: 84%;
+    color: var(--amarelo-maquina);
+    filter: drop-shadow(0 0.6rem 1.2rem rgb(0 0 0 / 0.45));
+  }
+  .logo-plana svg {
+    width: 100%;
+    height: auto;
+  }
+  .logo-plana path + path {
+    fill: #d9d4cb;
+  }
   .dica-girar {
     position: absolute;
     left: 50%;
@@ -647,35 +661,29 @@
     font-size: 1.25rem;
   }
 
-  /* "H e H" entalhado no chão do rodapé: a letra mostra as camadas de solo do corte,
-     sombra na aresta de cima e luz na de baixo. (drop-shadow, porque o text-shadow
-     é pintado por cima do background-clip: text e apaga as camadas.) */
-  .marca-entalhada {
-    /* "H e H" mede ~3em: com 31cqi ocupa ~95% da largura do rodapé em qualquer tela. */
-    font-size: 26vw;
-    font-size: 31cqi;
-    font-weight: 900;
-    font-stretch: 125%;
-    line-height: 0.8;
-    letter-spacing: -0.045em;
-    word-spacing: -0.12em;
-    white-space: nowrap;
-    color: transparent;
-    /* Camadas irregulares: terra roxa em cima, escurecendo para baixo, com veios finos. */
-    background: linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--terra-roxa) 80%, var(--poeira)) 0%,
-      var(--terra-roxa) 18%,
-      color-mix(in oklab, var(--solo-fundo) 70%, black) 19.5% 21%,
-      color-mix(in oklab, var(--terra-roxa) 70%, var(--solo-fundo)) 22.5% 44%,
-      color-mix(in oklab, var(--terra-roxa) 65%, var(--poeira)) 45.5% 46.5%,
-      color-mix(in oklab, var(--terra-roxa) 55%, var(--solo-fundo)) 48.5% 69%,
-      color-mix(in oklab, var(--solo-fundo) 70%, black) 70% 71.5%,
-      color-mix(in oklab, var(--terra-roxa) 35%, var(--solo-fundo)) 73% 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    filter: drop-shadow(0 -0.012em 0 rgb(0 0 0 / 0.55)) drop-shadow(0 0.012em 0 color-mix(in oklab, var(--poeira) 25%, transparent));
+  /* Rodapé: a marca gigante bem apagada ao fundo, numa cor só, saindo pela borda de baixo. */
+  .marca-fundo {
+    position: absolute;
+    right: -8%;
+    bottom: -9%;
+    display: block;
+    width: max(42rem, 82%);
+    color: var(--poeira);
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  .marca-fundo svg {
+    width: 100%;
+    height: auto;
+  }
+  .marca-fundo path {
+    fill: currentColor;
+  }
+  /* Na tela estreita só cabia um pedaço da marca, que virava blocos soltos. */
+  @media (max-width: 47.99rem) {
+    .marca-fundo {
+      display: none;
+    }
   }
 
   .link-secundario {

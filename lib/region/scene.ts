@@ -76,7 +76,8 @@ const toScene = ({ east, north }: Place) => new Vector3(east * KM, 0, -north * K
  */
 export function createRegionMap({ canvas, colors, places, rings, getProgress, onFrame, still }: RegionSceneOptions) {
   const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "low-power" });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+  // No celular, 1,5x basta (menos pixels para a GPU pintar a cada quadro, sem diferença visível).
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, canvas.clientWidth < 700 ? 1.5 : 1.75));
   renderer.setClearColor(0x000000, 0);
   renderer.debug.checkShaderErrors = process.env.NODE_ENV !== "production";
   renderer.toneMapping = NeutralToneMapping;
@@ -246,15 +247,21 @@ diffuseColor.rgb = mix(diffuseColor.rgb, uRing, glow);`,
 
   // ---------- Câmera e laço ----------
   let distance = 20;
+  /** Tela estreita (celular): o mapa inteiro ficava pequeno e os nomes do norte se encavalavam. */
+  let narrow = false;
   const resize = () => {
     const { clientWidth: w, clientHeight: h } = canvas;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
+    narrow = w < 600;
     const halfV = MathUtils.degToRad(camera.fov / 2);
     const halfH = Math.atan(Math.tan(halfV) * camera.aspect);
-    // Cabe a largura do bloco visto de cima em diagonal e a altura dele em perspectiva.
-    distance = Math.max(5.7 / Math.tan(halfH), 4.1 / Math.tan(halfV));
+    // Cabe a largura do bloco visto de cima em diagonal e a altura dele em perspectiva. No celular,
+    // só o anel de 30 km com os nomes (as bordas do bloco saem um pouco da tela).
+    distance = narrow
+      ? Math.max(4.0 / Math.tan(halfH), 3.7 / Math.tan(halfV))
+      : Math.max(5.7 / Math.tan(halfH), 4.1 / Math.tan(halfV));
     camera.updateProjectionMatrix();
     if (still) draw(0);
   };
@@ -269,7 +276,8 @@ diffuseColor.rgb = mix(diffuseColor.rgb, uRing, glow);`,
   const labels: LabelPoint[] = anchors.map(() => ({ x: 0, y: 0, visible: false }));
   const draw = (progress: number) => {
     const azimuth = lerp(-0.32, 0.22, progress) + pointer.sx * 0.08;
-    const elevation = 0.78;
+    // No celular, mais de cima: em 45°, as cidades do norte ficavam comprimidas umas sobre as outras.
+    const elevation = narrow ? 1.02 : 0.78;
     camera.position.set(
       Math.sin(azimuth) * Math.cos(elevation) * distance,
       Math.sin(elevation) * distance,
