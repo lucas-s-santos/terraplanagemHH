@@ -67,6 +67,9 @@ const relief = (x: number, z: number) =>
   0.2;
 
 /** Coordenadas da cena: leste é +x, norte é -z (o norte fica no fundo). */
+/** Pausa entre as etapas da montagem, para a rolagem não travar enquanto a maquete nasce. */
+const yieldToMain = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
 const toScene = ({ east, north }: Place) => new Vector3(east * KM, 0, -north * KM);
 
 /**
@@ -74,7 +77,7 @@ const toScene = ({ east, north }: Place) => new Vector3(east * KM, 0, -north * K
  * topo, anéis de distância a partir do trevo de Alterosa (com um pulso saindo dele) e uma
  * estaca em cada cidade. Os nomes são HTML (acessíveis), posicionados pela projeção.
  */
-export function createRegionMap({ canvas, colors, places, rings, getProgress, onFrame, still }: RegionSceneOptions) {
+export async function createRegionMap({ canvas, colors, places, rings, getProgress, onFrame, still }: RegionSceneOptions) {
   const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "low-power" });
   // No celular, 1,5x basta (menos pixels para a GPU pintar a cada quadro, sem diferença visível).
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, canvas.clientWidth < 700 ? 1.5 : 1.75));
@@ -104,21 +107,27 @@ export function createRegionMap({ canvas, colors, places, rings, getProgress, on
   const top = new BufferGeometry();
   const count = (N + 1) * (N + 1);
   const topPos = new Float32Array(count * 3);
-  const index: number[] = [];
+  const index = new Uint32Array(N * N * 6);
+  let k = 0;
   for (let j = 0; j <= N; j++) {
     for (let i = 0; i <= N; i++) {
       const x = -HALF + (2 * HALF * i) / N;
       const z = -HALF + (2 * HALF * j) / N;
-      topPos.set([x, relief(x, z), z], (j * (N + 1) + i) * 3);
+      const v = (j * (N + 1) + i) * 3;
+      topPos[v] = x;
+      topPos[v + 1] = relief(x, z);
+      topPos[v + 2] = z;
       if (i < N && j < N) {
         const a = j * (N + 1) + i;
-        index.push(a, a + N + 1, a + 1, a + 1, a + N + 1, a + N + 2);
+        index.set([a, a + N + 1, a + 1, a + 1, a + N + 1, a + N + 2], k);
+        k += 6;
       }
     }
   }
   top.setAttribute("position", new BufferAttribute(topPos, 3));
-  top.setIndex(index);
+  top.setIndex(new BufferAttribute(index, 1));
   top.computeVertexNormals();
+  await yieldToMain();
 
   const uniforms = {
     uTime: { value: 0 },
@@ -185,7 +194,8 @@ diffuseColor.rgb = mix(diffuseColor.rgb, uRing, glow);`,
   const wallCount = 4 * (N + 1) * (ROWS + 1);
   const wallPos = new Float32Array(wallCount * 3);
   const wallCol = new Float32Array(wallCount * 3);
-  const wallIdx: number[] = [];
+  const wallIdx = new Uint32Array(4 * N * ROWS * 6);
+  let w = 0;
   const color = new Color();
   edges.forEach((edge, s) => {
     const base = s * (N + 1) * (ROWS + 1);
@@ -194,22 +204,28 @@ diffuseColor.rgb = mix(diffuseColor.rgb, uRing, glow);`,
       for (let row = 0; row <= ROWS; row++) {
         const y = lerp(yTop, BOTTOM, row / ROWS);
         const v = base + row * (N + 1) + i;
-        wallPos.set([x, y, z], v * 3);
+        wallPos[v * 3] = x;
+        wallPos[v * 3 + 1] = y;
+        wallPos[v * 3 + 2] = z;
         const wobble = 0.3 * Math.sin(x * 2.3 + z * 1.7);
         const depth = ((0.45 - y) / (0.45 - BOTTOM)) * strata.length + wobble;
         const band = clamp(Math.floor(depth), 0, strata.length - 1);
         color.copy(strata[band]).lerp(strata[clamp(band + 1, 0, strata.length - 1)], smoothstep(depth - Math.floor(depth), 0.8, 1));
         color.multiplyScalar(lerp(1, 0.5, row / ROWS));
-        wallCol.set([color.r, color.g, color.b], v * 3);
-        if (row < ROWS && i < N) wallIdx.push(v, v + N + 1, v + 1, v + 1, v + N + 1, v + N + 2);
+        color.toArray(wallCol, v * 3);
+        if (row < ROWS && i < N) {
+          wallIdx.set([v, v + N + 1, v + 1, v + 1, v + N + 1, v + N + 2], w);
+          w += 6;
+        }
       }
     });
   });
   const walls = new BufferGeometry();
   walls.setAttribute("position", new BufferAttribute(wallPos, 3));
   walls.setAttribute("color", new BufferAttribute(wallCol, 3));
-  walls.setIndex(wallIdx);
+  walls.setIndex(new BufferAttribute(wallIdx, 1));
   walls.computeVertexNormals();
+  await yieldToMain();
   const wallMaterial = new MeshStandardMaterial({ vertexColors: true, roughness: 0.95 });
   block.add(new Mesh(walls, wallMaterial));
 
@@ -284,6 +300,7 @@ diffuseColor.rgb = mix(diffuseColor.rgb, uRing, glow);`,
       Math.cos(azimuth) * Math.cos(elevation) * distance,
     );
     camera.lookAt(0, -0.05, 0.25);
+    if (!compiled) return;
     renderer.render(scene, camera);
     const { clientWidth: w, clientHeight: h } = canvas;
     anchors.forEach((anchor, i) => {
@@ -295,6 +312,8 @@ diffuseColor.rgb = mix(diffuseColor.rgb, uRing, glow);`,
     onFrame(labels);
   };
 
+  // Shaders compilados em paralelo antes do primeiro desenho (na hora, travavam a rolagem).
+  let compiled = false;
   const observer = new ResizeObserver(resize);
   observer.observe(canvas);
   resize();
@@ -310,6 +329,8 @@ diffuseColor.rgb = mix(diffuseColor.rgb, uRing, glow);`,
     pointer.sx = MathUtils.damp(pointer.sx, pointer.x, 3, dt);
     draw(getProgress());
   };
+  await renderer.compileAsync(scene, camera);
+  compiled = true;
   if (still) draw(0.5);
 
   return {

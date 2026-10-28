@@ -312,10 +312,17 @@ export function createSoilCut({ canvas, colors, getProgress, still }: SoilCutOpt
     } else {
       block.rotation.y = -0.35;
     }
-    renderer.render(scene, camera);
+    if (compiled) renderer.render(scene, camera);
   };
 
+  // Shaders compilados em paralelo antes do primeiro desenho: na hora, a compilação travava a rolagem.
+  let compiled = false;
+  const ready = renderer.compileAsync(scene, camera).then(() => {
+    compiled = true;
+  });
+
   return {
+    ready,
     /** Só desenha enquanto a seção está na tela. */
     setRunning(on: boolean) {
       if (on === running) return;

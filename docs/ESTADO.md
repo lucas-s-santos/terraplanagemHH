@@ -2,6 +2,14 @@
 
 Última sessão: 28/10/2026, na branch **`feat/whatsapp-sutil`** (saiu da `main` depois do merge do PR #2, `5b4aa15`; ainda sem commit). A `feat/retroescavadeira` já está toda na `main`. A **`main` é a versão em vídeo** desde 23/10; a versão 3D das ilhas ficou na tag **`versao-3d`**.
 
+**Noite de 28/10: site mais leve (o Lucas sentiu travando).** Medido rolando a página inteira (`pagina.mjs` no scratchpad: quadros por seção; o Chrome de teste usa a GPU de verdade, NVIDIA T600).
+- **O travamento grande era o reflexo de céu da retroescavadeira** (PMREM): 1,45 s parado na entrada de "Como trabalhamos", até com placa de vídeo. Agora os shaders do PMREM são compilados em paralelo antes (`lib/backhoe/sky.ts`, `warmUp`: usa partes internas do three r186; se mudarem, só perde o aquecimento). Detalhe que custou: a malha do aquecimento precisa de atributo de posição, senão a chave do programa muda e o three compila outro na hora.
+- **Bloco de terra e maquete da região** também compilavam na hora: agora `compileAsync` antes do primeiro desenho; a maquete monta em etapas, sem criar arrays por vértice.
+- **Vídeos mais leves:** 16:9 em 1280×720 (estavam em 1920×1080), hero em 960×540 e 540×960 (fica desfocado, não perde nada). De 19 MB para ~11 MB; o do hero de 2,4 MB para 0,6 MB. As versões em 1080 estão em `media-originais/site-1080/`.
+- Resultado (pior quadro): "Como trabalhamos" de 1.568 ms para 233 ms no computador; "Antes e depois" de 300 para 34 ms; "Onde atuamos" de 267 para 17 ms no celular simulado; tarefas longas na página inteira de 3,0 s para 0,6 s (computador).
+- Testado e descartado: o grão de filme e o desfoque do hero não pesam (tirar os dois não mudou nada). As seções de vídeo ficam em ~53 qps no teste por causa da decodificação; sem os vídeos, 60.
+- Sobra: ~0,2 s ao montar a retroescavadeira (JavaScript da montagem do modelo) e ~0,5 s com a CPU 4× mais lenta.
+
 **Fim de 28/10: WhatsApp discreto ao longo da página.**
 - **Orçamento em cada serviço** (`Services.tsx`, `.link-orcamento`): embaixo do texto, um link com o balão ("Pedir orçamento de destoca") que abre o WhatsApp com o serviço já escrito (`orcamento` e `mensagem` de cada item em `content/site.ts`). A cliente recebe a conversa sabendo o que a pessoa quer.
 - **Atalho fixo no celular** (`components/whatsapp/FloatingWhatsApp.tsx`, `.atalho-whatsapp`): uma etiqueta escura com o balão amarelo e "WhatsApp" no canto de baixo, no tom dos rótulos da régua (sem a bolinha verde). Aparece quando o hero sai e some quando o contato entra (dali para baixo o botão grande e o rodapé resolvem). Também sai da frente da retroescavadeira (`[data-tela-cheia]`): no celular a legenda dela fica exatamente nesse canto. Na tela larga não existe (quem leva ao contato é a régua).
