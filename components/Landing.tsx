@@ -13,6 +13,7 @@ import { Region } from "@/components/sections/Region";
 import { Services } from "@/components/sections/Services";
 import { SiteFooter } from "@/components/sections/SiteFooter";
 import { LocalBusinessJsonLd } from "@/components/seo/LocalBusinessJsonLd";
+import { FloatingWhatsApp } from "@/components/whatsapp/FloatingWhatsApp";
 
 /** A página inteira. */
 export function Landing() {
@@ -35,6 +36,7 @@ export function Landing() {
         <Contact />
       </main>
       <SiteFooter />
+      <FloatingWhatsApp />
       <LocalBusinessJsonLd />
     </>
   );

@@ -1,6 +1,11 @@
+import { ChatIcon } from "@/components/whatsapp/ChatIcon";
 import { site } from "@/content/site";
+import { whatsappHref } from "@/lib/whatsapp";
 
-/** Uma parada por serviço: texto à esquerda, o clipe da máquina trabalhando ao fundo. */
+/**
+ * Uma parada por serviço: texto à esquerda, o clipe da máquina trabalhando ao fundo. Embaixo, um
+ * link discreto que abre o WhatsApp com o serviço já escrito na mensagem.
+ */
 export function Services() {
   const { servicos } = site;
 
@@ -22,6 +27,10 @@ export function Services() {
             <div data-stop={servico.id} className="veu-leitura max-w-[30rem]">
               <h3 className="titulo-secao text-[clamp(2rem,3.4vw,3.1rem)]">{servico.nome}</h3>
               <p className="mt-4 max-w-[34ch] text-lg leading-relaxed text-poeira/85">{servico.texto}</p>
+              <a href={whatsappHref(servico.mensagem)} target="_blank" rel="noopener" className="link-orcamento mt-4">
+                <ChatIcon className="size-[1.1rem] shrink-0 text-amarelo-maquina" />
+                {servico.orcamento}
+              </a>
             </div>
           </div>
         </article>

@@ -56,7 +56,8 @@ export interface BeforeAfterPair {
 }
 
 export const beforeAfter: Record<BeforeAfterId, BeforeAfterPair | null> = {
-  destoca: null,
-  terreno: null,
-  estrada: null,
+  destoca: { antes: "/media/antes-destoca.webp", depois: "/media/depois-destoca.webp" },
+  terreno: { antes: "/media/antes-terreno.webp", depois: "/media/depois-terreno.webp" },
+  // No antes da estrada, os letreiros da retroescavadeira foram apagados à mão (delogo do ffmpeg, 28/10).
+  estrada: { antes: "/media/antes-estrada.webp", depois: "/media/depois-estrada.webp" },
 };

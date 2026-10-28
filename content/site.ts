@@ -24,6 +24,8 @@ export const site = {
     numero: "5535999746093",
     confirmado: false,
     mensagem: "Olá! Vim pelo site e quero fazer um orçamento.",
+    // O atalho fixo do celular (entre o hero e o contato).
+    atalho: { texto: "WhatsApp", rotulo: "Chamar no WhatsApp" },
   },
 
   seo: {
@@ -47,6 +49,7 @@ export const site = {
     ctaSecundario: "Ver serviços",
   },
 
+  // Cada serviço tem o seu pedido de orçamento: a conversa no WhatsApp já começa dizendo o serviço.
   servicos: {
     titulo: "Serviços",
     itens: [
@@ -54,31 +57,43 @@ export const site = {
         id: "reservatorio",
         nome: "Reservatório de água",
         texto: "Represas e tanques escavados e compactados para segurar água na seca.",
+        orcamento: "Pedir orçamento de reservatório",
+        mensagem: "Olá! Vim pelo site e quero um orçamento de reservatório de água.",
       },
       {
         id: "preparo-solo",
         nome: "Preparação de solo",
         texto: "Descompactação e acerto da terra antes do plantio.",
+        orcamento: "Pedir orçamento de preparo de solo",
+        mensagem: "Olá! Vim pelo site e quero um orçamento de preparação de solo.",
       },
       {
         id: "aracao",
         nome: "Aração e gradagem",
         texto: "Terra virada e destorroada, no ponto de plantar.",
+        orcamento: "Pedir orçamento de aração e gradagem",
+        mensagem: "Olá! Vim pelo site e quero um orçamento de aração e gradagem.",
       },
       {
         id: "estradas",
         nome: "Abertura e manutenção de estradas",
         texto: "Estradas rurais abertas e recuperadas, com caimento e saída de água para aguentar a chuva.",
+        orcamento: "Pedir orçamento de estrada",
+        mensagem: "Olá! Vim pelo site e quero um orçamento de abertura ou manutenção de estrada.",
       },
       {
         id: "destoca",
         nome: "Destoca de eucalipto",
         texto: "Tocos e raízes arrancados. A área fica limpa para plantar ou construir.",
+        orcamento: "Pedir orçamento de destoca",
+        mensagem: "Olá! Vim pelo site e quero um orçamento de destoca de eucalipto.",
       },
       {
         id: "terrenos",
         nome: "Preparação de terrenos",
         texto: "Corte, aterro e nivelamento para a obra começar no plano certo.",
+        orcamento: "Pedir orçamento de terreno",
+        mensagem: "Olá! Vim pelo site e quero um orçamento de preparação de terreno.",
       },
     ],
   },
