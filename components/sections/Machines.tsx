@@ -207,7 +207,8 @@ export function Machines() {
         <p className="mt-5 max-w-[44ch] leading-relaxed text-poeira/75">{maquinas.apoio}</p>
       </div>
 
-      <div data-pecas style={still ? undefined : { height: `${ITEMS.length * 100}svh` }}>
+      {/* data-tela-cheia: o atalho do WhatsApp no celular sai da frente (ficaria sobre a legenda). */}
+      <div data-pecas data-tela-cheia style={still ? undefined : { height: `${ITEMS.length * 100}svh` }}>
         <div ref={stage} className={still ? "relative" : "sticky top-0 h-svh overflow-hidden"}>
           <div
             aria-hidden="true"

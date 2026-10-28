@@ -697,6 +697,80 @@
     text-underline-offset: 0.45em;
   }
 
+  /* Orçamento de cada serviço: um link de texto com o balão, abaixo do texto, sem disputar com o título. */
+  .link-orcamento {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 2.75rem;
+    font-size: 0.975rem;
+    font-weight: 600;
+    color: color-mix(in oklab, var(--poeira) 92%, transparent);
+    text-decoration: underline 1px color-mix(in oklab, var(--poeira) 35%, transparent);
+    text-underline-offset: 0.35em;
+    transition:
+      color 160ms ease-out,
+      text-decoration-color 160ms ease-out,
+      text-underline-offset 160ms ease-out;
+  }
+  .link-orcamento:hover {
+    color: var(--poeira);
+    text-decoration-color: var(--amarelo-maquina);
+    text-underline-offset: 0.45em;
+  }
+
+  /* Atalho do WhatsApp no celular: uma etiqueta escura no canto, no tom dos rótulos da régua. */
+  .atalho-whatsapp {
+    position: fixed;
+    z-index: 30;
+    right: var(--gutter);
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1rem 0 0.85rem;
+    border: 1px solid color-mix(in oklab, var(--poeira) 16%, transparent);
+    border-radius: 4px;
+    background: color-mix(in oklab, var(--solo-fundo) 84%, transparent);
+    backdrop-filter: blur(8px);
+    color: var(--poeira);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    opacity: 0;
+    translate: 0 0.75rem;
+    visibility: hidden;
+    transition:
+      opacity 220ms ease-out,
+      translate 220ms ease-out,
+      visibility 0s linear 220ms;
+  }
+  .atalho-whatsapp[data-visivel="true"] {
+    opacity: 1;
+    translate: 0 0;
+    visibility: visible;
+    transition:
+      opacity 220ms ease-out,
+      translate 220ms ease-out,
+      visibility 0s;
+  }
+  .atalho-whatsapp:active {
+    background: var(--solo-fundo);
+  }
+  /* Na tela larga quem leva ao contato é a régua; o atalho é só do celular. */
+  @media (min-width: 48rem) {
+    .atalho-whatsapp {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .atalho-whatsapp,
+    .atalho-whatsapp[data-visivel="true"] {
+      translate: none;
+      transition: none;
+    }
+  }
+
   .link-discreto {
     text-decoration: underline transparent;
     text-underline-offset: 0.3em;

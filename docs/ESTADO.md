@@ -1,6 +1,14 @@
 # Estado do projeto: onde paramos
 
-Última sessão: 28/10/2026, na branch **`feat/retroescavadeira`** (no GitHub até `8497f69`; o trabalho de 28/10 ainda sem commit). A **`main` é a versão em vídeo** desde 23/10; a versão 3D das ilhas ficou na tag **`versao-3d`**.
+Última sessão: 28/10/2026, na branch **`feat/whatsapp-sutil`** (saiu da `main` depois do merge do PR #2, `5b4aa15`; ainda sem commit). A `feat/retroescavadeira` já está toda na `main`. A **`main` é a versão em vídeo** desde 23/10; a versão 3D das ilhas ficou na tag **`versao-3d`**.
+
+**Fim de 28/10: WhatsApp discreto ao longo da página.**
+- **Orçamento em cada serviço** (`Services.tsx`, `.link-orcamento`): embaixo do texto, um link com o balão ("Pedir orçamento de destoca") que abre o WhatsApp com o serviço já escrito (`orcamento` e `mensagem` de cada item em `content/site.ts`). A cliente recebe a conversa sabendo o que a pessoa quer.
+- **Atalho fixo no celular** (`components/whatsapp/FloatingWhatsApp.tsx`, `.atalho-whatsapp`): uma etiqueta escura com o balão amarelo e "WhatsApp" no canto de baixo, no tom dos rótulos da régua (sem a bolinha verde). Aparece quando o hero sai e some quando o contato entra (dali para baixo o botão grande e o rodapé resolvem). Também sai da frente da retroescavadeira (`[data-tela-cheia]`): no celular a legenda dela fica exatamente nesse canto. Na tela larga não existe (quem leva ao contato é a régua).
+- O balão (`components/whatsapp/ChatIcon.tsx`) é um ícone de conversa em traço, não a logo do WhatsApp.
+- **Prompts do antes e depois reescritos** (`PROMPTS-FLOW.md`, seção 3): o "depois" da destoca descrito em cima da foto do antes que já temos, e todos os DEPOIS como edição ("Edit this photo" + tudo o que não muda). Funcionou: os três depois batem com o antes (conferido sobrepondo as fotos).
+- **Antes e depois no ar com os 3 pares: destoca, terreno e estrada** (`beforeAfter` em `content/media.ts`; originais em `media-originais/*_flow_*.jpg`). WebP de 1600 px (180–350 KB, acima dos 180 KB do script, mas o `next/image` entrega AVIF no tamanho da tela: 42 KB em 828 px, 180 KB em 1920 px).
+- **Estrada:** o antes veio com uma retroescavadeira com adesivos e emblema. A edição no Flow tirou o emblema, mas deixou os letreiros do capô e da lateral; eles foram apagados à mão com o `delogo` do ffmpeg (`media-originais/antes-estrada_sem-marcas.jpg`, a partir de `antes-estrada_flow_4c162aab_editado.jpg`). Ampliado dá para ver o retoque; no tamanho do site, parece pintura gasta.
 
 **Sessão de 28/10: as pendências de 27/10 feitas e revisão completa do celular.**
 - **Rodapé novo** (`SiteFooter.tsx`): saiu o "HeH" entalhado. Logo grande e WhatsApp em cima; telefones, e-mail, endereço com "Ver no mapa" (Google Maps) e a lista de serviços (cada um leva à sua parada: `id` nos artigos) em colunas; faixa final com © e "Voltar ao topo" (`#inicio`). A marca gigante bem apagada ao fundo (`.marca-fundo`), só na tela larga: no celular virava blocos soltos. Links com 44 px de toque e respeito à área segura do iPhone.
@@ -138,7 +146,8 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 | `components/sections/TerrainEdge.tsx` | Borda irregular de bloco de solo (faixa de terra roxa + solo escuro); `flip` para a borda de baixo |
 | `components/sections/Process.tsx` | Como trabalhamos: linha de nível (ondulada → reta) desenhada no scroll, etapas que acendem na estaca |
 | `components/sections/Contact.tsx` | Contato final (parada `contato`): título, apoio e o WhatsApp grande |
-| `components/sections/SiteFooter.tsx` | Chão do rodapé: telefones, e-mail, endereço e o "H e H" entalhado |
+| `components/sections/SiteFooter.tsx` | Rodapé: logo e WhatsApp em cima; telefones, e-mail, endereço (com "Ver no mapa") e serviços em colunas; a marca bem apagada ao fundo na tela larga |
+| `components/whatsapp/FloatingWhatsApp.tsx` | Atalho do WhatsApp no celular, entre o hero e o contato; sai da frente de `[data-tela-cheia]` |
 
 **Para adicionar uma parada:** o id em `lib/stops.ts`, o clipe em `content/media.ts` e um marcador `data-stop="<mesmo id>"` na página, **na mesma ordem**.
 **Para adicionar uma seção no painel de terra:** é só colocá-la dentro do `<EarthPanel>` em `components/Landing.tsx`. Ordem atual: Como trabalhamos, Máquinas, Antes e depois, Onde atuamos.
@@ -193,15 +202,15 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 
 - [ ] **Clipes do Flow que faltam** (tabela no topo e seção 7).
 - [ ] **WhatsApp provisório**: usando (35) 99974-6093 (`content/site.ts`, `confirmado: false`).
-- [ ] **Ícone** provisório (`app/icon.svg`) até chegar o logo.
+- [ ] **Logo e ícone são proposta nossa** (`lib/logo/marca.ts`, `app/icon.svg`): a cliente precisa aprovar.
 - [ ] **Textos das etapas de "Como trabalhamos"** escritos por nós (a sequência é do briefing). Confirmar com a cliente, principalmente "valor e prazo antes de qualquer máquina entrar".
 - [ ] **Telefones sem rótulo de quem é quem** (o briefing pede "telefones com rótulo"). Perguntar à cliente junto com qual é o WhatsApp.
 - [ ] Linha "imagens ilustrativas" discreta no rodapé, se a cliente concordar.
 - [ ] **Domínio provisório** em `content/site.ts` (`seo.url`: hehterraplanagem.com.br). Ele vai no link canônico, na imagem OG e no JSON-LD. Na Vercel, a variável `NEXT_PUBLIC_SITE_URL` tem precedência.
 - [ ] Pendências com a cliente: lista em `BRIEFING.md`.
 - [ ] **Cidades atendidas:** o mapa de "Onde atuamos" mostra só os vizinhos de Alterosa. Com a lista da cliente, trocar em `content/site.ts` (`atuacao.cidades`) e, se fizer sentido, o texto.
-- [ ] **Criação da cena das máquinas trava a página por um instante** (compilação dos shaders de pintura, recorte e sombra). No Chrome sem GPU leva segundos; num celular deve ser bem menos, mas pode dar um engasgo ao entrar na seção. Caminho: `renderer.compileAsync` antes do primeiro desenho e criar a cena mais cedo.
-- [ ] **TBT ~550 ms** no Lighthouse celular (JavaScript da hidratação). Investigar o chunk maior (`bootup-time`).
+- [ ] **Resto do engasgo da cena das máquinas** (~1,6 s com a CPU 4× mais lenta, só na primeira visita): o reflexo de céu (PMREM) compila na hora. Caminho: trocar por matcap, como na logo. (O `compileAsync` e a montagem em etapas já estão feitos, 28/10.)
+- [ ] **TBT ~365 ms** no Lighthouse celular. Opção a decidir: logo 3D só na tela larga, logo plana no celular.
 
 ## 6. Próximos passos (ordem sugerida)
 

@@ -164,30 +164,31 @@ COMPOSITION: the machine seen exactly from the side (pure side profile, 90 degre
 
 ## 3. Antes e depois (o slider da caçamba)
 
-Cada par é **o mesmo lugar, com a mesma câmera**: gere o ANTES; depois, no Flow, **edite a própria imagem do antes** (não gere do zero) pedindo o DEPOIS. Assim o enquadramento bate e o slider funciona. 16:9.
+Cada par é **o mesmo lugar, com a mesma câmera**. Gere o ANTES (com o PHOTO STYLE) e confira; depois, no Flow, **edite a própria imagem do antes** (anexe a foto do antes ao prompt; não gere do zero) com o prompt do DEPOIS. Assim o enquadramento bate e o slider funciona. 16:9.
 
-**Destoca** → `antes-destoca.jpg` / `depois-destoca.jpg`
+> **28/10:** as duas tentativas de "depois" da destoca saíram de outro lugar porque foram geradas do zero. Os prompts de DEPOIS agora começam com "Edit this photo", listam tudo o que não pode mudar e trocam o PHOTO STYLE por uma frase curta de "mesma foto" (o bloco inteiro convidava o modelo a refazer a cena). "Perfectly level" saiu: terra perfeita demais denuncia a IA.
+
+**Destoca** → `antes-destoca.jpg` (feito, 27/10: `media-originais/antes-destoca_flow_798aea2a.jpg`) / `depois-destoca.jpg`
 ```
-ANTES: A former eucalyptus plantation on red soil right after the harvest: rows of cut eucalyptus stumps with tangled roots, dry bark, branches and leaves scattered on the ground, some young sprouts coming out of the stumps. Seen from a slightly raised point, about 3 meters high, looking across the rows toward the hills.
-```
-```
-DEPOIS (editar a imagem do antes): Keep exactly the same place, camera, horizon, hills, light and shadows. Remove every stump, root, branch and sprout: the whole area is now cleared, raked and evenly harrowed red soil with fine parallel lines, ready for planting. Nothing else changes.
+DEPOIS (editar a foto do antes): Edit this photo. Keep exactly the same place, camera position, lens, framing, horizon, distant hills, eucalyptus groves, the wire fence with wooden posts on the right, the dry yellow pasture beyond the fence, the sky, and the afternoon light and shadows. Change only the ground of the old plantation: remove every eucalyptus stump, root, sprout, branch, strip of bark and pile of dry leaves. That ground is now cleared and freshly harrowed red soil (terra roxa): loose, crumbly and slightly uneven, with shallow parallel lines left by a disc harrow, a few small clods and stones, faint tractor tire tracks and a little dust. Some dry grass remains only along the edges. It must still look like the same ordinary, unedited phone photo: same colors, same sharpness, same grain, no HDR. Do not add machines, people, objects or text.
 ```
 
 **Terreno** → `antes-terreno.jpg` / `depois-terreno.jpg`
 ```
-ANTES: A sloping rural lot at the edge of a small town: uneven ground covered with tall dry grass, weeds and a few termite mounds, a gully of red soil cut by rain, a wire fence on one side. Seen from about 2 meters high, looking up the slope.
+ANTES: A sloping empty rural lot at the edge of a small town: uneven ground covered with tall dry grass and weeds, two or three termite mounds, and a gully of exposed red soil (terra roxa) cut by rainwater down the slope. A simple wire fence with wooden posts on the left side, a few small houses with clay tile roofs far in the background, rolling hills and eucalyptus behind them. Seen from about 2 meters high, standing at the bottom of the lot and looking up the slope; the horizon in the upper third. Wide 16:9 landscape.
 ```
+(+ PHOTO STYLE)
 ```
-DEPOIS (editar a imagem do antes): Keep exactly the same place, camera, horizon, fence, hills and light. The lot is now a perfectly level building pad of compacted red earth with faint roller marks, a clean cut slope (talude) at the back showing red and ochre soil layers with grass on top, and thin wooden grade stakes with yellow tips at the corners. No weeds, no gully. Nothing else changes.
+DEPOIS (editar a foto do antes): Edit this photo. Keep exactly the same place, camera position, framing, horizon, fence, houses, hills, sky and light. Change only the lot: the tall grass, weeds, termite mounds and the gully are gone. The lot is now a level building pad of freshly compacted red earth, with faint roller marks, a few small loose clods and some dust, and a clean cut slope (talude) at the back where the hill was cut, showing red and ochre soil layers with grass along its top edge. Four thin wooden stakes with yellow painted tips mark the corners of the pad. It must still look like the same ordinary, unedited phone photo: same colors, same sharpness, no HDR. Do not add machines, people or text.
 ```
 
 **Estrada rural** → `antes-estrada.jpg` / `depois-estrada.jpg`
 ```
-ANTES: A damaged rural dirt road between pastures after the rainy season: deep ruts and potholes full of muddy water, eroded edges, a washed-out side with exposed rocks, grass invading the track. Seen from the middle of the road at about 1.7 meters high, the road curving away toward the hills.
+ANTES: A damaged rural dirt road of red soil between two pastures after the rainy season: deep wheel ruts, potholes with muddy water, eroded edges, one side washed out by rain with exposed stones, and grass growing along the middle of the track. Barbed-wire fences with wooden posts on both sides. Seen from the middle of the road at about 1.7 meters high (a person standing), the road curving gently to the right toward soft hills and a row of eucalyptus. Wide 16:9 landscape.
 ```
+(+ PHOTO STYLE)
 ```
-DEPOIS (editar a imagem do antes): Keep exactly the same place, camera, curve, pastures, hills and light. The road is now freshly graded: a smooth, slightly crowned red dirt surface with neat drainage ditches on both sides and a small water outlet turning into the pasture. No ruts, no puddles. Nothing else changes.
+DEPOIS (editar a foto do antes): Edit this photo. Keep exactly the same place, camera position, framing, curve of the road, fences, pastures, hills, eucalyptus, sky and light. Change only the road: it has just been regraded by a motor grader. A smooth, compacted red dirt surface, slightly higher in the middle so the rain runs to the sides, with long faint grader marks along the road; a neat drainage ditch on each side and a short outlet channel that takes the water from the ditch into the pasture; a low ridge of loose soil left by the grader along one edge. No ruts, no potholes, no puddles, no grass on the track. It must still look like the same ordinary, unedited phone photo: same colors, same sharpness, no HDR. Do not add machines, people or text.
 ```
 
 ## 4. Clipes que ainda faltam (vídeo, prompts acima)
