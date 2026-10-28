@@ -9,16 +9,17 @@ export function Hero() {
   const telefone = telefones[0];
 
   return (
-    <section data-stop="hero" data-regua={site.regua.inicio} aria-labelledby="hero-titulo" className="relative flex min-h-svh flex-col">
+    <section id="inicio" data-stop="hero" data-regua={site.regua.inicio} aria-labelledby="hero-titulo" className="relative flex min-h-svh flex-col">
       <header className="relative z-10 mx-auto flex w-full max-w-(--max-conteudo) items-center justify-between px-(--gutter) pt-6 md:pt-8">
         <Logo className="block h-9 text-poeira md:h-11" />
-        <a href={`tel:${telefone.numero}`} className="link-discreto text-[0.95rem] font-medium">
+        <a href={`tel:${telefone.numero}`} className="link-discreto inline-flex min-h-11 items-center text-[0.95rem] font-medium">
           {telefone.rotulo}
         </a>
       </header>
 
-      {/* A logo 3D: no celular em cima do texto; na tela larga à direita, sobre o vídeo desfocado. */}
-      <HeroLogo className="absolute inset-x-0 top-[12svh] h-[32svh] md:inset-x-auto md:top-[13svh] md:right-[3vw] md:h-[70svh] md:w-[46vw]" />
+      {/* A logo 3D: no celular no fluxo, entre o cabeçalho e o texto (em tela baixa, posicionada por
+          altura fixa, ela invadia o título); na tela larga, solta à direita, sobre o vídeo desfocado. */}
+      <HeroLogo className="relative mt-[2svh] h-[30svh] w-full shrink-0 md:absolute md:inset-x-auto md:top-[13svh] md:right-[3vw] md:mt-0 md:h-[70svh] md:w-[46vw]" />
 
       <div className="mx-auto flex w-full max-w-(--max-conteudo) flex-1 items-end px-(--gutter) pb-[9svh] md:items-center md:pb-[4svh]">
         <div className="veu-leitura max-w-[44rem]">
@@ -31,7 +32,7 @@ export function Hero() {
             <a href={whatsappHref()} target="_blank" rel="noopener" className="botao-primario" data-poeira>
               {hero.ctaPrincipal}
             </a>
-            <a href="#servicos" className="link-secundario">
+            <a href="#servicos" className="link-secundario inline-flex min-h-11 items-center">
               {hero.ctaSecundario}
             </a>
           </div>

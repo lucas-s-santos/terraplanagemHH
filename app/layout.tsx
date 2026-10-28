@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Archivo } from "next/font/google";
 import { site } from "@/content/site";
@@ -12,6 +12,12 @@ const archivo = Archivo({
   variable: "--font-archivo",
   display: "swap",
 });
+
+// A barra do navegador no celular na cor do solo (a página inteira é escura).
+export const viewport: Viewport = {
+  themeColor: "#2b1d15",
+  colorScheme: "dark",
+};
 
 // A imagem de compartilhamento é o app/opengraph-image.jpg (convenção do Next).
 export const metadata: Metadata = {

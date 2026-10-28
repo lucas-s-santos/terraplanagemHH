@@ -198,7 +198,11 @@ export const site = {
   },
 
   rodape: {
-    linha: "Terraplanagem e destoca em Alterosa – MG",
+    linha: "Terraplanagem, destoca, estradas e preparo de solo para o campo e para a obra. Alterosa e região, Sul de Minas.",
+    rotuloServicos: "Serviços",
+    rotuloRodape: "Rodapé",
+    mapa: "Ver no mapa",
+    topo: "Voltar ao topo",
   },
 } as const;
 

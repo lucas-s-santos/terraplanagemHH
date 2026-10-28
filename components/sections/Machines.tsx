@@ -145,7 +145,8 @@ export function Machines() {
           if (cancelled) return;
           const styles = getComputedStyle(document.documentElement);
           const token = (name: string) => styles.getPropertyValue(`--${name}`).trim();
-          scene = createBackhoeBlueprint({
+          // Montada em etapas e compilada em paralelo (lib/backhoe/blueprint.ts): não trava a rolagem.
+          return createBackhoeBlueprint({
             canvas: el,
             colors: {
               yellow: token("amarelo-maquina"),
@@ -157,7 +158,15 @@ export function Machines() {
             onFrame,
             still: reduced,
           });
-          scene.setRunning(visible);
+        })
+        .then((created) => {
+          if (!created) return;
+          if (cancelled) {
+            created.dispose();
+            return;
+          }
+          scene = created;
+          created.setRunning(visible);
           setState("on");
         })
         .catch(() => setState("off"));
@@ -191,7 +200,7 @@ export function Machines() {
 
   return (
     <section ref={root} data-regua={maquinas.titulo} aria-labelledby="maquinas-titulo">
-      <div className="mx-auto w-full max-w-(--max-conteudo) px-(--gutter) pt-[14svh]">
+      <div className="mx-auto w-full max-w-(--max-conteudo) px-(--gutter) pt-[6svh] md:pt-[14svh]">
         <h2 id="maquinas-titulo" className="titulo-secao text-[clamp(2rem,3.4vw,3.1rem)]">
           {maquinas.titulo}
         </h2>
