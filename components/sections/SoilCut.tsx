@@ -25,7 +25,7 @@ export function SoilCut({ progress }: { progress: RefObject<number> }) {
           if (cancelled) return;
           const styles = getComputedStyle(document.documentElement);
           const token = (name: string) => styles.getPropertyValue(`--${name}`).trim();
-          scene = createSoilCut({
+          const created = createSoilCut({
             canvas: el,
             colors: {
               soil: token("terra-roxa"),
@@ -37,8 +37,12 @@ export function SoilCut({ progress }: { progress: RefObject<number> }) {
             getProgress: () => progress.current ?? 0,
             still: reduced,
           });
-          scene.setRunning(visible);
-          setState("on");
+          scene = created;
+          return created.ready.then(() => {
+            if (cancelled) return;
+            created.setRunning(visible);
+            setState("on");
+          });
         })
         .catch(() => setState("off"));
 

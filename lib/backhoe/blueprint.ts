@@ -152,7 +152,7 @@ export async function createBackhoeBlueprint({ canvas, colors, getProgress, onFr
   renderer.localClippingEnabled = true;
 
   const scene = new Scene();
-  const reflection = skyReflection(renderer, KEY);
+  const reflection = await skyReflection(renderer, KEY);
   scene.environment = reflection.texture;
   scene.environmentIntensity = 0.5;
   const camera = new PerspectiveCamera(FOV, 1, 0.5, 200);

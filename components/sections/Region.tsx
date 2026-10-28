@@ -53,7 +53,8 @@ export function Region() {
           if (cancelled) return;
           const styles = getComputedStyle(document.documentElement);
           const token = (name: string) => styles.getPropertyValue(`--${name}`).trim();
-          scene = createRegionMap({
+          // Montada em etapas e compilada em paralelo (lib/region/scene.ts): não trava a rolagem.
+          return createRegionMap({
             canvas: el,
             colors: { soil: token("terra-roxa"), dark: token("solo-fundo"), dust: token("poeira"), yellow: token("amarelo-maquina") },
             places: PLACES,
@@ -69,7 +70,15 @@ export function Region() {
               });
             },
           });
-          scene.setRunning(visible);
+        })
+        .then((created) => {
+          if (!created) return;
+          if (cancelled) {
+            created.dispose();
+            return;
+          }
+          scene = created;
+          created.setRunning(visible);
           setState("on");
         })
         .catch(() => setState("off"));
