@@ -1,6 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- O H da marca com a linha de nível atravessando de ponta a ponta (a marca inteira some em 16 px). -->
-  <rect width="64" height="64" rx="14" fill="#2b1d15"/>
-  <path d="M14 11h13v17H14zM37 11h13v17H37zM14 37h13v16H14zM37 37h13v16H37z" fill="#e7c78f"/>
-  <path d="M7 28h50v9H7z" fill="#f2b705"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- O ícone reduzido da marca (o H com a curva e o platô; desenho em lib/logo/marca.ts), em amarelo sobre o solo. Legível até 16 px. -->
+  <rect width="120" height="120" rx="26" fill="#2b1d15"/>
+  <g transform="translate(9.6 9.6) scale(0.84)"><rect x="10" y="10" width="26" height="100" rx="3" fill="#f2b705"/><rect x="84" y="10" width="26" height="100" rx="3" fill="#f2b705"/><rect x="34" y="64" width="52" height="12" fill="#f2b705"/><path d="M34 44 Q48 32 60 44 Q72 56 86 44" fill="none" stroke="#f2b705" stroke-width="12"/></g>
 </svg>

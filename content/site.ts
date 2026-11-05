@@ -5,8 +5,8 @@
 export const site = {
   nome: "H e H Terraplanagem",
   marca: "H e H",
-  // A logo (proposta nossa, 27/10: a cliente ainda não mandou a dela): a marca "H e H" cortada pela
-  // linha de nível e o nome embaixo. Desenho em lib/logo/marca.ts.
+  // A logo (identidade de 05/11, em docs/identidade-visual/): a retroescavadeira sobre a curva e o
+  // platô, "H e H" (a marca) e o nome embaixo. Desenho em lib/logo/marca.ts.
   logo: {
     nome: "TERRAPLANAGEM",
     dicaGirar: "Arraste para girar",

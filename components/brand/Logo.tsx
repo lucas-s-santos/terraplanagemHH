@@ -1,36 +1,63 @@
 import { site } from "@/content/site";
-import { LETRAS_SVG, MARCA_HEIGHT, MARCA_WIDTH, NIVEL } from "@/lib/logo/marca";
-
-/** Espaço entre a marca e o nome, e a altura do nome, nas unidades da marca (altura 100). */
-const NAME_GAP = 16;
-const NAME_SIZE = 25;
+import { Icone } from "./Icone";
+import { SimboloDesenho } from "./Simbolo";
 
 /**
- * A logo: a marca "H e H" (letras na cor do texto, linha de nível em amarelo) e, com `nome`,
- * "Terraplanagem" por extenso embaixo, na largura exata da marca. O nome por extenso vai
- * para leitores de tela; o desenho, não.
+ * Logo completa, nas unidades do símbolo (164 × 120), como na capa da identidade: a retroescavadeira
+ * em amarelo e, ao lado, "H e H" largo e "TERRAPLANAGEM" espaçado, na cor do texto. O comprimento
+ * de cada linha é fixo (textLength): o desenho não muda enquanto a Archivo carrega.
  */
-export function Logo({ className, nome = true, decorativa = false }: { className?: string; nome?: boolean; decorativa?: boolean }) {
-  const height = nome ? MARCA_HEIGHT + NAME_GAP + NAME_SIZE : MARCA_HEIGHT;
+const COMPLETA = {
+  viewBox: "0 8 490 104",
+  texto: 188,
+  sigla: { y: 76.5, tamanho: 94, comprimento: 300 },
+  nome: { y: 110.4, tamanho: 20.8, comprimento: 274 },
+} as const;
+
+/**
+ * A logo. `completa`: símbolo + "H e H" + "TERRAPLANAGEM" (rodapé, tamanhos grandes).
+ * `compacta`: o ícone reduzido e o nome numa linha só (cabeçalho), como no topo das pranchas.
+ */
+export function Logo({ variante = "completa", className }: { variante?: "completa" | "compacta"; className?: string }) {
+  if (variante === "compacta") {
+    return (
+      <span className={`inline-flex items-center gap-2.5 ${className ?? ""}`}>
+        <Icone className="size-8 shrink-0 text-amarelo-maquina md:size-9" />
+        <span className="text-[1.0625rem] font-semibold md:text-lg">{site.nome}</span>
+      </span>
+    );
+  }
+
+  const { viewBox, texto, sigla, nome } = COMPLETA;
   return (
-    <span className={className} aria-hidden={decorativa || undefined}>
-      {!decorativa && <span className="sr-only">{site.nome}</span>}
-      <svg viewBox={`0 0 ${MARCA_WIDTH} ${height}`} aria-hidden="true" className="block h-full w-auto overflow-visible">
-        <path d={LETRAS_SVG.join("")} fill="currentColor" />
-        <path d={NIVEL} fill="var(--amarelo-maquina)" />
-        {nome && (
-          <text
-            x={0}
-            y={height}
-            textLength={MARCA_WIDTH}
-            lengthAdjust="spacing"
-            fill="currentColor"
-            fontSize={NAME_SIZE}
-            className="logo-nome"
-          >
-            {site.logo.nome}
-          </text>
-        )}
+    <span className={className}>
+      <span className="sr-only">{site.nome}</span>
+      <svg viewBox={viewBox} aria-hidden="true" focusable="false" className="block h-full w-auto overflow-visible">
+        <g style={{ color: "var(--amarelo-maquina)" }}>
+          <SimboloDesenho />
+        </g>
+        <text
+          x={texto}
+          y={sigla.y}
+          fontSize={sigla.tamanho}
+          textLength={sigla.comprimento}
+          lengthAdjust="spacing"
+          fill="currentColor"
+          className="logo-sigla"
+        >
+          {site.marca}
+        </text>
+        <text
+          x={texto}
+          y={nome.y}
+          fontSize={nome.tamanho}
+          textLength={nome.comprimento}
+          lengthAdjust="spacing"
+          fill="currentColor"
+          className="logo-nome"
+        >
+          {site.logo.nome}
+        </text>
       </svg>
     </span>
   );
