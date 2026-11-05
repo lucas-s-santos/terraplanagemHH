@@ -1,6 +1,6 @@
 # Estado do projeto: onde paramos
 
-Última sessão: 05/11/2026, na branch **`feat/nova-logo`** (saiu da `main` em `985060d`, com o `feat/whatsapp-sutil` já mesclado; ainda sem commit). A **`main` é a versão em vídeo** desde 23/10; a versão 3D das ilhas ficou na tag **`versao-3d`**.
+Última sessão: 05/11/2026, na branch **`feat/nova-logo`** (saiu da `main` em `985060d`, com o `feat/whatsapp-sutil` já mesclado). Commit `3df3478` no GitHub; PR aberto pelo link de comparação, porque o `gh` não está instalado nesta máquina. A **`main` é a versão em vídeo** desde 23/10; a versão 3D das ilhas ficou na tag **`versao-3d`**.
 
 **05/11: nova identidade visual, já no site.** O kit está em `docs/identidade-visual/`: SVGs de cada variação, PNGs da logo horizontal, as 7 pranchas em HTML e PNG e os originais do design. O símbolo é uma **retroescavadeira de perfil em traço chapado**: a caçamba cava a curva (o terreno como chega) e as rodas andam sobre o platô (o terreno como a H e H entrega). O ícone reduzido é um H com a curva em cima e o platô embaixo. A paleta é a mesma de `tokens.css` e a fonte continua Archivo.
 - **Geometria única** em `lib/logo/marca.ts` (os números das pranchas, 164 × 120): serve os SVGs (`components/brand/Simbolo.tsx` e `Icone.tsx`) e o 3D.
