@@ -14,6 +14,8 @@ export function LocalBusinessJsonLd() {
     name: nome,
     url: siteUrl.href,
     image: new URL("/opengraph-image.jpg", siteUrl).href,
+    // O ícone da marca em 512 px (o H com a curva e o platô sobre o solo).
+    logo: new URL("/marca/logo.png", siteUrl).href,
     description: seo.descricao,
     email,
     telephone: telefones[0].numero,

@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Logo } from "@/components/brand/Logo";
+import { Simbolo } from "@/components/brand/Simbolo";
 import { site } from "@/content/site";
 import { useStageStore } from "@/lib/store";
 
 /**
- * A logo 3D do hero (lib/logo/scene.ts), para pegar e girar. O three só baixa depois que o vídeo
+ * O símbolo 3D do hero (lib/logo/scene.ts), para pegar e girar. O three só baixa depois que o vídeo
  * do hero entrou (fim do preloader), num momento ocioso: carregar e montar a cena junto com a
  * página disputava a CPU com a hidratação (TBT de 5 s no Lighthouse). Só desenha com o hero na
- * tela. Sem placa de vídeo (ou sem WebGL), fica a mesma logo em SVG, parada.
+ * tela. Sem placa de vídeo (ou sem WebGL), fica o mesmo símbolo em SVG, parado.
  */
 export function HeroLogo({ className }: { className: string }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -43,7 +43,7 @@ export function HeroLogo({ className }: { className: string }) {
             created?.dispose();
             return;
           }
-          // Sem placa de vídeo: a cena não se monta e fica a logo em SVG.
+          // Sem placa de vídeo: a cena não se monta e fica o símbolo em SVG.
           if (!created) {
             setState("flat");
             return;
@@ -113,7 +113,7 @@ export function HeroLogo({ className }: { className: string }) {
     <div aria-hidden="true" className={className}>
       {state === "flat" ? (
         <div className="flex h-full items-center justify-center">
-          <Logo nome={false} decorativa className="logo-plana" />
+          <Simbolo className="logo-plana" />
         </div>
       ) : (
         <>

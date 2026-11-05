@@ -1,4 +1,5 @@
 import { Logo } from "@/components/brand/Logo";
+import { Simbolo } from "@/components/brand/Simbolo";
 import { site } from "@/content/site";
 import { whatsappHref } from "@/lib/whatsapp";
 import { ContourField } from "./ContourField";
@@ -9,8 +10,8 @@ const mapsHref = (endereco: string) => `https://www.google.com/maps/search/?api=
 
 /**
  * Rodapé: a página termina em chão firme. A logo e o WhatsApp em cima; os contatos por extenso,
- * o endereço com o mapa e os serviços (que levam a cada parada) em colunas; a marca gigante bem
- * apagada ao fundo, saindo pela borda.
+ * o endereço com o mapa e os serviços (que levam a cada parada) em colunas; a retroescavadeira
+ * gigante bem apagada ao fundo, saindo pela borda.
  */
 export function SiteFooter() {
   const { contato, telefones, email, endereco, rodape, servicos } = site;
@@ -22,7 +23,7 @@ export function SiteFooter() {
       <TerrainEdge />
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <ContourField layout="rodape" />
-        <Logo nome={false} decorativa className="marca-fundo" />
+        <Simbolo className="marca-fundo" />
       </div>
 
       <div className="mx-auto w-full max-w-(--max-conteudo) px-(--gutter) pt-[12svh] pb-[calc(1.5rem+env(safe-area-inset-bottom))]">

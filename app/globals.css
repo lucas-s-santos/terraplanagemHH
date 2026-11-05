@@ -240,10 +240,13 @@
     }
   }
 
-  /* A logo: o nome por extenso embaixo da marca (a largura vem do textLength do SVG). */
+  /* A logo completa: "H e H" largo e pesado, "TERRAPLANAGEM" em peso médio (as larguras vêm do textLength do SVG). */
+  .logo-sigla {
+    font-weight: 800;
+    font-stretch: 125%;
+  }
   .logo-nome {
-    font-weight: 700;
-    font-stretch: 110%;
+    font-weight: 500;
   }
 
   /* A logo 3D do hero: arrasta na horizontal; na vertical, o toque continua rolando a página. */
@@ -251,19 +254,13 @@
     cursor: grab;
     touch-action: pan-y;
   }
-  /* Sem placa de vídeo: a mesma logo em SVG, parada, com as cores do 3D (letras amarelas, barra de aço). */
+  /* Sem placa de vídeo: o mesmo símbolo em SVG, parado, em amarelo de máquina. */
   .logo-plana {
     display: block;
     width: 84%;
+    height: auto;
     color: var(--amarelo-maquina);
     filter: drop-shadow(0 0.6rem 1.2rem rgb(0 0 0 / 0.45));
-  }
-  .logo-plana svg {
-    width: 100%;
-    height: auto;
-  }
-  .logo-plana path + path {
-    fill: #d9d4cb;
   }
   .dica-girar {
     position: absolute;
@@ -662,22 +659,17 @@
   }
 
   /* Rodapé: a marca gigante bem apagada ao fundo, numa cor só, saindo pela borda de baixo. */
+  /* A retroescavadeira da marca, gigante e bem apagada, andando para fora da borda. */
   .marca-fundo {
     position: absolute;
-    right: -8%;
-    bottom: -9%;
+    right: -10%;
+    bottom: -6%;
     display: block;
-    width: max(42rem, 82%);
+    width: max(40rem, 70%);
+    height: auto;
     color: var(--poeira);
     opacity: 0.05;
     pointer-events: none;
-  }
-  .marca-fundo svg {
-    width: 100%;
-    height: auto;
-  }
-  .marca-fundo path {
-    fill: currentColor;
   }
   /* Na tela estreita só cabia um pedaço da marca, que virava blocos soltos. */
   @media (max-width: 47.99rem) {

@@ -1,70 +1,103 @@
 /**
- * A marca "H e H": dois H e um e cortados por uma só linha de nível, que é ao mesmo tempo o
- * travessão dos H e a barra do e (o terreno nivelado, a mesma ideia do preloader e da régua).
- * Unidades: altura 100. As letras ficam fora da faixa da barra, então nada se sobrepõe: no SVG
- * cada parte tem a sua cor e no 3D o seu material, sem duas faces no mesmo lugar.
- * A mesma geometria serve o SVG (components/brand/Logo.tsx) e o 3D (lib/logo/scene.ts).
+ * A marca H e H (identidade de 05/11, em docs/identidade-visual/): uma retroescavadeira de perfil em
+ * traço chapado. A caçamba cava a curva (o terreno como chega) e as rodas andam sobre o platô (o
+ * terreno como a H e H entrega). Para tamanhos pequenos, o ícone: um H com a curva por cima e o
+ * platô por baixo.
+ * Unidades do desenho original (símbolo 164 × 120, ícone 120 × 120), y para baixo. A mesma
+ * geometria serve o SVG (components/brand/) e o 3D (lib/logo/scene.ts).
  */
 
-const H = 100;
-/** A faixa da linha de nível (de cima para baixo). */
-const BAND_TOP = 41;
-const BAND_BOTTOM = 59;
-/** Haste do H e largura do H. */
-const STEM = 24;
-const H_WIDTH = 80;
-const GAP = 16;
-/** O e: anel com o corte embaixo à direita, centrado na barra. */
-const E_OUTER = 31;
-const E_INNER = 14;
-const E_CUT_DEG = 40;
+export type Ponto = readonly [number, number];
 
-const E_CENTER_X = H_WIDTH + GAP + E_OUTER;
-const RIGHT_H = E_CENTER_X + E_OUTER + GAP;
-export const MARCA_WIDTH = RIGHT_H + H_WIDTH;
-export const MARCA_HEIGHT = H;
-
-const n = (value: number) => Number(value.toFixed(2));
-const rect = (x: number, y: number, w: number, h: number) => `M${n(x)} ${n(y)}h${n(w)}v${n(h)}h${n(-w)}Z`;
-
-/** Um H: as duas hastes, sem o trecho que a barra cobre (`under`: quanto entram por baixo dela). */
-function letterH(x: number, under: number) {
-  const top = BAND_TOP + under;
-  const bottom = BAND_BOTTOM - under;
-  return [
-    rect(x, 0, STEM, top),
-    rect(x + H_WIDTH - STEM, 0, STEM, top),
-    rect(x, bottom, STEM, H - bottom),
-    rect(x + H_WIDTH - STEM, bottom, STEM, H - bottom),
-  ];
+export interface Retangulo {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  /** Raio dos cantos. */
+  r: number;
 }
 
-/** O e: o arco de cima (acima da barra) e o de baixo (abaixo dela, até o corte). */
-function letterE(under: number) {
-  const cx = E_CENTER_X;
-  const cy = H / 2;
-  const half = (BAND_BOTTOM - BAND_TOP) / 2 - under;
-  const outerX = Math.sqrt(E_OUTER ** 2 - half ** 2);
-  const innerX = Math.sqrt(E_INNER ** 2 - half ** 2);
-  const cut = (E_CUT_DEG * Math.PI) / 180;
-  const top = cy - half;
-  const bottom = cy + half;
-  const upper =
-    `M${n(cx - outerX)} ${n(top)}A${E_OUTER} ${E_OUTER} 0 0 1 ${n(cx + outerX)} ${n(top)}` +
-    `L${n(cx + innerX)} ${n(top)}A${E_INNER} ${E_INNER} 0 0 0 ${n(cx - innerX)} ${n(top)}Z`;
-  // De baixo: da esquerda, contorna por baixo até o corte inclinado, e volta por dentro.
-  const lower =
-    `M${n(cx - outerX)} ${n(bottom)}A${E_OUTER} ${E_OUTER} 0 0 0 ${n(cx + E_OUTER * Math.cos(cut))} ${n(cy + E_OUTER * Math.sin(cut))}` +
-    `L${n(cx + E_INNER * Math.cos(cut))} ${n(cy + E_INNER * Math.sin(cut))}` +
-    `A${E_INNER} ${E_INNER} 0 0 1 ${n(cx - innerX)} ${n(bottom)}Z`;
-  return [upper, lower];
+/** Curva de Bézier quadrática: início, controle e fim. */
+export type Quadratica = readonly [Ponto, Ponto, Ponto];
+
+export interface Traco {
+  pontos: readonly Ponto[];
+  largura: number;
+  /** Ponta redonda (o braço da retro) ou reta (o braço da pá); as junções são sempre redondas. */
+  ponta: "redonda" | "reta";
 }
 
-/**
- * As letras (sem a barra), cada parte um caminho fechado. No 3D, encostadas na barra; no SVG,
- * entrando 1 unidade por baixo dela (a barra é desenhada por cima), senão o antialias deixa um fio.
- */
-export const LETRAS: readonly string[] = [...letterH(0, 0), ...letterE(0), ...letterH(RIGHT_H, 0)];
-export const LETRAS_SVG: readonly string[] = [...letterH(0, 1), ...letterE(1), ...letterH(RIGHT_H, 1)];
-/** A linha de nível, de ponta a ponta. */
-export const NIVEL = rect(0, BAND_TOP, MARCA_WIDTH, BAND_BOTTOM - BAND_TOP);
+export interface Roda {
+  cx: number;
+  cy: number;
+  r: number;
+  traco: number;
+}
+
+export const SIMBOLO_LARGURA = 164;
+export const SIMBOLO_ALTURA = 120;
+/** Onde o desenho está de fato dentro do quadro de 164 × 120 (o alto do quadro é vazio). */
+export const SIMBOLO_CAIXA = { x: 0, y: 30, w: 162, h: 81 } as const;
+
+/** A máquina: chassi, cabine (com a janela vazada), capô, pá da frente, caçamba, rodas e braços. */
+export const MAQUINA = {
+  retangulos: [
+    { x: 50, y: 66, w: 88, h: 14, r: 2 },
+    { x: 100, y: 52, w: 32, h: 14, r: 2 },
+  ] satisfies Retangulo[],
+  /** Caminhos cheios (só M, H, V, L, Q e Z). A cabine é vazada (evenodd). */
+  caminhos: [
+    { d: "M70 36 H96 L102 66 H70 Z M76 42 V58 H97 L94 42 Z", vazado: true },
+    { d: "M139 68 L153 68 L161 97 L161 101 L142 101 Q134 86 139 68 Z", vazado: false },
+    { d: "M10 76 Q7 94 24 97 L26 87 Q17 85 19 76 Z", vazado: false },
+  ],
+  rodas: [
+    { cx: 62, cy: 88, r: 12, traco: 8 },
+    { cx: 124, cy: 92, r: 8, traco: 6 },
+  ] satisfies Roda[],
+  bracos: [
+    { pontos: [[104, 50], [128, 50], [144, 72]], largura: 5, ponta: "reta" },
+    { pontos: [[54, 68], [30, 34]], largura: 7, ponta: "redonda" },
+    { pontos: [[30, 34], [15, 78]], largura: 6, ponta: "redonda" },
+  ] satisfies Traco[],
+};
+
+/** O terreno: a curva que a caçamba cava e o platô em que a máquina anda. */
+export const TERRENO = {
+  plato: { x: 42, y: 101, w: 119, h: 6, r: 0 } satisfies Retangulo,
+  curva: {
+    // "M2 104 Q12 96 22 104 T42 104" com o T escrito por extenso (o controle refletido).
+    trechos: [
+      [[2, 104], [12, 96], [22, 104]],
+      [[22, 104], [32, 112], [42, 104]],
+    ] satisfies Quadratica[],
+    largura: 6,
+  },
+};
+
+/** O ícone reduzido: as duas hastes do H, a curva (traço) e o platô. */
+export const ICONE_LADO = 120;
+export const ICONE = {
+  hastes: [
+    { x: 10, y: 10, w: 26, h: 100, r: 3 },
+    { x: 84, y: 10, w: 26, h: 100, r: 3 },
+  ] satisfies Retangulo[],
+  curva: {
+    trechos: [
+      [[34, 44], [48, 32], [60, 44]],
+      [[60, 44], [72, 56], [86, 44]],
+    ] satisfies Quadratica[],
+    largura: 12,
+  },
+  plato: { x: 34, y: 64, w: 52, h: 12, r: 0 } satisfies Retangulo,
+};
+
+/** A curva em `d` de SVG. */
+export const curvaD = (trechos: readonly Quadratica[]) =>
+  trechos
+    .map(([inicio, controle, fim], i) => `${i === 0 ? `M${inicio[0]} ${inicio[1]} ` : ""}Q${controle[0]} ${controle[1]} ${fim[0]} ${fim[1]}`)
+    .join(" ");
+
+/** Uma linha quebrada em `d` de SVG. */
+export const tracoD = (pontos: readonly Ponto[]) => pontos.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x} ${y}`).join(" ");

@@ -6,13 +6,16 @@ import {
   MathUtils,
   Mesh,
   MeshMatcapMaterial,
+  Path,
   PerspectiveCamera,
   SRGBColorSpace,
   Scene,
+  Shape,
+  Vector2,
   WebGLRenderer,
 } from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
-import { LETRAS, MARCA_HEIGHT, MARCA_WIDTH, NIVEL } from "./marca";
+import { MAQUINA, type Ponto, type Quadratica, type Retangulo, type Roda, SIMBOLO_CAIXA, TERRENO } from "./marca";
 
 const { clamp, damp, lerp, smoothstep } = MathUtils;
 
@@ -32,10 +35,12 @@ export interface LogoSceneOptions {
 /** Quanto a marca ocupa da largura do canvas. */
 const FILL = 0.84;
 const FOV = 26;
-/** Espessura das letras e da barra, nas unidades da marca (altura 100): a barra sai mais, como uma lâmina. */
-const LETTER_DEPTH = 26;
-const BAR_DEPTH = 38;
+/** Espessura da chapa, nas unidades do símbolo: o terreno sai mais que a máquina, como a lâmina. */
+const MACHINE_DEPTH = 16;
+const TERRAIN_DEPTH = 24;
 const ENTRANCE_SECONDS = 1.7;
+/** Pontos por trecho de curva (a curva do terreno vira um contorno). */
+const CURVE_STEPS = 16;
 
 interface MatcapTones {
   /** Brilho (no alto, à esquerda), cor do corpo e sombra (na borda). */
@@ -86,25 +91,112 @@ function matcap({ light, base, shade, metal = false }: MatcapTones) {
   return texture;
 }
 
-/** Os caminhos da marca (SVG) em formas do three. */
-function shapesOf(paths: readonly string[]) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg">${paths.map((d) => `<path d="${d}"/>`).join("")}</svg>`;
-  // Cada caminho é um contorno fechado, sem furo (o furo do e é a própria barra). O three decide
-  // furo por contenção, então a orientação do SVG (y para baixo) não importa.
+// ---------- O símbolo em formas do three. No SVG há traços; aqui, cada traço vira o contorno dele. ----------
+// As peças se sobrepõem (braço sobre o chassi, roda sobre o platô): faces da frente no mesmo plano e
+// com o mesmo material dão a mesma cor no matcap, então a sobreposição não aparece.
+
+function rectangle({ x, y, w, h, r }: Retangulo) {
+  const shape = new Shape();
+  if (!r) return shape.setFromPoints([new Vector2(x, y), new Vector2(x + w, y), new Vector2(x + w, y + h), new Vector2(x, y + h)]);
+  shape.moveTo(x + r, y);
+  shape.lineTo(x + w - r, y);
+  shape.quadraticCurveTo(x + w, y, x + w, y + r);
+  shape.lineTo(x + w, y + h - r);
+  shape.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  shape.lineTo(x + r, y + h);
+  shape.quadraticCurveTo(x, y + h, x, y + h - r);
+  shape.lineTo(x, y + r);
+  shape.quadraticCurveTo(x, y, x + r, y);
+  return shape;
+}
+
+/** Um caminho cheio do SVG. O three decide o furo por contenção: a janela, dentro da cabine, sai vazada. */
+function filledPath(d: string) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg"><path d="${d}"/></svg>`;
   return new SVGLoader().parse(svg).paths.flatMap((path) => path.toShapes());
 }
 
-function extrude(paths: readonly string[], depth: number): BufferGeometry {
-  const geometry = new ExtrudeGeometry(shapesOf(paths), {
+/** Roda: o anel do traço. */
+function ring({ cx, cy, r, traco }: Roda) {
+  const shape = new Shape().absarc(cx, cy, r + traco / 2, 0, Math.PI * 2, false);
+  shape.holes.push(new Path().absarc(cx, cy, r - traco / 2, 0, Math.PI * 2, true));
+  return shape;
+}
+
+const disc = ([x, y]: Ponto, r: number) => new Shape().absarc(x, y, r, 0, Math.PI * 2, false);
+
+/** Um trecho reto de traço: retângulo (ponta reta) ou cápsula (ponta redonda). */
+function segment([ax, ay]: Ponto, [bx, by]: Ponto, width: number, round: boolean) {
+  const angle = Math.atan2(by - ay, bx - ax);
+  const half = width / 2;
+  const nx = -Math.sin(angle) * half;
+  const ny = Math.cos(angle) * half;
+  if (!round) {
+    return new Shape().setFromPoints([
+      new Vector2(ax + nx, ay + ny),
+      new Vector2(bx + nx, by + ny),
+      new Vector2(bx - nx, by - ny),
+      new Vector2(ax - nx, ay - ny),
+    ]);
+  }
+  const shape = new Shape();
+  shape.moveTo(ax + nx, ay + ny);
+  shape.lineTo(bx + nx, by + ny);
+  shape.absarc(bx, by, half, angle + Math.PI / 2, angle - Math.PI / 2, true);
+  shape.lineTo(ax - nx, ay - ny);
+  shape.absarc(ax, ay, half, angle - Math.PI / 2, angle - (3 * Math.PI) / 2, true);
+  return shape;
+}
+
+/** A curva do terreno com espessura (pontas retas, como no SVG). */
+function curveBand(parts: readonly Quadratica[], width: number) {
+  const half = width / 2;
+  const left: Vector2[] = [];
+  const right: Vector2[] = [];
+  parts.forEach(([p0, p1, p2], index) => {
+    for (let k = index === 0 ? 0 : 1; k <= CURVE_STEPS; k++) {
+      const t = k / CURVE_STEPS;
+      const u = 1 - t;
+      const x = u * u * p0[0] + 2 * u * t * p1[0] + t * t * p2[0];
+      const y = u * u * p0[1] + 2 * u * t * p1[1] + t * t * p2[1];
+      const dx = 2 * u * (p1[0] - p0[0]) + 2 * t * (p2[0] - p1[0]);
+      const dy = 2 * u * (p1[1] - p0[1]) + 2 * t * (p2[1] - p1[1]);
+      const length = Math.hypot(dx, dy) || 1;
+      left.push(new Vector2(x - (dy / length) * half, y + (dx / length) * half));
+      right.push(new Vector2(x + (dy / length) * half, y - (dx / length) * half));
+    }
+  });
+  return new Shape([...left, ...right.reverse()]);
+}
+
+function machineShapes() {
+  const shapes: Shape[] = [
+    ...MAQUINA.retangulos.map(rectangle),
+    ...MAQUINA.caminhos.flatMap(({ d }) => filledPath(d)),
+    ...MAQUINA.rodas.map(ring),
+  ];
+  for (const { pontos, largura, ponta } of MAQUINA.bracos) {
+    for (let i = 1; i < pontos.length; i++) shapes.push(segment(pontos[i - 1], pontos[i], largura, ponta === "redonda"));
+    // Junções redondas (o braço da pá dobra).
+    for (let i = 1; i < pontos.length - 1; i++) shapes.push(disc(pontos[i], largura / 2));
+  }
+  return shapes;
+}
+
+const terrainShapes = () => [rectangle(TERRENO.plato), curveBand(TERRENO.curva.trechos, TERRENO.curva.largura)];
+
+function extrude(shapes: Shape[], depth: number): BufferGeometry {
+  const geometry = new ExtrudeGeometry(shapes, {
     depth,
     bevelEnabled: true,
-    bevelThickness: 2.4,
-    bevelSize: 1.6,
+    bevelThickness: 1.2,
+    bevelSize: 0.7,
     bevelSegments: 2,
-    curveSegments: 20,
+    curveSegments: 16,
   });
-  // Centro da marca na origem e a profundidade centrada (o SVG desce em y: o grupo inverte).
-  geometry.translate(-MARCA_WIDTH / 2, -MARCA_HEIGHT / 2, -depth / 2);
+  // Centro do desenho na origem e a profundidade centrada (o SVG desce em y: o grupo inverte).
+  const { x, y, w, h } = SIMBOLO_CAIXA;
+  geometry.translate(-(x + w / 2), -(y + h / 2), -depth / 2);
   return geometry;
 }
 
@@ -123,11 +215,11 @@ function isSoftwareRenderer(renderer: WebGLRenderer) {
 const yieldToMain = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
 /**
- * A logo em 3D no hero: as letras em pintura amarela de máquina e a linha de nível em aço
- * escovado, mais saliente, como a lâmina. Dá para pegar e girar (com inércia); solta, ela volta
- * devagar a ficar de frente, balançando de leve. Entra quando o vídeo entra: a barra passa da
- * esquerda para a direita e as letras assentam nela.
- * Montada em etapas (com pausas entre elas); sem placa de vídeo, devolve null (fica a logo em SVG).
+ * O símbolo em 3D no hero, como uma chapa recortada: a retroescavadeira em pintura amarela de
+ * máquina e o terreno (a curva e o platô) em aço escovado, mais saliente, como a lâmina. Dá para
+ * pegar e girar (com inércia); solta, ela volta devagar a ficar de frente, balançando de leve.
+ * Entra quando o vídeo entra: o terreno passa da esquerda para a direita e a máquina assenta nele.
+ * Montada em etapas (com pausas entre elas); sem placa de vídeo, devolve null (fica o símbolo em SVG).
  */
 export async function createLogoScene({ canvas, colors, still, onGrab }: LogoSceneOptions) {
   const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
@@ -145,7 +237,7 @@ export async function createLogoScene({ canvas, colors, still, onGrab }: LogoSce
   const scene = new Scene();
   const camera = new PerspectiveCamera(FOV, 1, 1, 100);
 
-  // ---------- Materiais (matcap): pintura de máquina na frente, a lateral mais escura; aço na barra ----------
+  // ---------- Materiais (matcap): pintura de máquina na frente, a lateral mais escura; aço no terreno ----------
   const textures = [
     matcap({ light: "#fff6d2", base: colors.yellow, shade: "#7a4d00" }),
     matcap({ light: "#f6d77e", base: "#c98d00", shade: "#4f3200" }),
@@ -154,23 +246,17 @@ export async function createLogoScene({ canvas, colors, still, onGrab }: LogoSce
   ];
   const [paint, paintSide, steel, steelSide] = textures.map((texture) => new MeshMatcapMaterial({ matcap: texture }));
 
-  // ---------- A marca: cada letra separada (para a entrada) e a barra; de quatro em quatro peças, uma pausa ----------
-  const letterGeometries: BufferGeometry[] = [];
-  for (const d of LETRAS) {
-    letterGeometries.push(extrude([d], LETTER_DEPTH));
-    if (letterGeometries.length % 4 === 0) await yieldToMain();
-  }
-  const barGeometry = extrude([NIVEL], BAR_DEPTH);
+  // ---------- O símbolo: a máquina e o terreno, cada um uma peça (para a entrada); uma pausa entre eles ----------
+  const machineGeometry = extrude(machineShapes(), MACHINE_DEPTH);
+  await yieldToMain();
+  const terrainGeometry = extrude(terrainShapes(), TERRAIN_DEPTH);
   const mark = new Group();
-  const letters = letterGeometries.map((geometry) => {
-    const mesh = new Mesh(geometry, [paint, paintSide]);
-    mark.add(mesh);
-    return mesh;
-  });
-  const bar = new Mesh(barGeometry, [steel, steelSide]);
-  mark.add(bar);
-  // Unidades da marca para o mundo; y invertido porque o SVG desce (o three corrige a face com escala negativa).
-  const unit = 4.4 / MARCA_WIDTH;
+  const machine = new Mesh(machineGeometry, [paint, paintSide]);
+  const terrain = new Mesh(terrainGeometry, [steel, steelSide]);
+  mark.add(machine, terrain);
+  // Unidades do símbolo para o mundo; y invertido porque o SVG desce (o three corrige a face com escala negativa).
+  const { w: MARK_WIDTH, h: MARK_HEIGHT } = SIMBOLO_CAIXA;
+  const unit = 4.4 / MARK_WIDTH;
   mark.scale.set(unit, -unit, unit);
   const pivot = new Group();
   pivot.add(mark);
@@ -185,8 +271,8 @@ export async function createLogoScene({ canvas, colors, still, onGrab }: LogoSce
     camera.aspect = w / h;
     const halfWidth = Math.atan(Math.tan(MathUtils.degToRad(FOV / 2)) * camera.aspect);
     // Cabe pela largura e, em telas baixas, pela altura (a marca girada ocupa mais).
-    const byWidth = (MARCA_WIDTH * unit) / 2 / (FILL * Math.tan(halfWidth));
-    const byHeight = (MARCA_HEIGHT * unit * 1.9) / 2 / Math.tan(MathUtils.degToRad(FOV / 2));
+    const byWidth = (MARK_WIDTH * unit) / 2 / (FILL * Math.tan(halfWidth));
+    const byHeight = (MARK_HEIGHT * unit * 1.9) / 2 / Math.tan(MathUtils.degToRad(FOV / 2));
     camera.position.set(0, 0, Math.max(byWidth, byHeight));
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
@@ -244,21 +330,17 @@ export async function createLogoScene({ canvas, colors, still, onGrab }: LogoSce
   canvas.addEventListener("pointerup", onUp);
   canvas.addEventListener("pointercancel", onUp);
 
-  // ---------- Entrada: a barra passa da esquerda e as letras assentam nela ----------
+  // ---------- Entrada: o terreno passa da esquerda, como a lâmina, e a máquina assenta nele ----------
   let entrance = calm ? ENTRANCE_SECONDS : -1;
   const place = () => {
     const t = entrance < 0 ? 0 : entrance / ENTRANCE_SECONDS;
-    const barIn = smoothstep(t, 0, 0.55);
-    bar.position.x = lerp(-MARCA_WIDTH * 1.4, 0, barIn);
-    letters.forEach((letter, i) => {
-      // Da esquerda para a direita, como a lâmina passando.
-      const from = 0.25 + (i / letters.length) * 0.45;
-      const k = smoothstep(t, from, from + 0.3);
-      letter.position.y = lerp(-70, 0, k);
-      letter.rotation.x = lerp(0.9, 0, k);
-      letter.visible = k > 0.001;
-    });
-    bar.visible = barIn > 0.001;
+    const terrainIn = smoothstep(t, 0, 0.55);
+    terrain.position.x = lerp(-MARK_WIDTH * 1.4, 0, terrainIn);
+    terrain.visible = terrainIn > 0.001;
+    const machineIn = smoothstep(t, 0.3, 0.85);
+    machine.position.y = lerp(-60, 0, machineIn);
+    machine.rotation.x = lerp(0.9, 0, machineIn);
+    machine.visible = machineIn > 0.001;
   };
 
   // ---------- Laço ----------
@@ -369,7 +451,7 @@ export async function createLogoScene({ canvas, colors, still, onGrab }: LogoSce
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerup", onUp);
       canvas.removeEventListener("pointercancel", onUp);
-      [...letterGeometries, barGeometry].forEach((geometry) => geometry.dispose());
+      [machineGeometry, terrainGeometry].forEach((geometry) => geometry.dispose());
       [paint, paintSide, steel, steelSide].forEach((material) => material.dispose());
       textures.forEach((texture) => texture.dispose());
       renderer.dispose();

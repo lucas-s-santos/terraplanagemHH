@@ -1,6 +1,14 @@
 # Estado do projeto: onde paramos
 
-Última sessão: 28/10/2026, na branch **`feat/whatsapp-sutil`** (saiu da `main` depois do merge do PR #2, `5b4aa15`; ainda sem commit). A `feat/retroescavadeira` já está toda na `main`. A **`main` é a versão em vídeo** desde 23/10; a versão 3D das ilhas ficou na tag **`versao-3d`**.
+Última sessão: 05/11/2026, na branch **`feat/nova-logo`** (saiu da `main` em `985060d`, com o `feat/whatsapp-sutil` já mesclado; ainda sem commit). A **`main` é a versão em vídeo** desde 23/10; a versão 3D das ilhas ficou na tag **`versao-3d`**.
+
+**05/11: nova identidade visual, já no site.** O kit está em `docs/identidade-visual/`: SVGs de cada variação, PNGs da logo horizontal, as 7 pranchas em HTML e PNG e os originais do design. O símbolo é uma **retroescavadeira de perfil em traço chapado**: a caçamba cava a curva (o terreno como chega) e as rodas andam sobre o platô (o terreno como a H e H entrega). O ícone reduzido é um H com a curva em cima e o platô embaixo. A paleta é a mesma de `tokens.css` e a fonte continua Archivo.
+- **Geometria única** em `lib/logo/marca.ts` (os números das pranchas, 164 × 120): serve os SVGs (`components/brand/Simbolo.tsx` e `Icone.tsx`) e o 3D.
+- **Cabeçalho:** `<Logo variante="compacta">` (o ícone e "H e H Terraplanagem" numa linha, como no topo das pranchas). A logo completa ficava pequena demais ali: "TERRAPLANAGEM" com 7 px.
+- **Hero:** o 3D virou uma **chapa recortada da retroescavadeira** (`lib/logo/scene.ts`): a máquina em pintura amarela e o terreno (curva e platô) em aço, mais saliente, como a lâmina de antes. Os traços do SVG viram contornos (cápsulas, anéis, a curva com espessura); as peças se sobrepõem sem defeito, porque o matcap pinta da mesma cor faces da frente no mesmo plano. Na entrada, o terreno passa da esquerda e a máquina assenta nele. Continuam o arrastar para girar, a montagem em etapas e o `compileAsync`. Sem placa de vídeo, fica o símbolo em SVG, todo amarelo (`.logo-plana`, conferido com o Chrome em SwiftShader).
+- **Rodapé:** a logo completa (`<Logo>`, um SVG com textLength, como na capa da identidade) e a retroescavadeira gigante e apagada ao fundo (`.marca-fundo`).
+- **Ícones:** `app/icon.svg` (o H amarelo sobre o solo, legível em 16 px em aba clara e escura) e `app/apple-icon.png` (180 px, quadrado cheio; o iOS arredonda). `public/marca/logo.png` (512 px) entrou como `logo` no JSON-LD.
+- A imagem OG não mudou (ela não tinha a marca antiga, só o nome escrito).
 
 **Noite de 28/10: site mais leve (o Lucas sentiu travando).** Medido rolando a página inteira (`pagina.mjs` no scratchpad: quadros por seção; o Chrome de teste usa a GPU de verdade, NVIDIA T600).
 - **O travamento grande era o reflexo de céu da retroescavadeira** (PMREM): 1,45 s parado na entrada de "Como trabalhamos", até com placa de vídeo. Agora os shaders do PMREM são compilados em paralelo antes (`lib/backhoe/sky.ts`, `warmUp`: usa partes internas do three r186; se mudarem, só perde o aquecimento). Detalhe que custou: a malha do aquecimento precisa de atributo de posição, senão a chave do programa muda e o three compila outro na hora.
@@ -138,8 +146,8 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 | `components/sections/ContourField.tsx` | Curvas de nível em SVG (geradas por código, sem cruzar) no fundo do painel e do rodapé; desenham-se com o scroll |
 | `components/sections/SoilCut.tsx` + `lib/soil/scene.ts` | **Corte de solo 3D** em "Como trabalhamos": bloco com camadas de solo; estacas do gabarito sobem na visita técnica, a frente de corte nivela o topo na execução, entrega com terra batida. Preso na tela (sticky) enquanto as etapas passam. three.js sob demanda, só desenha visível; movimento reduzido = estado final parado |
 | `components/Landing.tsx` | A página inteira (`app/page.tsx` só a usa) |
-| `lib/logo/marca.ts` + `components/brand/Logo.tsx` | A marca "H e H" com a linha de nível (caminhos SVG, altura 100) e a logo com o nome embaixo |
-| `components/sections/HeroLogo.tsx` + `lib/logo/scene.ts` | A logo 3D do hero: extrusão dos caminhos da marca, arrastar para girar, entrada com o vídeo |
+| `lib/logo/marca.ts` + `components/brand/` | A marca (identidade de 05/11): a geometria do símbolo e do ícone em `marca.ts`; `Simbolo`, `Icone` e `Logo` (completa ou compacta) em SVG. Kit e pranchas em `docs/identidade-visual/` |
+| `components/sections/HeroLogo.tsx` + `lib/logo/scene.ts` | O símbolo 3D do hero (chapa recortada: máquina amarela, terreno em aço), arrastar para girar, entrada com o vídeo |
 | `lib/backhoe/` | **Retroescavadeira 3D**: `materials.ts` (pintura, aço, borracha, vidro e poeira de terra roxa no shader), `parts.ts` (perfis curvos, pneus, aros, caçambas, cilindros hidráulicos, fusão de peças fixas), `model.ts` (montagem, juntas e os pontos das linhas de chamada: giro, lança, braço, caçamba com balancim e biela, pá, sapatas), `cycle.ts` (pose de transporte e ciclo de escavação), `sky.ts` (reflexo de céu), `blueprint.ts` (a cena da seção das máquinas). A cena do antigo hero 3D está no commit `367ab2c` |
 | `components/sections/Machines.tsx` | **A máquina certa para cada serviço**: palco preso na tela (`[data-pecas]`, 5 trechos de 100svh). A retro, de lado, começa como desenho de arestas (planta técnica) e a lâmina amarela a pinta (planos de recorte); depois pá, sapatas, lança e braço e caçamba trabalham, cada uma no seu trecho, com a linha de chamada saindo da legenda. Palavra gigante atrás. Movimento reduzido ou sem WebGL: máquina parada e as legendas em lista |
 | `components/sections/BeforeAfter.tsx` | **Antes e depois**: lâmina com a caçamba como controle (`role="slider"`, setas, Home/End), um botão por par, entrada automática até o meio. Só os pares com imagem em `content/media.ts`; sem nenhum, não aparece |
@@ -154,7 +162,7 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 | `components/sections/TerrainEdge.tsx` | Borda irregular de bloco de solo (faixa de terra roxa + solo escuro); `flip` para a borda de baixo |
 | `components/sections/Process.tsx` | Como trabalhamos: linha de nível (ondulada → reta) desenhada no scroll, etapas que acendem na estaca |
 | `components/sections/Contact.tsx` | Contato final (parada `contato`): título, apoio e o WhatsApp grande |
-| `components/sections/SiteFooter.tsx` | Rodapé: logo e WhatsApp em cima; telefones, e-mail, endereço (com "Ver no mapa") e serviços em colunas; a marca bem apagada ao fundo na tela larga |
+| `components/sections/SiteFooter.tsx` | Rodapé: logo e WhatsApp em cima; telefones, e-mail, endereço (com "Ver no mapa") e serviços em colunas; a retroescavadeira da marca bem apagada ao fundo na tela larga |
 | `components/whatsapp/FloatingWhatsApp.tsx` | Atalho do WhatsApp no celular, entre o hero e o contato; sai da frente de `[data-tela-cheia]` |
 
 **Para adicionar uma parada:** o id em `lib/stops.ts`, o clipe em `content/media.ts` e um marcador `data-stop="<mesmo id>"` na página, **na mesma ordem**.
@@ -210,7 +218,7 @@ Com o Lenis, uma captura logo depois de pular o scroll pode sair "fantasma" (dua
 
 - [ ] **Clipes do Flow que faltam** (tabela no topo e seção 7).
 - [ ] **WhatsApp provisório**: usando (35) 99974-6093 (`content/site.ts`, `confirmado: false`).
-- [ ] **Logo e ícone são proposta nossa** (`lib/logo/marca.ts`, `app/icon.svg`): a cliente precisa aprovar.
+- [ ] **A identidade visual é proposta nossa** (05/11, `docs/identidade-visual/`): a cliente precisa aprovar. O cartão de visita ainda tem "[Nome do responsável]".
 - [ ] **Textos das etapas de "Como trabalhamos"** escritos por nós (a sequência é do briefing). Confirmar com a cliente, principalmente "valor e prazo antes de qualquer máquina entrar".
 - [ ] **Telefones sem rótulo de quem é quem** (o briefing pede "telefones com rótulo"). Perguntar à cliente junto com qual é o WhatsApp.
 - [ ] Linha "imagens ilustrativas" discreta no rodapé, se a cliente concordar.
